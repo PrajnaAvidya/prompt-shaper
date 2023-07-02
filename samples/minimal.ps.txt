@@ -1,0 +1,3 @@
+{basicSlot}
+This is the most basic example of a slot (template variable) with no dynamic vars
+{/basicSlot}

@@ -1,0 +1,23 @@
+// here we define a few basic slots
+{basicSlot}
+This is the most basic example of a slot (template variable) with no dynamic vars
+{/basicSlot}
+
+{slotWithGlobalVars}
+This is a slot that references global variables (will error if the referenced name slots are not defined)
+{{basicSnippet}}
+{/slotWithGlobalVars}
+
+{slotWithParameters(param1, param2="defaultValue")}
+This is a slot that has required and optional parameters
+{{param1}}
+{{param2}}
+{/slotWithParameters}
+
+// examples of calling each:
+{{basicSnippet}}
+
+{{snippetWithGlobalVars}}
+
+// param2 is optional since it has a default value
+{{snippetWithParameters(param1="hello world"}}

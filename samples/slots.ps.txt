@@ -20,5 +20,7 @@ This is a slot that has required and optional parameters
 {{slotWithGlobalVars}}
 
 // param2 is optional since it has a default value
-{{slotWithParameters(param1="hello!", param2="test with \" quote"}}
-{{slotWithParameters(param1="hello2!"}}
+{{slotWithParameters(param1="test with \" quote"}}
+
+// if a param doesn't have surrounding quotes, it will be treated as a number
+{{slotWithParameters(param1=2}}

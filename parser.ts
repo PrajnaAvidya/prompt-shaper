@@ -1,9 +1,7 @@
 import { readFileSync } from 'fs'
 
 // load file
-// const text = readFileSync('samples/minimal.ps.txt', 'utf8')
 const text = readFileSync('samples/slots.ps.txt', 'utf8')
-// console.log(`initial file:\n${text}`)
 
 // remove comments
 const withoutComments = text.replace(/\/\/.*$/gm, '');
@@ -19,7 +17,6 @@ const slotDefinitions = Array.from(withoutComments.matchAll(singleBracePattern))
       const defaultValuePattern = /"([^"\\]*(?:\\.[^"\\]*)*)"/;
       const defaultValueMatch = defaultValueRaw.match(defaultValuePattern);
       let defaultValue = defaultValueMatch ? defaultValueMatch[1] : defaultValueRaw;
-      // replace escaped double quote with just double quote
       defaultValue = defaultValue.replace(/\\"/g, '"');
       return { name: name.trim(), defaultValue: defaultValue.trim() };
     });
@@ -40,11 +37,12 @@ const matchSlotVariables = (template: string) => {
       const [name, paramsRaw] = match[1].split('(');
       let params: {name: string, value: string}[] = []
       if (paramsRaw) {
-        let paramPattern = /(\w+)="([^"\\]*(?:\\.[^"\\]*)*)"/g;
+        let paramPattern = /(\w+)="([^"\\]*(?:\\.[^"\\]*)*)"|(\w+)=(\d+)/g;
         let paramMatches = Array.from(paramsRaw.matchAll(paramPattern))
           .map(match => {
-            let value = match[2].replace(/\\"/g, '"');
-            return { name: match[1], value: value };
+            let value = match[2] || match[4];
+            value = value.replace(/\\"/g, '"');
+            return { name: match[1] || match[3], value: value };
           });
 
         return {
@@ -59,7 +57,7 @@ const matchSlotVariables = (template: string) => {
     });
 }
 
-const renderTemplate = (template: string, depth: number = 4): string => {
+const renderTemplate = (template: string, depth: number = 0): string => {
   if (depth > 5) return template; // prevent infinite recursion
 
   let renderedTemplate = template;

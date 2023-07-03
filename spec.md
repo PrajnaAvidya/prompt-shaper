@@ -2,31 +2,42 @@
 // (comments are not added to the final prompt)
 // TODO should there be some option/setting to separate snippets by == or not? (e.g. when iterating a collection)
 
-// this is a "snippet" (better name)
-// the atomic unit of re-useable text that will be injected into a prompt
-{{summarizePrompt}}
+### Slots
 
-// this is a collection of snippets
-// example of iterating a collection (will just print each member in order)
-[chapters]
+this is the syntax for injecting a slot variable. the atomic unit of re-useable text: `{{summarizePrompt}}`
 
-// iterating a collection with custom output
-[chapters] => chapter,index
-This is another chapter:
-{{chapter}}
-This is the end of the chapter.
-[/chapters]
+a slot with variables (all variables are strings and must be double-quoted and double quotes can be escaped with a backslash): `{{coverLetterIntro(companyName="Prajna Concepts", year="2023")}}`
 
-// a snippet with a variable
-{{coverLetterIntro(companyName="Prajna Concepts")}}
+a basic slot definition:
+```
+{coverLetterIntro}
+Hello,
 
-// defining a snippet inline
-// TODO should template vars be different syntax from snippet injection?
+My name is Rafiq, and I'm excited to apply for the position at this company!
+{/coverLetterIntro}
+```
+
+a slot definition containing slot variables:
+```
 {coverLetterIntro}
 Hello,
 
 My name is Rafiq, and I'm excited to apply for the position of {{Position}} at {{CompanyName}}!
 {/coverLetterIntro}
+```
+
+### Collections (TBD/WIP)
+
+// this is a collection of slots
+// example of iterating a collection (will just print each member in order)
+[chapters]
+
+// iterating a collection with custom output
+[chapters] => chapter,index
+Chapter {{index+1}} // TODO do we really need to support expressions? that means we need to differentiate between string/number slot types.
+{{chapter}}
+This is the end of the chapter.
+[/chapters]
 
 // defining a collection inline
 {chapter1}

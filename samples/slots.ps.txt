@@ -20,4 +20,4 @@ This is a slot that has required and optional parameters
 {{snippetWithGlobalVars}}
 
 // param2 is optional since it has a default value
-{{snippetWithParameters(param1="hello world"}}
+{{snippetWithParameters(param1="hello!", param2=", world!", param3="test \" quote"}}

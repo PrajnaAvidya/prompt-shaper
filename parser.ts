@@ -1,49 +1,49 @@
 import { readFileSync } from 'fs'
 
 // load file
-const text = readFileSync('samples/slots.ps.txt', 'utf8')
+const text = readFileSync('samples/number-params.ps.txt', 'utf8')
 
 // remove comments
-const withoutComments = text.replace(/\/\/.*$/gm, '');
+const withoutComments = text.replace(/\/\/.*$/gm, '')
 
 // match slot definitions: {slot} and {slot(param1, param2="defaultValue")}content{/slot}
-const singleBracePattern = /{([^}(]+)(?:\(([^)]*)\))?\}([\s\S]*?){\/\1}/g;
+const singleBracePattern = /{([^}(]+)(?:\(([^)]*)\))?\}([\s\S]*?){\/\1}/g
 const slotDefinitions = Array.from(withoutComments.matchAll(singleBracePattern))
   .map(match => {
-    const params = match[2] ? match[2].split(',').map(param => param.trim()) : [];
-    const requiredParams = params.filter(param => !param.includes('='));
+    const params = match[2] ? match[2].split(',').map(param => param.trim()) : []
+    const requiredParams = params.filter(param => !param.includes('='))
     const optionalParams = params.filter(param => param.includes('=')).map(param => {
-      const [name, defaultValueRaw] = param.split('=');
-      const defaultValuePattern = /"([^"\\]*(?:\\.[^"\\]*)*)"/;
-      const defaultValueMatch = defaultValueRaw.match(defaultValuePattern);
-      let defaultValue = defaultValueMatch ? defaultValueMatch[1] : defaultValueRaw;
-      defaultValue = defaultValue.replace(/\\"/g, '"');
-      return { name: name.trim(), defaultValue: defaultValue.trim() };
-    });
-    return { name: match[1], requiredParams, optionalParams, content: match[3].trim() };
-  });
+      const [name, defaultValueRaw] = param.split('=')
+      const defaultValuePattern = /"([^"\\]*(?:\\.[^"\\]*)*)"/
+      const defaultValueMatch = defaultValueRaw.match(defaultValuePattern)
+      let defaultValue = defaultValueMatch ? defaultValueMatch[1] : defaultValueRaw
+      defaultValue = defaultValue.replace(/\\"/g, '"')
+      return { name: name.trim(), defaultValue: defaultValue.trim() }
+    })
+    return { name: match[1], requiredParams, optionalParams, content: match[3].trim() }
+  })
 
 console.log('slot definitions:', slotDefinitions)
 
 // remove matched slots and excess whitespace
-let finalTemplate = withoutComments.replace(singleBracePattern, '').replace(/\n{3,}/g, '\n\n').trim();
-console.log(`final template to render:\n${finalTemplate}`);
+let finalTemplate = withoutComments.replace(singleBracePattern, '').replace(/\n{3,}/g, '\n\n').trim()
+console.log(`final template to render:\n${finalTemplate}`)
 
 // match slot variables and get params
 const matchSlotVariables = (template: string) => {
-  const slotPattern = /{{([^}]+)}}/g;
+  const slotPattern = /{{([^}]+)}}/g
   return Array.from(template.matchAll(slotPattern))
     .map(match => {
-      const [name, paramsRaw] = match[1].split('(');
-      let params: {name: string, value: string}[] = []
+      const [name, paramsRaw] = match[1].split('(')
+      let params: {name: string, value: string | number}[] = []
       if (paramsRaw) {
-        let paramPattern = /(\w+)="([^"\\]*(?:\\.[^"\\]*)*)"|(\w+)=(\d+)/g;
+        let paramPattern = /(\w+)="([^"\\]*(?:\\.[^"\\]*)*)"|(\w+)=(\d+)/g
         let paramMatches = Array.from(paramsRaw.matchAll(paramPattern))
           .map(match => {
-            let value = match[2] || match[4];
-            value = value.replace(/\\"/g, '"');
-            return { name: match[1] || match[3], value: value };
-          });
+            let value = match[2] || match[4]
+            value = value.replace(/\\"/g, '"')
+            return { name: match[1] || match[3], value: value }
+          })
 
         return {
           name,
@@ -54,39 +54,73 @@ const matchSlotVariables = (template: string) => {
       }
 
       return { name, params, index: match.index!, length: match[0].length! }
-    });
+    })
 }
 
 const renderTemplate = (template: string, depth: number = 0): string => {
-  if (depth > 5) return template; // prevent infinite recursion
+  if (depth > 5) return template // prevent infinite recursion
 
-  let renderedTemplate = template;
-  const slotMatches = matchSlotVariables(renderedTemplate);
+  let renderedTemplate = template
+  const slotMatches = matchSlotVariables(renderedTemplate)
 
+  // console.log('slotMatches', slotMatches)
   slotMatches.reverse().forEach(slotVar => {
-    const slotDef = slotDefinitions.find(def => def.name === slotVar.name);
+    // console.log('slotVar', slotVar)
+    // console.log('slotDefinitions', slotDefinitions)
+    const slotDef = slotDefinitions.find(def => def.name === slotVar.name)
     if (!slotDef) {
-      throw new Error(`Slot definition for ${slotVar.name} not found`);
+      throw new Error(`slot definition for ${slotVar.name} not found`)
     }
 
-    let params = [...slotVar.params];
+    let params = [...slotVar.params]
     slotDef.optionalParams.forEach(optParam => {
       if (!params.some(param => param.name === optParam.name)) {
-        params.push({ name: optParam.name, value: optParam.defaultValue });
+        params.push({ name: optParam.name, value: optParam.defaultValue })
       }
-    });
+    })
 
-    let renderedText = slotDef.content;
+    let renderedText = slotDef.content
+    // console.log('renderedText', renderedText)
     params.forEach(param => {
-      const paramPattern = new RegExp(`{{${param.name}}}`, 'g');
-      renderedText = renderedText.replace(paramPattern, param.value);
+      console.log('param', param);
+
+      // match arithmetic operations
+      // TODO only allow on numeric params
+      const arithmeticPattern = new RegExp(`{{${param.name}\\s*([\\+\\-\\*\\/])?\\s*(\\d+)?}}`, 'g');
+      renderedText = renderedText.replace(arithmeticPattern, (match, operator, number): string => {
+        // console.log('match', match)
+        if (operator && number) {
+          let result;
+          switch (operator) {
+            case '+':
+              result = Number(param.value) + Number(number);
+              break;
+            case '-':
+              result = Number(param.value) - Number(number);
+              break;
+            case '*':
+              result = Number(param.value) * Number(number);
+              break;
+            case '/':
+              result = Number(param.value) / Number(number);
+              break;
+            default:
+              throw new Error(`Unsupported operator ${operator}`);
+          }
+
+          return result.toString();
+        } else {
+          // Regular variable replacement
+          return param.value.toString();
+        }
+      });
     });
 
-    renderedTemplate = renderedTemplate.substring(0, slotVar.index) + renderedText + renderedTemplate.substring(slotVar.index + slotVar.length);
-  });
+    renderedTemplate = renderedTemplate.substring(0, slotVar.index) + renderedText + renderedTemplate.substring(slotVar.index + slotVar.length)
+  })
 
   // recursively render nested slots
-  return renderTemplate(renderedTemplate, depth + 1);
+  return renderTemplate(renderedTemplate, depth + 1)
 }
 
-console.log(`final rendered template:\n${renderTemplate(finalTemplate)}`);
+console.log(`final rendered template:\n${renderTemplate(finalTemplate)}`)

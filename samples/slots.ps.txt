@@ -5,19 +5,20 @@ This is the most basic example of a slot (template variable) with no dynamic var
 
 {slotWithGlobalVars}
 This is a slot that references global variables (will error if the referenced name slots are not defined)
-{{basicSnippet}}
+{{basicSlot}}
 {/slotWithGlobalVars}
 
-{slotWithParameters(param1, param2="defaultValue")}
+{slotWithParameters(param1, param2="\"default value \" with quotes\"")}
 This is a slot that has required and optional parameters
 {{param1}}
 {{param2}}
 {/slotWithParameters}
 
 // examples of calling each:
-{{basicSnippet}}
+{{basicSlot}}
 
-{{snippetWithGlobalVars}}
+{{slotWithGlobalVars}}
 
 // param2 is optional since it has a default value
-{{snippetWithParameters(param1="hello!", param2=", world!", param3="test \" quote"}}
+{{slotWithParameters(param1="hello!", param2="test with \" quote"}}
+{{slotWithParameters(param1="hello2!"}}

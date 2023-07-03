@@ -35,8 +35,7 @@ const matchSlotVariables = (template: string) => {
       const [name, paramsRaw] = match[1].split('(')
       let params: {name: string, value: string | number}[] = []
       if (paramsRaw) {
-        let paramPattern = /(\w+)="([^"\\]*(?:\\.[^"\\]*)*)"|(\w+)=(\d+)/g
-        let paramMatches = Array.from(paramsRaw.matchAll(paramPattern))
+        let paramMatches = Array.from(paramsRaw.matchAll(/(\w+)="([^"\\]*(?:\\.[^"\\]*)*)"|(\w+)=(-?\d+(\.\d+)?)/g))
           .map(match => {
             const value = match[4] ? Number(match[4]) : match[2]
             return { name: match[1] || match[3], value: value }

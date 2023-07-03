@@ -14,11 +14,9 @@ const slotDefinitions = Array.from(withoutComments.matchAll(singleBracePattern))
     const requiredParams = params.filter(param => !param.includes('='))
     const optionalParams = params.filter(param => param.includes('=')).map(param => {
       const [name, defaultValueRaw] = param.split('=')
-      const defaultValuePattern = /"([^"\\]*(?:\\.[^"\\]*)*)"/
-      const defaultValueMatch = defaultValueRaw.match(defaultValuePattern)
-      let defaultValue = defaultValueMatch ? defaultValueMatch[1] : defaultValueRaw
-      defaultValue = defaultValue.replace(/\\"/g, '"')
-      return { name: name.trim(), defaultValue: defaultValue.trim() }
+      const defaultValueMatch = defaultValueRaw.match(/"([^"\\]*(?:\\.[^"\\]*)*)"/)
+      const defaultValue = defaultValueMatch ?  defaultValueMatch[1].replace(/\\"/g, '"') : Number(defaultValueRaw)
+      return { name: name.trim(), defaultValue }
     })
     return { name: match[1], requiredParams, optionalParams, content: match[3].trim() }
   })
@@ -27,7 +25,7 @@ console.log('slot definitions:', slotDefinitions)
 
 // remove matched slots and excess whitespace
 let finalTemplate = withoutComments.replace(singleBracePattern, '').replace(/\n{3,}/g, '\n\n').trim()
-console.log(`final template to render:\n${finalTemplate}`)
+console.log(`\ntemplate to render:\n${finalTemplate}`)
 
 // match slot variables and get params
 const matchSlotVariables = (template: string) => {
@@ -40,8 +38,7 @@ const matchSlotVariables = (template: string) => {
         let paramPattern = /(\w+)="([^"\\]*(?:\\.[^"\\]*)*)"|(\w+)=(\d+)/g
         let paramMatches = Array.from(paramsRaw.matchAll(paramPattern))
           .map(match => {
-            let value = match[2] || match[4]
-            value = value.replace(/\\"/g, '"')
+            const value = match[4] ? Number(match[4]) : match[2]
             return { name: match[1] || match[3], value: value }
           })
 
@@ -63,10 +60,8 @@ const renderTemplate = (template: string, depth: number = 0): string => {
   let renderedTemplate = template
   const slotMatches = matchSlotVariables(renderedTemplate)
 
-  // console.log('slotMatches', slotMatches)
+  // console.log('slotMatches', slotMatches[1].params)
   slotMatches.reverse().forEach(slotVar => {
-    // console.log('slotVar', slotVar)
-    // console.log('slotDefinitions', slotDefinitions)
     const slotDef = slotDefinitions.find(def => def.name === slotVar.name)
     if (!slotDef) {
       throw new Error(`slot definition for ${slotVar.name} not found`)
@@ -82,14 +77,11 @@ const renderTemplate = (template: string, depth: number = 0): string => {
     let renderedText = slotDef.content
     // console.log('renderedText', renderedText)
     params.forEach(param => {
-      console.log('param', param);
-
-      // match arithmetic operations
-      // TODO only allow on numeric params
+      // console.log('param', param);
+      // match arithmetic operations (only allowed on numeric params)
       const arithmeticPattern = new RegExp(`{{${param.name}\\s*([\\+\\-\\*\\/])?\\s*(\\d+)?}}`, 'g');
       renderedText = renderedText.replace(arithmeticPattern, (match, operator, number): string => {
-        // console.log('match', match)
-        if (operator && number) {
+        if (typeof param.value === 'number' && operator && number) {
           let result;
           switch (operator) {
             case '+':
@@ -123,4 +115,4 @@ const renderTemplate = (template: string, depth: number = 0): string => {
   return renderTemplate(renderedTemplate, depth + 1)
 }
 
-console.log(`final rendered template:\n${renderTemplate(finalTemplate)}`)
+console.log(`\nfinal rendered text:\n${renderTemplate(finalTemplate)}`)

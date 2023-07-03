@@ -1,0 +1,15 @@
+{slotWithNumberParam(param)}
+If you add {{param}} with 2 you get {{param+2}}
+{/slotWithNumberParam}
+
+{slotWithDefaultNumberParam(param=25)}
+If you subtract 2 from {{param}} you get {{param-2}}
+{/slotWithDefaultNumberParam}
+
+
+{{slotWithNumberParam(param=10)}}
+
+// arithmetic will not be done on strings:
+{{slotWithNumberParam(param="10")}}
+
+{{slotWithDefaultNumberParam}}

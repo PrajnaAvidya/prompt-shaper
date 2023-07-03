@@ -1,16 +1,20 @@
-// working draft of my prompt construction scriping language
-// (comments are not added to the final prompt)
-// TODO should there be some option/setting to separate snippets by == or not? (e.g. when iterating a collection)
+# PromptShape
+
+working draft of my prompt construction scriping language
 
 ### Why
 
-I'm a programmer and like many others I've seen great productivity gains due to the assistance of LLMs. the standard way of interacting with GPT through a chat interface works great for a lot of things, but I do a lot of what I would call "non linear" workflows and find myself spending a lot of time copying and pasting out of text files to construct the exact prompts I want to run. I want to add a UI to do some of these tasks in Prajna Chat but decided that first I needed some kind of engine to run all this. after looking into existing templating engines like Handlebars I decided nothing out there was quite what I'm looking for so decided to build my own templating language specifically designed for running GPT/LLM prompts. the idea is that you could just work out of a text file and save a lot of time vs doing a bunch of copy/pasting of repeatedly used text fragments. or you could build a UI around it and make it even more powerful.
+I'm a programmer and like many others I've seen great productivity gains due to the assistance of LLMs. the standard way of interacting with GPT through a chat interface works great for a lot of things, but I do a lot of what I would call "non-linear" workflows and find myself spending a lot of time copying and pasting out of text files to construct the exact prompts I want to run. I wanted to add a UI to do some of these tasks in Prajna Chat (my custom GPT client) but decided that first I needed some kind of engine to run all this. after looking into existing templating engines like Handlebars I decided nothing out there was quite what I'm looking for so decided to build my own templating language specifically designed for running GPT/LLM prompts. the idea is that you could just work out of a text file and save a lot of time vs doing a bunch of copy/pasting of repeatedly used text fragments. or you could build a UI around it and make it even more powerful.
 
 ### Slots
 
 this is the syntax for injecting a slot variable. the atomic unit of re-useable text: `{{summarizePrompt}}`
 
-a slot with variables (all variables are strings and must be double-quoted and double quotes can be escaped with a backslash): `{{coverLetterIntro(companyName="Prajna Concepts", year="2023")}}`
+a slot with parameters: `{{coverLetterIntro(companyName="Prajna Concepts", year=2023)}}`
+
+all parameters are either strings or numbers (strings are double-quoted, can use backslash to escape double quotes in string parameters)
+
+slots are either defined inline
 
 a basic slot definition:
 ```
@@ -32,9 +36,9 @@ My name is Rafiq, and I'm excited to apply for the position of {{Position}} at {
 
 ### Collections (TBD/WIP)
 
-// this is a collection of slots
-// example of iterating a collection (will just print each member in order)
-[chapters]
+A collection is an ordered list of slot variables
+
+// example of iterating a collection (will just print each member in order) `[chapters]`
 
 // iterating a collection with custom output
 [chapters] => chapter,index

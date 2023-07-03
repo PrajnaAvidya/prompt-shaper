@@ -1,0 +1,4 @@
+improve clarity of slot definition vs variable, maybe they should just be called different things
+collections
+gpt calls - do they need an option to be deferred vs instant?
+should there be some option/setting to separate snippets by == or not? (e.g. when iterating a collection)

@@ -1,14 +1,14 @@
 import { readFileSync } from 'fs'
 
 // load file
-const text = readFileSync('samples/number-params.ps.txt', 'utf8')
+const text = readFileSync('samples/slots.ps.txt', 'utf8')
 
 // remove comments
 const withoutComments = text.replace(/\/\/.*$/gm, '')
 
-// match slot definitions: {slot} and {slot(param1, param2="defaultValue")}content{/slot}
+// match inline template tags: {templateName} and {templateName(param1, param2="defaultValue")}
 const singleBracePattern = /{([^}(]+)(?:\(([^)]*)\))?\}([\s\S]*?){\/\1}/g
-const slotDefinitions = Array.from(withoutComments.matchAll(singleBracePattern))
+const templateDefinitions = Array.from(withoutComments.matchAll(singleBracePattern))
   .map(match => {
     const params = match[2] ? match[2].split(',').map(param => param.trim()) : []
     const requiredParams = params.filter(param => !param.includes('='))
@@ -21,16 +21,15 @@ const slotDefinitions = Array.from(withoutComments.matchAll(singleBracePattern))
     return { name: match[1], requiredParams, optionalParams, content: match[3].trim() }
   })
 
-console.log('slot definitions:', slotDefinitions)
+console.log('template definitions:', templateDefinitions)
 
-// remove matched slots and excess whitespace
+// remove matched templates and excess whitespace
 let finalTemplate = withoutComments.replace(singleBracePattern, '').replace(/\n{3,}/g, '\n\n').trim()
-console.log(`\ntemplate to render:\n${finalTemplate}`)
+console.log(`\ntext to render:\n${finalTemplate}`)
 
-// match slot variables and get params
-const matchSlotVariables = (template: string) => {
-  const slotPattern = /{{([^}]+)}}/g
-  return Array.from(template.matchAll(slotPattern))
+// match variables and get params
+const matchVariables = (template: string) => {
+  return Array.from(template.matchAll(/{{([^}]+)}}/g))
     .map(match => {
       const [name, paramsRaw] = match[1].split('(')
       let params: {name: string, value: string | number}[] = []
@@ -57,23 +56,23 @@ const renderTemplate = (template: string, depth: number = 0): string => {
   if (depth > 5) return template // prevent infinite recursion
 
   let renderedTemplate = template
-  const slotMatches = matchSlotVariables(renderedTemplate)
+  const variables = matchVariables(renderedTemplate)
 
-  // console.log('slotMatches', slotMatches[1].params)
-  slotMatches.reverse().forEach(slotVar => {
-    const slotDef = slotDefinitions.find(def => def.name === slotVar.name)
-    if (!slotDef) {
-      throw new Error(`slot definition for ${slotVar.name} not found`)
+  // replace variables in reverse order so character positions can be used
+  variables.reverse().forEach(variable => {
+    const templateDef = templateDefinitions.find(def => def.name === variable.name)
+    if (!templateDef) {
+      throw new Error(`template definition for ${variable.name} not found`)
     }
 
-    let params = [...slotVar.params]
-    slotDef.optionalParams.forEach(optParam => {
+    let params = [...variable.params]
+    templateDef.optionalParams.forEach(optParam => {
       if (!params.some(param => param.name === optParam.name)) {
         params.push({ name: optParam.name, value: optParam.defaultValue })
       }
     })
 
-    let renderedText = slotDef.content
+    let renderedText = templateDef.content
     // console.log('renderedText', renderedText)
     params.forEach(param => {
       // console.log('param', param);
@@ -101,16 +100,16 @@ const renderTemplate = (template: string, depth: number = 0): string => {
 
           return result.toString();
         } else {
-          // Regular variable replacement
+          // regular variable replacement
           return param.value.toString();
         }
       });
     });
 
-    renderedTemplate = renderedTemplate.substring(0, slotVar.index) + renderedText + renderedTemplate.substring(slotVar.index + slotVar.length)
+    renderedTemplate = renderedTemplate.substring(0, variable.index) + renderedText + renderedTemplate.substring(variable.index + variable.length)
   })
 
-  // recursively render nested slots
+  // recursively render nested templates
   return renderTemplate(renderedTemplate, depth + 1)
 }
 

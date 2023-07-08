@@ -1,0 +1,14 @@
+// defining a collection inline
+{chapter1}
+This is the first chapter.
+{/chapter1}
+
+{chapter2}
+This is the second chapter.
+{/chapter2}
+
+{chapter3}
+This is the last chapter.
+{/chapter3}
+
+[]chapters = chapter1, chapter2, chapter3

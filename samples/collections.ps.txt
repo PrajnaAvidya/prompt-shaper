@@ -12,3 +12,5 @@ This is the last chapter.
 {/chapter3}
 
 []chapters = chapter1, chapter2, chapter3
+
+// TODO iterate it

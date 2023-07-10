@@ -2,7 +2,8 @@ import { readFileSync } from 'fs'
 
 // load file
 // const text = readFileSync('samples/slots.ps.txt', 'utf8')
-const text = readFileSync('samples/collections.ps.txt', 'utf8')
+// const text = readFileSync('samples/collections.ps.txt', 'utf8')
+const text = readFileSync('story/story.ps.txt', 'utf8')
 
 // remove comments
 const withoutComments = text.replace(/\/\/.*$/gm, '')
@@ -70,6 +71,10 @@ const renderTemplate = (template: string, depth: number = 0): string => {
 
   let renderedTemplate = template
   const variables = matchVariables(renderedTemplate)
+
+  // TODO match collections
+
+  // TODO render collections
 
   // replace variables in reverse order so character positions can be used
   variables.reverse().forEach(variable => {

@@ -6,9 +6,9 @@ Working draft of my prompt construction scripting language
 
 I'm a programmer and like many others I've seen great productivity gains due to the assistance of LLMs. the standard way of interacting with GPT through a chat interface works great for a lot of things, but I do a lot of what I would call "non-linear" workflows and find myself spending a lot of time copying and pasting out of text files to construct the exact prompts I want to run. I wanted to add a UI to do some of these tasks in Prajna Chat (my custom GPT client) but decided that first I needed some kind of engine to run all this. after looking into existing templating engines like Handlebars I decided nothing out there was quite what I'm looking for so decided to build my own templating language specifically designed for running GPT/LLM prompts. the idea is that you could just work out of a text file and save a lot of time vs doing a bunch of copy/pasting of repeatedly used text fragments. or you could build a UI around it and make it even more powerful.
 
-### Templates, Slots, and Parameters
+### Templates and Variables
 
-A template is either a file (for the included samples I'm using the .ps.txt extension) or defined inline in a template file.
+A template is either a file (for the included samples I'm using the .ps.txt extension) or defined inline in a template file. Templates are loaded into variables, which can be injected into other templates.
 
 Here's an example of an inline template which is defined using single bracket tags (it will become a variable called `basicTemplate`):
 ```
@@ -17,85 +17,79 @@ This is the most basic example of an inline variable with no parameters
 {/basicTemplate}
 ```
 
-Templates can contain slots (defined using double brackets) which will render content stored inside variables. Slots can reference a global definition (i.e. an inline template), or a variable specific to the current template which is called a parameter.
+A variable is injected as a slot using double bracket tags so to render the previous template you would write `{{basicTemplate}}`
+
+### Slots and Parameters
+
+Templates can contain slots which will render content stored inside variables. Slots can reference a global definition (i.e. an inline template), or a variable specific to the current template which is called a parameter.
 
 ```
-{templateWithGlobalSlot}
-This template loads and renders a variable called contactInfo:
+// example of defining the variable contactInfo, then another variable greeting which uses contactInfo as a global variable, then rendering it inline
+
+{contactInfo}
+Me
+me@hello.com
+555-555-5555
+{/contactInfo}
+
+{greeting}
+Here is my contact info:
 {{contactInfo}}
-{/templateWithGlobalSlot}
+{/greeting}
+
+{{greeting}}
 ```
 
+Parameters can be strings or numbers
+
 ```
-{templateWithLocalSlots(phoneNumber, zipCode}
-This template displays a phone number and zip code:
-Phone Number: {{phoneNumber}}
-Zip Code: {{zipCode}}
-{/templateWithLocalSlots}
+// example of a template with paramters used as slots. note that zipCode is a numeric parameter.
+
+{contactInfo(name, email, zipCode}
+{{name}}
+{{email}}
+{{zipCode}}
+{/contactInfo}
+
+{{contactInfo(name="Me", email="me@hello.com", zipCode=55555)}}
+```
+
+The only difference between string and number params is that numeric params can have basic arithmetic operations done on its output. Supported operations are `+ - * /`.
+```
+{chapterTitle(chapterIndex)}
+Chapter {{chapterIndex+1}}
+{/chapterTitle}
+
+{{chapterTitle(chapterIndex=0)}}
+
+// this will output "Chapter 0" because operations are ignored for string parameters.
+{{chapterTitle(chapterIndex="0")}}
+```
+
+TODO ability to use variable as param
+
+### Variables
+The contents of templates will be loaded into variables which are available to render inside other templates.
+
+### Loading templates from files
+The parser will load files as templates from within templates:
+```
+// this will load a variable called fileTemplate from "file-template.ps.txt:
+{fileTemplate} => path="file-template.ps.txt"
 ```
 
 ### Misc
 
 Comments are marked with double slashes `// this is a comment` and are removed before rendering.
 
-### Variables
-The contents of templates will be loaded into variables which are available to render inside other templates.
-
-
-
 TODO default/slot params
 TODO string vs numeric params
-
-### Slots
-
-this is the syntax for injecting a slot variable. the atomic unit of re-useable text: `{{summarizePrompt}}`
-
-a slot with parameters: `{{coverLetterIntro(companyName="Prajna Concepts", year=2023)}}`
-
-all parameters are either strings or numbers (strings are double-quoted, you can use a backslash to escape double quotes in string parameters e.g. "\"this string \" has quotes\"")
-
-slots are either defined inline
-
-a basic slot definition:
-```
-{coverLetterIntro}
-Hello,
-
-My name is Rafiq, and I'm excited to apply for a position at this company!
-{/coverLetterIntro}
-```
-
-a slot definition containing global slot variables:
-```
-{coverLetterIntro}
-Hello,
-
-My name is Rafiq, and I'm excited to apply for the position of {{Position}} at {{CompanyName}}!
-{/coverLetterIntro}
-```
-
-a slot definition containing local slot variables:
-```
-{coverLetterIntro}
-Hello,
-
-My name is Rafiq, and I'm excited to apply for the position of {{Position}} at {{CompanyName}}!
-{/coverLetterIntro}
-```
 
 ### Collections (TBD/WIP)
 
 A collection is an ordered list of slot variables
 
-// example of iterating a collection (will just print each member in order) `[chapters]`
-
-// iterating a collection with custom output
-[chapters] => chapter,index
-Chapter {{index+1}}
-{{chapter}}
-This is the end of the chapter.
-[/chapters]
-
+```
 // defining a collection inline
 {chapter1}
 This is the first chapter.
@@ -110,8 +104,27 @@ This is the last chapter.
 {/chapter3}
 
 []chapters = chapter1, chapter2, chapter3
+```
 
-// TODO how to append
+```
+// example of iterating a collection
+[chapters] => chapter
+Chapter text:
+{{chapter}}
+This is the end of the chapter.
+[/chapters]
+```
+
+```
+// iterating a collection with index value
+[chapters] => chapter,index
+Chapter {{index+1}}:
+{{chapter}}
+This is the end of the chapter.
+[/chapters]
+```
+
+// TODO how to append to collection
 
 // TODO what steps to take in compilation?
 // remove comments
@@ -127,19 +140,6 @@ This is the last chapter.
 %gpt%
 This is the prompt that will be sent to gpt
 %gpt%
-
-// could something like this work?
-{bookSummary}
-[chapters] => chapter,index
-%gpt%
-Please summarize this chapter of the book "Faceless Killers" in 2-3 paragraphs:
-==
-Chapter {{index}}:
-{{chapter}}
-%/gpt%
-[/chapters]
-{/bookSummary}
-
 // what if I wanted to put the results into a collection?
 // need a way to define the name of each snippet inside the collection
 // basically need a mapping function

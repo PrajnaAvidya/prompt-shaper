@@ -2,8 +2,7 @@ import { readFileSync } from 'fs'
 
 // load file
 // const text = readFileSync('samples/slots.ps.txt', 'utf8')
-// const text = readFileSync('samples/collections.ps.txt', 'utf8')
-const text = readFileSync('story/story.ps.txt', 'utf8')
+const text = readFileSync('samples/collections.ps.txt', 'utf8')
 
 // remove comments
 const withoutComments = text.replace(/\/\/.*$/gm, '')

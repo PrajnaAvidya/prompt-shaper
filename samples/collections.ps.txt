@@ -14,3 +14,15 @@ This is the last chapter.
 []chapters = chapter1, chapter2, chapter3
 
 // TODO iterate it
+
+[chapters] => chapter
+Chapter text:
+{{chapter}}
+This is the end of the chapter.
+[/chapters]
+
+[chapters] => chapter,index
+Chapter {{index+1}}
+{{chapter}}
+This is the end of the chapter.
+[/chapters]

@@ -1,6 +1,13 @@
+use variable as param
+do isNumeric on trimmed inline templates to see if they should be numbers
+
+REDO RENDERING SO ITS FULLY RECURSIVE (starts at the top level and works down template/collection definitions and renders like a tree)
+
 improve clarity of slot definition vs variable, maybe they should just be called different things
 collections/iterating
 basic for loops (can we just iterate a collection for all cases or is this actually needed?)
 load/run template from a file from within a template
 gpt calls - do they need an option to be deferred vs instant?
 should there be some option/setting to separate snippets by == or not? (e.g. when iterating a collection)
+look for name conflicts
+validate the names of collection vars

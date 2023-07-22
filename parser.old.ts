@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync } from 'fs'
+import {loadFileContent} from "./src/utils";
 
 enum variableType {
   string,
@@ -14,14 +15,7 @@ interface variableDefinition {
 }
 
 // load/track files (to prevent circular dependencies)
-const loadedFiles = new Set();
-const loadFileContent = (filePath: string): string => {
-  if (loadedFiles.has(filePath)) {
-    throw new Error(`Circular dependency detected: file "${filePath}" has already been loaded.`);
-  }
-  loadedFiles.add(filePath);
-  return readFileSync(filePath, 'utf8').toString();
-};
+
 
 // load file
 // const text = loadFileContent('samples/file-variables.ps.txt')

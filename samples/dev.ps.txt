@@ -1,11 +1,13 @@
 I'm developing a templating engine in TS called PromptShape for efficient text-based gpt prompting. Here's my WIP readme/spec so far:
 
 {currentQuestion}
-I want to redo and improve how single bracket variables are defined.
-I want the default way to define a string or number variable to look like how file vars are current defined and file vars to look like this:
-{fileVar=load("fileName")}
-the load() could represent any number of custom modifiers or extensions for using variables
-combine the
+I want to redo the parser in PEG.js. please write the code to match my new variable format:
+{variableName = value}
+
+where variableName starts with a letter and contains any combo of letters, numbers, and underscores
+value is either a double quoted string e.g. "testValue" or an unquoted number e.g. 5 or 55.5, or value can be a function of the format functionName(params) where functionName obeys the same rules as variableName and params is a list of string and numeric params separated by commas
+
+It should support arbitrary whitespace between elements but it should only be on a single line (no newline chars allowed using this inline definition)
 {/currentQuestion}
 
 {spec = "spec.md"}
@@ -16,4 +18,5 @@ Here's the source code for the parser:
 {parser = "parser.ts"}
 {{@parser}}
 ===
-I would like some help developing it further. {{@currentQuestion}}
+I would like some help developing it further.
+{{@currentQuestion}}

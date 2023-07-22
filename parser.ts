@@ -7,7 +7,7 @@ enum variableType {
 }
 interface variableDefinition {
   name: string
-  type: variableType,
+  // type: variableType,
   content: string
   requiredParams: string[]
   optionalParams: {defaultValue: string | number, name: string}[]
@@ -30,7 +30,7 @@ const text = loadFileContent('samples/dev.ps.txt')
 // remove comments
 const withoutComments = text.replace(/\/\/.*$/gm, '')
 
-// match file loading tags: {@variableName = "filePath" or variableName = "filePath"}
+// match file loading tag: {variableName = "filePath"}
 // TODO make this the general inline matching section
 const fileLoadPattern = /{([^\s=]{1,})\s*=\s*"([^"\n]{1,})"}/g;
 const fileLoadMatches = Array.from(withoutComments.matchAll(fileLoadPattern))
@@ -39,6 +39,7 @@ fileLoadMatches.forEach(match => {
   const variableName = match[1].trim();
   const filePath = match[2];
   const fileContent= loadFileContent(filePath)
+  // const fileContent = "todo"
 
   // add the loaded file content as a new template definition
   fileTemplateDefinitions.push({ name: variableName, requiredParams: [], optionalParams: [], content: fileContent });

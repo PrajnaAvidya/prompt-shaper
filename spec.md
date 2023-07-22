@@ -1,18 +1,21 @@
 # PromptShape
-
 Working draft of my prompt construction scripting language
 
 ### Why
-
-I'm a programmer and like many others I've seen great productivity gains due to the assistance of LLMs. the standard way of interacting with GPT through a chat interface works great for a lot of things, but I do a lot of what I would call "non-linear" workflows and find myself spending a lot of time copying and pasting out of text files to construct the exact prompts I want to run. I wanted to add a UI to do some of these tasks in Prajna Chat (my custom GPT client) but decided that first I needed some kind of engine to run all this. after looking into existing templating engines like Handlebars I decided nothing out there was quite what I'm looking for so decided to build my own templating language specifically designed for running GPT/LLM prompts. the idea is that you could just work out of a text file and save a lot of time vs doing a bunch of copy/pasting of repeatedly used text fragments. or you could build a UI around it and make it even more powerful.
+I'm a programmer and like many I've seen great productivity gains due to the assistance of LLMs. the standard way of interacting with model through a chat interface works great for a lot of things, but I do a lot of what I call "non-linear" workflows and find myself spending a lot of time copying and pasting out of text files to construct the exact prompts I want to run. I wanted to add a UI to do some of these tasks in Prajna Chat (my custom GPT client) but decided that first I needed some kind of text/templating engine to run all this. Inspired by templating engines like Mustache/Handlebars I decided to build my own variant specifically designed for running GPT/LLM prompts. The idea is that you can just work out of a text file and save a lot of time vs doing a bunch of copy/pasting of repeatedly used text fragments. Or you can build a UI around it and make it even more powerful.
 
 ### Examples
-
 See the `samples` directory and try running them with the parser.
 
-### Templates and Variables
+### Terminology
+- Template - A file containing text that is rendered by the parser. I'm using the .ps.txt extension for the samples.
+- Variable - A value loaded from a template file, or defined inline in a template. Variables are defined using single brackets e.g. `{helloVariable="Hello World"}`
+- Slot - Renders the contents of a variable using double brackets e.g. `{{helloVariable}}`.
 
-A template is either a file (for the included samples I'm using the .ps.txt extension) or defined inline in a template file. Templates are loaded into variables, which can be injected into other templates.
+TODO Redo everything below
+
+### Templates and Variables
+A template is a file or inline string that gets loaded into a variable by the PromptShape parser and is then rendered.
 
 Here's an example of an inline template which is defined using single bracket tags (it will become a variable called `basicTemplate`):
 ```
@@ -21,11 +24,10 @@ This is the most basic example of an inline variable with no parameters
 {/basicTemplate}
 ```
 
-A variable is injected as a slot using double bracket tags so to render the previous template you would write `{{basicTemplate}}`
-
 ### Slots and Parameters
+A slot is used to render a variable in a template e.g to render the above template. `{{basicTemplate}}`
 
-Templates can contain slots which will render content stored inside variables. Slots can reference a global definition (i.e. an inline template), or a variable specific to the current template which is called a parameter.
+Inline templates can contain slots which will render content stored inside variables. Slots can reference a global definition (i.e. an inline template), or a variable specific to the current template which is called a parameter.
 
 ```
 // example of defining the variable contactInfo, then another variable greeting which uses contactInfo as a global variable, then rendering it inline

@@ -18,7 +18,8 @@ const loadFileContent = (filePath: string): string => {
 };
 
 // load file
-const text = loadFileContent('samples/file-variables.ps.txt')
+// const text = loadFileContent('samples/file-variables.ps.txt')
+const text = loadFileContent('samples/dev.ps.txt')
 
 // remove comments
 const withoutComments = text.replace(/\/\/.*$/gm, '')

@@ -1,9 +1,17 @@
 TOP PRIORITY
+- redo fucking everything
+- SETTLE THE FUCKING TEMPLATE VS SLOT VS VARIABLE THING ONCE AND FOR ALL
+-- I think it should only be called a template if it's a file that gets loaded/rendered
+- inline definitions ie {currentQuestion}Test{/currentQuestion}
+-- or {foo="bar"} and then I change file loading syntax
+
+return to loading variables as one of 3 types: string, number, template. templates are any variable loaded from file or defined as multi line.
+
+
 - use variable as param
 - do isNumeric on trimmed inline templates to see if the variables should be typed as numbers
--- maybe I need a third variable type (and auto-detect on load)? string, numeric, template.
-- tag for making gpt calls e.g. %gpt% (do they need an option to be deferred vs instant)
 
+then...
 REDO RENDERING SO ITS FULLY RECURSIVE (starts at the top level and works down template/collection definitions and renders like a tree)
 - look for name conflicts
 // (old) TODO what steps to take in compilation?
@@ -14,6 +22,7 @@ REDO RENDERING SO ITS FULLY RECURSIVE (starts at the top level and works down te
 // render collections
 // render all variables (will need to be called recursively because snippets can contain vars)
 // we're done? (no we still need to run the gpt query)
+- correct parsing of variable tags inside variables
 
 config
 - allow absolute/parent paths for template file load
@@ -32,6 +41,7 @@ nice to haves
 - 1 liner for defining string/numeric vars
 - also 1 liner to load/render file inline
 - file templates with local parameters
+- tag for making gpt calls e.g. %gpt% (do they need an option to be deferred vs instant)
 
 other random cool ideas
 - placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable
@@ -41,4 +51,4 @@ other random cool ideas
 if I were to use this to aid myself in writing this very app what would I need?
 - loading variables from files (params not needed) -- for including code/text samples
 -- is this really it? I don't think I need collections, are they more useful for writing? I guess I can have a collection of code samples
-- ability to auto prompt/output the final product (%gpt% tags or whatever). I should look into chaining with an existing openai library, no need to write my own thing.
+- ability to auto feed final output to gpt. I should look into using an existing openai library, no need to write my own thing for that.

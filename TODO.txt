@@ -1,15 +1,9 @@
 TOP PRIORITY
 - redo fucking everything
-- SETTLE THE FUCKING TEMPLATE VS SLOT VS VARIABLE THING ONCE AND FOR ALL
--- I think it should only be called a template if it's a file that gets loaded/rendered
-- inline definitions ie {currentQuestion}Test{/currentQuestion}
--- or {foo="bar"} and then I change file loading syntax
-
-return to loading variables as one of 3 types: string, number, template. templates are any variable loaded from file or defined as multi line.
-
-
+- inline then multi line variable definitions
+-- determine type at load (do isnumeric, some sort of check if string contains tags)
+-- only try to render inside template variables
 - use variable as param
-- do isNumeric on trimmed inline templates to see if the variables should be typed as numbers
 
 then...
 REDO RENDERING SO ITS FULLY RECURSIVE (starts at the top level and works down template/collection definitions and renders like a tree)
@@ -22,7 +16,7 @@ REDO RENDERING SO ITS FULLY RECURSIVE (starts at the top level and works down te
 // render collections
 // render all variables (will need to be called recursively because snippets can contain vars)
 // we're done? (no we still need to run the gpt query)
-- correct parsing of variable tags inside variables
+- this should correct parsing of variable tags inside variables
 - add explicit step to check for unpaired (or incorrectly ordered) tags before rendering
 
 config
@@ -43,6 +37,7 @@ nice to haves
 - also 1 liner to load/render file inline
 - file templates with local parameters
 - tag for making gpt calls e.g. %gpt% (do they need an option to be deferred vs instant)
+- render against a json hash instead of inline/loaded variables
 
 other random cool ideas
 - placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable

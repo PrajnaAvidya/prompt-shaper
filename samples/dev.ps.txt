@@ -2,6 +2,10 @@ I'm developing a templating engine in TS called PromptShape for efficient text-b
 
 {currentQuestion}
 I want to redo and improve how single bracket variables are defined.
+I want the default way to define a string or number variable to look like how file vars are current defined and file vars to look like this:
+{fileVar=load("fileName")}
+the load() could represent any number of custom modifiers or extensions for using variables
+combine the
 {/currentQuestion}
 
 {spec = "spec.md"}

@@ -1,7 +1,13 @@
 import { readFileSync, writeFileSync } from 'fs'
 
-interface templateDefinition {
+enum variableType {
+  string,
+  number,
+  template,
+}
+interface variableDefinition {
   name: string
+  type: variableType,
   content: string
   requiredParams: string[]
   optionalParams: {defaultValue: string | number, name: string}[]
@@ -25,9 +31,10 @@ const text = loadFileContent('samples/dev.ps.txt')
 const withoutComments = text.replace(/\/\/.*$/gm, '')
 
 // match file loading tags: {@variableName = "filePath" or variableName = "filePath"}
+// TODO make this the general inline matching section
 const fileLoadPattern = /{([^\s=]{1,})\s*=\s*"([^"\n]{1,})"}/g;
 const fileLoadMatches = Array.from(withoutComments.matchAll(fileLoadPattern))
-const fileTemplateDefinitions: templateDefinition[] = []
+const fileTemplateDefinitions: variableDefinition[] = []
 fileLoadMatches.forEach(match => {
   const variableName = match[1].trim();
   const filePath = match[2];
@@ -37,7 +44,7 @@ fileLoadMatches.forEach(match => {
   fileTemplateDefinitions.push({ name: variableName, requiredParams: [], optionalParams: [], content: fileContent });
 });
 
-// match inline template tags: {templateName} and {templateName(param1, param2="defaultValue")}
+// match multi line template tags: {templateName} and {templateName(param1, param2="defaultValue")}
 // const singleBracePattern = /{([^}(]+)(?:\(([^)]*)\))?\}([\s\S]*?){\/\1}/g
 const singleBracePattern = /(?<!{){([^}(]+)(?:\(([^)]*)\))?\}([\s\S]*?){\/\1}(?!})/g;
 

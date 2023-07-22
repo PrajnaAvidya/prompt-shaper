@@ -6,6 +6,10 @@ Working draft of my prompt construction scripting language
 
 I'm a programmer and like many others I've seen great productivity gains due to the assistance of LLMs. the standard way of interacting with GPT through a chat interface works great for a lot of things, but I do a lot of what I would call "non-linear" workflows and find myself spending a lot of time copying and pasting out of text files to construct the exact prompts I want to run. I wanted to add a UI to do some of these tasks in Prajna Chat (my custom GPT client) but decided that first I needed some kind of engine to run all this. after looking into existing templating engines like Handlebars I decided nothing out there was quite what I'm looking for so decided to build my own templating language specifically designed for running GPT/LLM prompts. the idea is that you could just work out of a text file and save a lot of time vs doing a bunch of copy/pasting of repeatedly used text fragments. or you could build a UI around it and make it even more powerful.
 
+### Examples
+
+See the `samples` directory and try running them with the parser.
+
 ### Templates and Variables
 
 A template is either a file (for the included samples I'm using the .ps.txt extension) or defined inline in a template file. Templates are loaded into variables, which can be injected into other templates.
@@ -74,15 +78,23 @@ The contents of templates will be loaded into variables which are available to r
 ### Loading templates from files
 The parser can load files as templates inline from within templates
 ```
-// this will load a variable called fileTemplate from "file-template.ps.txt:
-{fileTemplate} => path="file-template.ps.txt"
+// this will load variable called fileTemplate from "file-template.ps.txt:
+{fileTemplate = "file-template.ps.txt.txt"}
 
 {{fileTemplate}}
 ```
 
-TODO loading the contents of a file as a variable vs executing a loaded file as a template
+### Raw text variables
+To render a variable as raw text (i.e. don't parse and execute the contents) use the @ symbol in front of the slot (local parameters will be ignored).
 
-File templates with local parameters are not yet implemented,
+```
+{rawText}
+This is what a slot looks like in PromptShape: {{slot}}
+{rawText}
+
+// the following will just display the exact contents of rawText
+{{@rawText}}
+```
 
 ### Misc
 

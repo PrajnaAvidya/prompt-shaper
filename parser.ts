@@ -5,7 +5,6 @@ interface templateDefinition {
   content: string
   requiredParams: string[]
   optionalParams: {defaultValue: string | number, name: string}[]
-  rawText?: boolean
 }
 
 // load/track files (to prevent circular dependencies)
@@ -25,22 +24,16 @@ const text = loadFileContent('samples/file-variables.ps.txt')
 const withoutComments = text.replace(/\/\/.*$/gm, '')
 
 // match file loading tags: {@variableName = "filePath" or variableName = "filePath"}
-// const fileLoadPattern = /{(@?[^=]+)\s*=\s*"([^"]+)"}/g;
-const fileLoadPattern = /{(@?[^\s=]{1,})\s*=\s*"([^"\n]{1,})"}/g;
+const fileLoadPattern = /{([^\s=]{1,})\s*=\s*"([^"\n]{1,})"}/g;
 const fileLoadMatches = Array.from(withoutComments.matchAll(fileLoadPattern))
 const fileTemplateDefinitions: templateDefinition[] = []
 fileLoadMatches.forEach(match => {
-  console.log(match)
   const variableName = match[1].trim();
   const filePath = match[2];
   const fileContent= loadFileContent(filePath)
 
   // add the loaded file content as a new template definition
-  if (variableName.startsWith('@')) {
-    fileTemplateDefinitions.push({ name: variableName.substring(1), requiredParams: [], optionalParams: [], content: fileContent, rawText: true });
-  } else {
-    fileTemplateDefinitions.push({ name: variableName, requiredParams: [], optionalParams: [], content: fileContent });
-  }
+  fileTemplateDefinitions.push({ name: variableName, requiredParams: [], optionalParams: [], content: fileContent });
 });
 
 // match inline template tags: {templateName} and {templateName(param1, param2="defaultValue")}
@@ -61,8 +54,10 @@ const allTemplateDefinitions = [...fileTemplateDefinitions, ...Array.from(withou
 console.log('template definitions:', allTemplateDefinitions)
 
 // match variables and get params
-const matchVariables = (template: string) => {
-  return Array.from(template.matchAll(/{{([^}]+)}}/g))
+const matchVariables = (template: string, onlyMatchRaw: boolean = false) => {
+  const pattern = onlyMatchRaw ? /{{@([^}]+)}}/g : /{{(?!@)([^}]+)}}/g
+
+  return Array.from(template.matchAll(pattern))
     .map(match => {
       const [name, paramsRaw] = match[1].split('(')
       let params: {name: string, value: string | number}[] = []
@@ -89,12 +84,13 @@ const matchVariables = (template: string) => {
 let finalTemplate = withoutComments.replace(singleBracePattern, '').replace(fileLoadPattern, '').replace(/\n{3,}/g, '\n\n').trim()
 console.log(`\ntext to render:\n${finalTemplate}`)
 
-// TODO hold back replacing variables containing raw text and do them last (so they don't get rendered recursively)
+const maxDepth = 5;
 const renderTemplate = (template: string, depth: number = 0): string => {
-  if (depth > 5) return template // prevent infinite recursion
+  // after reaching max depth, we only render raw text variables and then return the result
+  const finalPass = depth > maxDepth
 
   let renderedTemplate = template
-  const variables = matchVariables(renderedTemplate)
+  const variables = matchVariables(renderedTemplate, finalPass)
 
   // replace variables in reverse order so character positions can be used
   variables.reverse().forEach(variable => {
@@ -148,7 +144,7 @@ const renderTemplate = (template: string, depth: number = 0): string => {
   })
 
   // recursively render nested templates
-  return renderTemplate(renderedTemplate, depth + 1)
+  return finalPass ? renderedTemplate : renderTemplate(renderedTemplate, depth + 1)
 }
 
 console.log(`\nfinal rendered text:\n${renderTemplate(finalTemplate)}`)

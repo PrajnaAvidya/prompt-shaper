@@ -1,13 +1,11 @@
-CURRENT
-load file as variable
-
-use variable as param
-
-do isNumeric on trimmed inline templates to see if the variables should be typed as numbers
-- maybe I need a third variable type? string, numeric, template.
-- 1 liner for defining string/numeric vars would be nice
+TOP PRIORITY
+- use variable as param
+- do isNumeric on trimmed inline templates to see if the variables should be typed as numbers
+-- maybe I need a third variable type (and auto-detect on load)? string, numeric, template.
+- tag for making gpt calls e.g. %gpt% (do they need an option to be deferred vs instant)
 
 REDO RENDERING SO ITS FULLY RECURSIVE (starts at the top level and works down template/collection definitions and renders like a tree)
+- look for name conflicts
 // (old) TODO what steps to take in compilation?
 // remove comments
 // get/validate all slot definitions, error if there are unmatched opening or closing tags
@@ -30,14 +28,13 @@ collection stuff? (low priority until I actually use them)
 - appending
 - for loops?
 
-load/run template from a file from within a template (execute file inline instead of loading as variable)
-gpt calls - do they need an option to be deferred vs instant?
-should there be some option/setting to separate snippets by == or not? (e.g. when iterating a collection)
-look for name conflicts
-file templates with local parameters
+nice to haves
+- 1 liner for defining string/numeric vars
+- also 1 liner to load/render file inline
+- file templates with local parameters
 
 other random cool ideas
-- linear placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable
+- placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable
 
 ===
 

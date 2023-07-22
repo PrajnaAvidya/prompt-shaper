@@ -1,3 +1,5 @@
+TODO redo
+
 I'm developing a templating engine in TS called PromptShape for efficient text-based gpt prompting. Here's my WIP readme/spec so far:
 ===
 # PromptShape

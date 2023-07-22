@@ -22,9 +22,9 @@ part
   / text
 
 variableDefinition
-  = "{" _ variableName:variableName _ "}" _ content:(variableDefinition / slot / text)* _ "{/" _ variableName _ "}"
+  = "{" _ variableName:variableName _ "(" _ variableParams:variableParams _ ")" _ "}" _ content:(variableDefinition / slot / text)* _ "{/" _ variableName _ "}"
     {
-      return { type: 'variable', variableName, content };
+      return { type: 'variable', variableName, variableParams, content };
     }
   / "{" _ variableName:variableName _ "=" _ value:value _ "}"
     {
@@ -40,6 +40,16 @@ slot
 params
   = head:param tail:(_ "," _ param)*
     { return [head].concat(tail.map(t => t[3])); }
+
+variableParams
+  = head:defaultParam tail:(_ "," _ defaultParam)*
+    { return [head].concat(tail.map(t => t[3])); }
+
+defaultParam
+  = variableName:variableName _ "=" _ value:value
+    { return { type: 'param', variableName, value, required: false }; }
+  / variableName:variableName
+    { return { type: 'param', variableName, value: null, required: true }; }
 
 value
   = string

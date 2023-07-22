@@ -9,11 +9,9 @@ parsing order
 - 2a) match and validate all variables and slots
 - 2b) remove variables
 - *) (future state) collection stuff
-- 3) remove excess whitespace
-- 4a) render slots with variable data from the bottom up
-- 4b) string variables will be parsed recursively (variables/slots within them will be rendered)
-
-TODO deal with stuff nested in multiline variables
+- 3a) remove excess whitespace
+- 3b) render slots with variable data from the bottom up
+- 3c) string variables will be parsed recursively (variables/slots within them will be rendered)
  */
 
 // const textToParse = loadFileContent('samples/inline-variable-definitions.ps.txt')
@@ -23,12 +21,12 @@ const textToParse = loadFileContent('samples/scratch.ps.txt')
 const withoutComments = textToParse.replace(/\/\/.*$/gm, '');
 console.log(`Text to parse:\n${withoutComments}`)
 
-// 2a) match all variables
+// 2a) match all variables/slots
+// TODO ignore variables/slots nested in multiline variables
 const variables: { [key: string]: object } = {}
-const slotNames: string[] = []
 // store slots/variables
-const parsed = variablesParser.parse(withoutComments)
-for (const value of parsed.parsed) {
+const parsedVaribles = variablesParser.parse(withoutComments)
+for (const value of parsedVaribles.parsed) {
   console.log(value)
   switch (value.type) {
     case "variable":
@@ -38,8 +36,6 @@ for (const value of parsed.parsed) {
       variables[value.variableName] = { name: value.variableName, value: value.value }
       break
     case "slot":
-      slotNames.push(value.variableName)
-      break
     case "text":
       break
     default:
@@ -49,13 +45,18 @@ for (const value of parsed.parsed) {
 // console.log('variables', variables)
 // console.log('slotNames', slotNames)
 
-const withoutVariables = parsed.text
+const withoutVariables = parsedVaribles.text
 
 // remove excess whitespace
 const withoutExcessWhiteSpace = withoutVariables.replace(/\n{3,}/g, '\n\n').trim()
-// console.log(withoutExcessWhiteSpace)
+console.log(`final template to render:\n${withoutExcessWhiteSpace}`)
 
-// TODO now reparse to get the correct locations of the slots
-// console.log(variablesParser.parse(withoutExcessWhiteSpace))
+// TODO reparse to get the correct locations of the slots & replace vars from the bottom up
+const parsedSlots = variablesParser.parse(withoutExcessWhiteSpace).parsed.filter((p: any) => p.type === 'slot').reverse()
+// console.log('parsedSlots', parsedSlots)
+for (const slot of parsedSlots) {
+  console.log(slot)
+  // TODO find variable
+  // TODO render variable
+}
 
-// TODO replase all vars from the bottom up

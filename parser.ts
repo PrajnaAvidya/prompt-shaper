@@ -47,6 +47,10 @@ const matchVariables = (template: string) => {
     })
 }
 
+// remove matched templates and excess whitespace
+let finalTemplate = withoutComments.replace(singleBracePattern, '').replace(/\n{3,}/g, '\n\n').trim()
+console.log(`\ntext to render:\n${finalTemplate}`)
+
 const renderTemplate = (template: string, depth: number = 0): string => {
   if (depth > 5) return template // prevent infinite recursion
 

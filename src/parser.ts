@@ -1,5 +1,4 @@
-import {loadFileContent} from "./utils";
-
+import { loadFileContent } from './utils'
 const parser = require('./ps-parser.js')
 
 const text = loadFileContent('samples/inline-variable-definitions.ps.txt')

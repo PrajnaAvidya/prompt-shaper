@@ -5,6 +5,7 @@ interface templateDefinition {
   content: string
   requiredParams: string[]
   optionalParams: {defaultValue: string | number, name: string}[]
+  rawText?: boolean
 }
 
 // load/track files (to prevent circular dependencies)
@@ -23,17 +24,23 @@ const text = loadFileContent('samples/file-variables.ps.txt')
 // remove comments
 const withoutComments = text.replace(/\/\/.*$/gm, '')
 
-// match file loading tags: {variableName = "filePath"}
-const fileLoadPattern = /{([^=]+)\s*=\s*"([^"]+)"}/g;
+// match file loading tags: {@variableName = "filePath" or variableName = "filePath"}
+// const fileLoadPattern = /{(@?[^=]+)\s*=\s*"([^"]+)"}/g;
+const fileLoadPattern = /{(@?[^\s=]{1,})\s*=\s*"([^"\n]{1,})"}/g;
 const fileLoadMatches = Array.from(withoutComments.matchAll(fileLoadPattern))
 const fileTemplateDefinitions: templateDefinition[] = []
 fileLoadMatches.forEach(match => {
+  console.log(match)
   const variableName = match[1].trim();
   const filePath = match[2];
-  console.log(filePath)
   const fileContent= loadFileContent(filePath)
+
   // add the loaded file content as a new template definition
-  fileTemplateDefinitions.push({ name: variableName, requiredParams: [], optionalParams: [], content: fileContent });
+  if (variableName.startsWith('@')) {
+    fileTemplateDefinitions.push({ name: variableName.substring(1), requiredParams: [], optionalParams: [], content: fileContent, rawText: true });
+  } else {
+    fileTemplateDefinitions.push({ name: variableName, requiredParams: [], optionalParams: [], content: fileContent });
+  }
 });
 
 // match inline template tags: {templateName} and {templateName(param1, param2="defaultValue")}
@@ -82,6 +89,7 @@ const matchVariables = (template: string) => {
 let finalTemplate = withoutComments.replace(singleBracePattern, '').replace(fileLoadPattern, '').replace(/\n{3,}/g, '\n\n').trim()
 console.log(`\ntext to render:\n${finalTemplate}`)
 
+// TODO hold back replacing variables containing raw text and do them last (so they don't get rendered recursively)
 const renderTemplate = (template: string, depth: number = 0): string => {
   if (depth > 5) return template // prevent infinite recursion
 

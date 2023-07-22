@@ -1,14 +1,45 @@
 import { readFileSync } from 'fs'
 
+interface templateDefinition {
+  name: string
+  content: string
+  requiredParams: string[]
+  optionalParams: {defaultValue: string | number, name: string}[]
+}
+
+// load/track files (to prevent circular dependencies)
+const loadedFiles = new Set();
+const loadFileContent = (filePath: string): string => {
+  if (loadedFiles.has(filePath)) {
+    throw new Error(`Circular dependency detected: file "${filePath}" has already been loaded.`);
+  }
+  loadedFiles.add(filePath);
+  return readFileSync(filePath, 'utf8').toString();
+};
+
 // load file
-const text = readFileSync('samples/slots.ps.txt', 'utf8')
+const text = loadFileContent('samples/file-variables.ps.txt')
 
 // remove comments
 const withoutComments = text.replace(/\/\/.*$/gm, '')
 
+// match file loading tags: {variableName = "filePath"}
+const fileLoadPattern = /{([^=]+)\s*=\s*"([^"]+)"}/g;
+const fileLoadMatches = Array.from(withoutComments.matchAll(fileLoadPattern))
+const fileTemplateDefinitions: templateDefinition[] = []
+fileLoadMatches.forEach(match => {
+  const variableName = match[1].trim();
+  const filePath = match[2];
+  console.log(filePath)
+  const fileContent= loadFileContent(filePath)
+  // add the loaded file content as a new template definition
+  fileTemplateDefinitions.push({ name: variableName, requiredParams: [], optionalParams: [], content: fileContent });
+});
+
 // match inline template tags: {templateName} and {templateName(param1, param2="defaultValue")}
 const singleBracePattern = /{([^}(]+)(?:\(([^)]*)\))?\}([\s\S]*?){\/\1}/g
-const templateDefinitions = Array.from(withoutComments.matchAll(singleBracePattern))
+
+const allTemplateDefinitions = [...fileTemplateDefinitions, ...Array.from(withoutComments.matchAll(singleBracePattern))
   .map(match => {
     const params = match[2] ? match[2].split(',').map(param => param.trim()) : []
     const requiredParams = params.filter(param => !param.includes('='))
@@ -19,8 +50,8 @@ const templateDefinitions = Array.from(withoutComments.matchAll(singleBracePatte
       return { name: name.trim(), defaultValue }
     })
     return { name: match[1], requiredParams, optionalParams, content: match[3].trim() }
-  })
-console.log('template definitions:', templateDefinitions)
+  })]
+console.log('template definitions:', allTemplateDefinitions)
 
 // match variables and get params
 const matchVariables = (template: string) => {
@@ -48,7 +79,7 @@ const matchVariables = (template: string) => {
 }
 
 // remove matched templates and excess whitespace
-let finalTemplate = withoutComments.replace(singleBracePattern, '').replace(/\n{3,}/g, '\n\n').trim()
+let finalTemplate = withoutComments.replace(singleBracePattern, '').replace(fileLoadPattern, '').replace(/\n{3,}/g, '\n\n').trim()
 console.log(`\ntext to render:\n${finalTemplate}`)
 
 const renderTemplate = (template: string, depth: number = 0): string => {
@@ -59,7 +90,7 @@ const renderTemplate = (template: string, depth: number = 0): string => {
 
   // replace variables in reverse order so character positions can be used
   variables.reverse().forEach(variable => {
-    const templateDef = templateDefinitions.find(def => def.name === variable.name)
+    const templateDef = allTemplateDefinitions.find(def => def.name === variable.name)
     if (!templateDef) {
       throw new Error(`template definition for ${variable.name} not found`)
     }

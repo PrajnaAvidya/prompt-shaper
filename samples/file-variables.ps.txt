@@ -1,0 +1,10 @@
+{license = "LICENSE.txt"}
+
+Here is the license for PromptShape:
+{{license}}
+
+// the @ operator treats a variable as raw text (does not execute contents)
+{@spec = "spec.md"}
+
+Here's the spec for PromptShape:
+{{spec}}

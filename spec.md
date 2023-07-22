@@ -72,11 +72,17 @@ TODO ability to use variable as param
 The contents of templates will be loaded into variables which are available to render inside other templates.
 
 ### Loading templates from files
-The parser will load files as templates from within templates:
+The parser can load files as templates inline from within templates
 ```
 // this will load a variable called fileTemplate from "file-template.ps.txt:
 {fileTemplate} => path="file-template.ps.txt"
+
+{{fileTemplate}}
 ```
+
+TODO loading the contents of a file as a variable vs executing a loaded file as a template
+
+File templates with local parameters are not yet implemented,
 
 ### Misc
 

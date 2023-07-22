@@ -1,13 +1,35 @@
 use variable as param
-do isNumeric on trimmed inline templates to see if they should be numbers
+do isNumeric on trimmed inline templates to see if the variables should be typed as numbers
+
+maybe I need a third variable type? string, numeric, template.
+- 1 liner for defining string/numeric vars would be nice
 
 REDO RENDERING SO ITS FULLY RECURSIVE (starts at the top level and works down template/collection definitions and renders like a tree)
 
-improve clarity of slot definition vs variable, maybe they should just be called different things
-collections/iterating
-basic for loops (can we just iterate a collection for all cases or is this actually needed?)
+config
+- allow absolute/parent paths for template file load
+
+collection stuff? (low priority until I actually use them)
+- pull collection stuff into a new branch until its ready
+- basic iterating
+- validate the names of collection vars
+- make collection variable name accessible
+- index access
+- appending
+- for loops?
+
 load/run template from a file from within a template
 gpt calls - do they need an option to be deferred vs instant?
 should there be some option/setting to separate snippets by == or not? (e.g. when iterating a collection)
 look for name conflicts
-validate the names of collection vars
+file templates with local parameters
+
+other random cool ideas
+- linear placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable
+
+===
+
+if I were to use this to aid myself in writing this very app what would I need?
+- loading variables from files (params not needed) -- for including code/text samples
+-- is this really it? I don't think I need collections, are they more useful for writing? I guess I can have a collection of code samples
+- ability to auto prompt/output the final product (%gpt% tags or whatever). I should look into chaining with an existing openai library, no need to write my own thing.

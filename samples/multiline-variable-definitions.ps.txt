@@ -1,0 +1,8 @@
+{multilineVariable}This is a basic multiline variable. It doesn't have to be multiple lines{/multilineVariable}
+
+{nestedMultilines}
+This is a multiline variable containing a nested variable
+{var2}
+Hello World
+{/var2}
+{/nestedMultilines}

@@ -5,6 +5,8 @@ TOP PRIORITY
 -- only try to render inside template variables
 - use variable as param
 
+granular test files and an automated suite to run them (each individual feature, error condition, etc)
+
 then...
 REDO RENDERING SO ITS FULLY RECURSIVE (starts at the top level and works down template/collection definitions and renders like a tree)
 - look for name conflicts

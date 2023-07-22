@@ -6,6 +6,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.3.3",
+    "@types/pegjs": "^0.10.3",
     "@typescript-eslint/eslint-plugin": "^6.1.0",
     "@typescript-eslint/parser": "^6.1.0",
     "eslint": "^8.45.0",
@@ -17,8 +18,9 @@
     "typescript": "^5.1.6"
   },
   "scripts": {
+    "compile": "pegjs src/parsers/slots-variables.pegjs",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
-    "parse": "pegjs src/ps-parser.pegjs && ts-node src/parser.ts"
+    "parse": "ts-node src/parser.ts"
   }
 }

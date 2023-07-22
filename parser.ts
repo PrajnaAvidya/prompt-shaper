@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 
 interface templateDefinition {
   name: string
@@ -38,7 +38,8 @@ fileLoadMatches.forEach(match => {
 });
 
 // match inline template tags: {templateName} and {templateName(param1, param2="defaultValue")}
-const singleBracePattern = /{([^}(]+)(?:\(([^)]*)\))?\}([\s\S]*?){\/\1}/g
+// const singleBracePattern = /{([^}(]+)(?:\(([^)]*)\))?\}([\s\S]*?){\/\1}/g
+const singleBracePattern = /(?<!{){([^}(]+)(?:\(([^)]*)\))?\}([\s\S]*?){\/\1}(?!})/g;
 
 const allTemplateDefinitions = [...fileTemplateDefinitions, ...Array.from(withoutComments.matchAll(singleBracePattern))
   .map(match => {
@@ -148,4 +149,6 @@ const renderTemplate = (template: string, depth: number = 0): string => {
   return finalPass ? renderedTemplate : renderTemplate(renderedTemplate, depth + 1)
 }
 
-console.log(`\nfinal rendered text:\n${renderTemplate(finalTemplate)}`)
+// console.log(`\nfinal rendered text:\n${renderTemplate(finalTemplate)}`)
+writeFileSync('output.txt', renderTemplate(finalTemplate))
+console.log('final text rendered to output.txt')

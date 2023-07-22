@@ -1,7 +1,7 @@
 I'm developing a templating engine in TS called PromptShape for efficient text-based gpt prompting. Here's my WIP readme/spec so far:
 
 {currentQuestion}
-I want to redo and improve how single bracket variables are defined. First, how do I only parse single bracket variable tags that are not surrounded by other single bracket tags in the current template?
+I want to redo and improve how single bracket variables are defined.
 {/currentQuestion}
 
 {spec = "spec.md"}

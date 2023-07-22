@@ -23,6 +23,7 @@ REDO RENDERING SO ITS FULLY RECURSIVE (starts at the top level and works down te
 // render all variables (will need to be called recursively because snippets can contain vars)
 // we're done? (no we still need to run the gpt query)
 - correct parsing of variable tags inside variables
+- add explicit step to check for unpaired (or incorrectly ordered) tags before rendering
 
 config
 - allow absolute/parent paths for template file load

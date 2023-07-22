@@ -5,6 +5,14 @@ maybe I need a third variable type? string, numeric, template.
 - 1 liner for defining string/numeric vars would be nice
 
 REDO RENDERING SO ITS FULLY RECURSIVE (starts at the top level and works down template/collection definitions and renders like a tree)
+// (old) TODO what steps to take in compilation?
+// remove comments
+// get/validate all slot definitions, error if there are unmatched opening or closing tags
+// remove slot definitions
+// check for collection defs, load them (error if referencing unknown snippets) and remove those from the page
+// render collections
+// render all variables (will need to be called recursively because snippets can contain vars)
+// we're done? (no we still need to run the gpt query)
 
 config
 - allow absolute/parent paths for template file load

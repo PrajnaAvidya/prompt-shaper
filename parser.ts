@@ -1,8 +1,7 @@
 import { readFileSync } from 'fs'
 
 // load file
-// const text = readFileSync('samples/slots.ps.txt', 'utf8')
-const text = readFileSync('samples/collections.ps.txt', 'utf8')
+const text = readFileSync('samples/slots.ps.txt', 'utf8')
 
 // remove comments
 const withoutComments = text.replace(/\/\/.*$/gm, '')
@@ -22,23 +21,6 @@ const templateDefinitions = Array.from(withoutComments.matchAll(singleBracePatte
     return { name: match[1], requiredParams, optionalParams, content: match[3].trim() }
   })
 console.log('template definitions:', templateDefinitions)
-
-// match collections
-// TODO validate variable names
-const collectionPattern = /^\[\](\w+)\s*=\s*([\w,\s]+)/gm;
-const collectionDefinitions = Array.from(withoutComments.matchAll(collectionPattern))
-  .map(match => {
-    // split variables by comma and trim whitespace
-    const variables = match[2].split(',').map(variable => variable.trim());
-    return { name: match[1], variables };
-  });
-console.log('collection definitions:', collectionDefinitions);
-
-// remove matched templates/collections and excess whitespace
-let finalTemplate = withoutComments.replace(singleBracePattern, '').replace(collectionPattern, '').replace(/\n{3,}/g, '\n\n').trim()
-console.log(`\ntext to render:\n${finalTemplate}`)
-
-// TODO render collections
 
 // match variables and get params
 const matchVariables = (template: string) => {
@@ -70,10 +52,6 @@ const renderTemplate = (template: string, depth: number = 0): string => {
 
   let renderedTemplate = template
   const variables = matchVariables(renderedTemplate)
-
-  // TODO match collections
-
-  // TODO render collections
 
   // replace variables in reverse order so character positions can be used
   variables.reverse().forEach(variable => {

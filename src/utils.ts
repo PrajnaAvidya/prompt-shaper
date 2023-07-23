@@ -8,3 +8,7 @@ export const loadFileContent = (filePath: string): string => {
   loadedFiles.add(filePath)
   return readFileSync(filePath, 'utf8').toString()
 }
+
+export const replaceStringAtLocation = (str: string, replacement: string | number, start: number, end: number): string => {
+  return str.substring(0, start) + replacement + str.substring(end)
+}

@@ -1,6 +1,5 @@
 TOP PRIORITY
 - finish redoing in peg
--- I fucked up and did unnamed params in slot calls, should I go back to the python style params (more verbose, but more robust)? both?
 -- nested tags & recursive render
 -- arithmetic
 -- syntax for outputting a function directly instead of loading to var: e.g. {load("file.txt")} or {@anotherFunction("foobar", 3.33)}

@@ -1,6 +1,6 @@
-import { loadFileContent } from './utils'
+import { loadFileContent, replaceStringAtLocation } from './utils'
 import peg from 'pegjs'
-import {parserParam, parserSection, parserType, parserVariables, valueType} from "./types";
+import { parserSection, parserType, parserVariables, valueType } from './types'
 
 const variablesParser = peg.generate(loadFileContent('src/parsers/slots-variables.pegjs'))
 
@@ -16,8 +16,8 @@ parsing order
  */
 
 // const textToParse = loadFileContent('samples/inline-variable-definitions.ps.txt')
-// const textToParse = loadFileContent('samples/dev.ps.txt')
-const textToParse = loadFileContent('samples/scratch.ps.txt')
+const textToParse = loadFileContent('samples/dev.ps.txt')
+// const textToParse = loadFileContent('samples/scratch.ps.txt')
 
 // 1) remove comments using regex
 const withoutComments = textToParse.replace(/\/\/.*$/gm, '')
@@ -29,7 +29,7 @@ const variables: parserVariables = {}
 // store variables
 const parsedVariables = variablesParser.parse(withoutComments)
 for (const value of parsedVariables.parsed as parserSection[]) {
-  // console.log(value)
+  console.log(value)
   switch (value.type) {
     case parserType.variable:
       if (value.variableName! in variables) {
@@ -39,7 +39,7 @@ for (const value of parsedVariables.parsed as parserSection[]) {
         name: value.variableName!,
         type: value.content!.type,
         value: value.content!.value,
-        params: (value.content!.type === 'function' ? value.content!.params : value.params) || []
+        params: (value.content!.type === 'function' ? value.content!.params : value.params) || [],
       }
       break
     case parserType.slot:
@@ -52,27 +52,44 @@ for (const value of parsedVariables.parsed as parserSection[]) {
 console.log('variables', variables)
 
 const withoutVariables = parsedVariables.text
-
-// remove excess whitespace
-const withoutExcessWhiteSpace = withoutVariables.replace(/\n{3,}/g, '\n\n').trim()
-console.log(`final template to render:\n${withoutExcessWhiteSpace}`)
+console.log(`final template to render:\n${withoutVariables}`)
 
 // reparse to get the correct locations of the slots & replace vars from the bottom up
 const parsedSlots = variablesParser
-  .parse(withoutExcessWhiteSpace)
-  .parsed.filter((p: any) => p.type === 'slot')
+  .parse(withoutVariables)
+  .parsed.filter((p: parserSection) => p.type === parserType.slot)
   .reverse()
 console.log('parsedSlots')
-let currentTemplate = withoutExcessWhiteSpace
-for (const slot of parsedSlots) {
+let currentTemplate = withoutVariables
+for (const slot of parsedSlots as parserSection[]) {
   console.log('slot', slot)
-  const variable = variables[slot.variableName]
+  const variable = variables[slot.variableName!]
   console.log('variable', variable)
   if (!variable) continue
 
   // TODO get contents of variable
+  // TODO arithmetic
+  let variableValue: string | number
+  switch (variable.type) {
+    case valueType.string:
+    case valueType.number:
+    case valueType.unknown:
+      variableValue = variable.value
+      break
+    case valueType.function:
+      // TODO handle function
+      variableValue = 'TODO render function'
+      break
+    default:
+      throw new Error(`Unknown variable type: ${variable.type}`)
+  }
 
-  // TODO replace slot with variable
+  // replace slot with variable
+  currentTemplate = replaceStringAtLocation(currentTemplate, variableValue, slot.location!.start.offset, slot.location!.end.offset)
 
-  break
+  // console.log(currentTemplate)
 }
+
+// remove excess whitespace
+const withoutExcessWhiteSpace = currentTemplate.replace(/\n{3,}/g, '\n\n').trim()
+console.log(withoutExcessWhiteSpace)

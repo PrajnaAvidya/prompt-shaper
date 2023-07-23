@@ -26,11 +26,11 @@ part
 variableDefinition
   = "{" _ variableName:variableName _ "(" _ variableParams:variableParams _ ")"? _ "}" _ content:(variableDefinition / slot / text)* _ "{/" _ variableName _ "}"
     {
-      return { type: 'variable', variableName, params:variableParams, content:{ type:content[0].type, value:content[0].content } };
+      return { type: 'variable', variableName, params:variableParams, content:{ type:'string', value:content[0].content } };
     }
   / "{" _ variableName:variableName _ "}" _ content:(variableDefinition / slot / text)*_ "{/" _ variableName _ "}"
     {
-      return { type: 'variable', variableName, params:[], content:{ type:content[0].type, value:content[0].content } };
+      return { type: 'variable', variableName, params:[], content:{ type:'string', value:content[0].content } };
     }
   / "{" _ variableName:variableName _ "=" _ value:value _ "}"
     {

@@ -25,8 +25,8 @@ export interface parserSection {
   content?: parserParam
   raw?: boolean
   location?: {
-    start: textLocation,
-    end: textLocation,
+    start: textLocation
+    end: textLocation
   }
 }
 
@@ -38,9 +38,9 @@ export interface textLocation {
 
 export interface parserVariables {
   [key: string]: {
-    name: string,
-    type: valueType,
-    value: string | number,
-    params: parserParam[],
+    name: string
+    type: valueType
+    value: string | number
+    params: parserParam[]
   }
 }

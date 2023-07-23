@@ -1,14 +1,8 @@
-import { readFileSync, writeFileSync } from 'fs'
+import { writeFileSync } from 'fs'
 import { loadFileContent } from './src/utils'
 
-enum variableType {
-  string,
-  number,
-  template,
-}
 interface variableDefinition {
   name: string
-  // type: variableType,
   content: string
   requiredParams: string[]
   optionalParams: { defaultValue: string | number; name: string }[]

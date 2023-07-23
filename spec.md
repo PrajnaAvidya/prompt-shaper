@@ -17,6 +17,9 @@ TODO Redo everything below
 ### Templates and Variables
 A template is a file or inline string that gets loaded into a variable by the PromptShape parser and is then rendered.
 
+TODO single + multi line templates
+TODO multiline are always strings
+
 Here's an example of an inline template which is defined using single bracket tags (it will become a variable called `basicTemplate`):
 ```
 {basicTemplate}

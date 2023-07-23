@@ -16,6 +16,7 @@ parsing order
 
 // const textToParse = loadFileContent('samples/inline-variable-definitions.ps.txt')
 const textToParse = loadFileContent('samples/scratch.ps.txt')
+// const textToParse = loadFileContent('samples/dev.ps.txt')
 
 // 1) remove comments using regex
 const withoutComments = textToParse.replace(/\/\/.*$/gm, '');
@@ -33,7 +34,7 @@ for (const value of parsedVaribles.parsed) {
       if (value.variableName in variables) {
         throw new Error(`Variable name conflict: ${value.variableName}`)
       }
-      variables[value.variableName] = { name: value.variableName, value: value.value }
+      variables[value.variableName] = { name: value.variableName, value: value.value || { type: 'string', value: value.content }, params: value.variableParams || [] }
       break
     case "slot":
     case "text":
@@ -42,7 +43,7 @@ for (const value of parsedVaribles.parsed) {
       throw new Error(`Unknown type:\n${value}`)
   }
 }
-// console.log('variables', variables)
+console.log('variables', variables)
 // console.log('slotNames', slotNames)
 
 const withoutVariables = parsedVaribles.text
@@ -52,11 +53,12 @@ const withoutExcessWhiteSpace = withoutVariables.replace(/\n{3,}/g, '\n\n').trim
 console.log(`final template to render:\n${withoutExcessWhiteSpace}`)
 
 // TODO reparse to get the correct locations of the slots & replace vars from the bottom up
-const parsedSlots = variablesParser.parse(withoutExcessWhiteSpace).parsed.filter((p: any) => p.type === 'slot').reverse()
-// console.log('parsedSlots', parsedSlots)
-for (const slot of parsedSlots) {
-  console.log(slot)
-  // TODO find variable
-  // TODO render variable
-}
+// const parsedSlots = variablesParser.parse(withoutExcessWhiteSpace).parsed.filter((p: any) => p.type === 'slot').reverse()
+// console.log('slots')
+// for (const slot of parsedSlots) {
+//   console.log(slot)
+//   // TODO find variable
+//   console.log(variables[slot.variableName])
+//   // TODO render variable
+// }
 

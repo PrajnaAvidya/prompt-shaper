@@ -1,7 +1,7 @@
 I'm developing a templating engine in TS called PromptShape for efficient text-based gpt prompting. Here's my WIP readme/spec so far:
 
 {currentQuestion}
-It works great but I want t
+It works great but how can I make it even cooler?
 {/currentQuestion}
 
 {spec = "spec.md"}

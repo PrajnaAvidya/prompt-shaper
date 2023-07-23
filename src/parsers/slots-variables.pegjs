@@ -5,7 +5,8 @@
         return part.value;
       } else if (part.type === 'slot') {
         let params = part.params ? "(" + part.params.map(p => p.type === 'string' ? `"${p.value}"` : p.value).join(', ') + ")" : "";
-        return "{{" + part.variableName + params + "}}";
+        let raw = part.raw ? "@" : "";
+        return "{{" + raw + part.variableName + params + "}}";
       } else {
         return '';
       }
@@ -22,9 +23,13 @@ part
   / text
 
 variableDefinition
-  = "{" _ variableName:variableName _ "(" _ variableParams:variableParams _ ")" _ "}" _ content:(variableDefinition / slot / text)* _ "{/" _ variableName _ "}"
+  = "{" _ variableName:variableName _ "(" _ variableParams:variableParams _ ")"? _ "}" _ content:(variableDefinition / slot / text)* _ "{/" _ variableName _ "}"
     {
       return { type: 'variable', variableName, variableParams, content };
+    }
+  / "{" _ variableName:variableName _ "}" _ content:(variableDefinition / slot / text)* _ "{/" _ variableName _ "}"
+    {
+      return { type: 'variable', variableName, variableParams: [], content };
     }
   / "{" _ variableName:variableName _ "=" _ value:value _ "}"
     {
@@ -32,9 +37,9 @@ variableDefinition
     }
 
 slot
-  = "{{" _ variableName:variableName _ "("? _ params:params? _ ")"? _ "}}"
+  = "{{" _ "@"? _ variableName:variableName _ "("? _ params:params? _ ")"? _ "}}"
     {
-      return { type: 'slot', variableName, params, location: location() };
+      return { type: 'slot', variableName, params, raw: text().includes('@'), location: location() };
     }
 
 params

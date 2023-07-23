@@ -9,9 +9,13 @@ I'm developing a templating engine in TS called PromptShape for efficient text-b
 ===
 I'm using PEG.js for the parser and here's the source code for the inline variable parser:
 
-{parser = load("parser.old.ts")}
-{{@parser}}
+{pegParser = load("src/parsers/slots-variables.pegjs")}
+{{@pegParser}}
+===
+Here's the current source code for the TS parser:
+
+{tsParser = load("src/parser.ts")}
+{{@tsParser}}
 ===
 I would like some help developing it further.
-{{dummyVariable}}
 {{currentQuestion}}

@@ -1,12 +1,13 @@
 import { readFileSync } from 'fs'
 
-const loadedFiles = new Set()
+const fileCache: { [key: string]: string } = {}
 export const loadFileContent = (filePath: string): string => {
-  if (loadedFiles.has(filePath)) {
-    throw new Error(`Circular dependency detected: file "${filePath}" has already been loaded.`)
+  if (filePath in fileCache) {
+    return fileCache[filePath]
   }
-  loadedFiles.add(filePath)
-  return readFileSync(filePath, 'utf8').toString()
+  const contents = readFileSync(filePath, 'utf8').toString()
+  fileCache[filePath] = contents
+  return contents
 }
 
 export const replaceStringAtLocation = (str: string, replacement: string | number, start: number, end: number): string => {

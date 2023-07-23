@@ -10,7 +10,7 @@ TOP PRIORITY
 - granular test files and an automated suite to run them (each individual feature, error condition, etc)
 
 config
-- allow absolute/parent paths for template file load
+- allow absolute/parent paths for template file load (for security)
 - show debug messages
 
 collection stuff? (low priority until I actually need them)

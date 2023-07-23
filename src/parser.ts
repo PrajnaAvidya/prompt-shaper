@@ -1,6 +1,7 @@
 import { loadFileContent, replaceStringAtLocation } from './utils'
 import peg from 'pegjs'
-import { parserSection, parserType, parserVariables, valueType } from './types'
+import { ParserSection, ParserType, ParserVariables, ValueType } from './types'
+import { functions } from './functions'
 
 const variablesParser = peg.generate(loadFileContent('src/parsers/slots-variables.pegjs'))
 
@@ -15,7 +16,7 @@ parsing order
 - 3c) string variables will be parsed recursively (variables/slots within them will be rendered)
  */
 
-// const textToParse = loadFileContent('samples/inline-variable-definitions.ps.txt')
+// const textToParse = loadFileContent('samples/multiline-variable-definitions.ps.txt')
 const textToParse = loadFileContent('samples/dev.ps.txt')
 // const textToParse = loadFileContent('samples/scratch.ps.txt')
 
@@ -25,13 +26,13 @@ const withoutComments = textToParse.replace(/\/\/.*$/gm, '')
 
 // 2a) match all variables/slots
 // TODO ignore variables/slots nested in multiline variables
-const variables: parserVariables = {}
+const variables: ParserVariables = {}
 // store variables
 const parsedVariables = variablesParser.parse(withoutComments)
-for (const value of parsedVariables.parsed as parserSection[]) {
+for (const value of parsedVariables.parsed as ParserSection[]) {
   console.log(value)
   switch (value.type) {
-    case parserType.variable:
+    case ParserType.variable:
       if (value.variableName! in variables) {
         throw new Error(`Variable name conflict: ${value.variableName}`)
       }
@@ -42,8 +43,8 @@ for (const value of parsedVariables.parsed as parserSection[]) {
         params: (value.content!.type === 'function' ? value.content!.params : value.params) || [],
       }
       break
-    case parserType.slot:
-    case parserType.text:
+    case ParserType.slot:
+    case ParserType.text:
       break
     default:
       throw new Error(`Unknown type:\n${value}`)
@@ -57,28 +58,31 @@ console.log(`final template to render:\n${withoutVariables}`)
 // reparse to get the correct locations of the slots & replace vars from the bottom up
 const parsedSlots = variablesParser
   .parse(withoutVariables)
-  .parsed.filter((p: parserSection) => p.type === parserType.slot)
+  .parsed.filter((p: ParserSection) => p.type === ParserType.slot)
   .reverse()
 console.log('parsedSlots')
 let currentTemplate = withoutVariables
-for (const slot of parsedSlots as parserSection[]) {
+for (const slot of parsedSlots as ParserSection[]) {
   console.log('slot', slot)
   const variable = variables[slot.variableName!]
   console.log('variable', variable)
   if (!variable) continue
 
-  // TODO get contents of variable
-  // TODO arithmetic
+  // get contents of variable
+  // TODO when do we do arithmetic
   let variableValue: string | number
   switch (variable.type) {
-    case valueType.string:
-    case valueType.number:
-    case valueType.unknown:
+    case ValueType.string:
+    case ValueType.number:
+    case ValueType.unknown:
       variableValue = variable.value
       break
-    case valueType.function:
-      // TODO handle function
-      variableValue = 'TODO render function'
+    case ValueType.function:
+      const func = functions[variable.value]
+      if (!func) {
+        throw new Error(`Unknown function: ${variable.value}`)
+      }
+      variableValue = func(...variable.params!)
       break
     default:
       throw new Error(`Unknown variable type: ${variable.type}`)

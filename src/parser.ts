@@ -34,6 +34,7 @@ for (const value of parsedVariables.parsed as ParserSection[]) {
   console.log(value)
   switch (value.type) {
     case ParserType.variable:
+      // TODO don't allow variables named after functions
       if (value.variableName! in variables) {
         throw new Error(`Variable name conflict: ${value.variableName}`)
       }
@@ -65,6 +66,16 @@ console.log('parsedSlots')
 let currentTemplate = withoutVariables
 for (const slot of parsedSlots as ParserSection[]) {
   console.log('slot', slot)
+
+  // look for inline function call
+  if (!variables[slot.variableName!] && slot.variableName! in functions) {
+    variables[slot.variableName!] = {
+      name: slot.variableName!,
+      type: ValueType.function,
+      value: slot.variableName!,
+      params: slot.params || [],
+    }
+  }
   const variable = variables[slot.variableName!]
   console.log('variable', variable)
   if (!variable) continue

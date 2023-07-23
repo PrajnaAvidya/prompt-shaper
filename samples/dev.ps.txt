@@ -4,18 +4,15 @@ current question/problem goes here
 
 I'm developing a templating engine in TS called PromptShape for efficient text-based gpt prompting. Here's my WIP readme/spec so far:
 
-{spec = load("spec.md")}
-{{@spec}}
+{{@load("spec.md")}}
 ===
 I'm using PEG.js for the parser and here's the source code for the inline variable parser:
 
-{pegParser = load("src/parsers/slots-variables.pegjs")}
-{{@pegParser}}
+{{@load("src/parsers/slots-variables.pegjs")}}
 ===
 Here's the current source code for the TS parser:
 
-{tsParser = load("src/parser.ts")}
-{{@tsParser}}
+{{@load("src/parser.ts")}}
 ===
 I would like some help developing it further.
 {{currentQuestion}}

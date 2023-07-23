@@ -1,5 +1,6 @@
 import { loadFileContent } from './utils'
-import peg from "pegjs";
+import peg from 'pegjs'
+import {parserParam, parserSection, parserType, parserVariables, valueType} from "./types";
 
 const variablesParser = peg.generate(loadFileContent('src/parsers/slots-variables.pegjs'))
 
@@ -15,50 +16,65 @@ parsing order
  */
 
 // const textToParse = loadFileContent('samples/inline-variable-definitions.ps.txt')
-const textToParse = loadFileContent('samples/scratch.ps.txt')
 // const textToParse = loadFileContent('samples/dev.ps.txt')
+const textToParse = loadFileContent('samples/scratch.ps.txt')
 
 // 1) remove comments using regex
-const withoutComments = textToParse.replace(/\/\/.*$/gm, '');
-console.log(`Text to parse:\n${withoutComments}`)
+const withoutComments = textToParse.replace(/\/\/.*$/gm, '')
+// console.log(`Text to parse:\n${withoutComments}`)
 
 // 2a) match all variables/slots
 // TODO ignore variables/slots nested in multiline variables
-const variables: { [key: string]: object } = {}
+// TODO variable function params not working
+const variables: parserVariables = {}
 // store slots/variables
 const parsedVaribles = variablesParser.parse(withoutComments)
-for (const value of parsedVaribles.parsed) {
+for (const value of parsedVaribles.parsed as parserSection[]) {
   console.log(value)
   switch (value.type) {
-    case "variable":
-      if (value.variableName in variables) {
+    case parserType.variable:
+      if (value.variableName! in variables) {
         throw new Error(`Variable name conflict: ${value.variableName}`)
       }
-      variables[value.variableName] = { name: value.variableName, value: value.value || { type: 'string', value: value.content }, params: value.variableParams || [] }
+      variables[value.variableName!] = {
+        name: value.variableName!,
+        type: value.content!.type,
+        // value: value.content || { type: valueType.string, value: value.content },
+        value: value.content!.value,
+        params: value.params || [],
+      }
       break
-    case "slot":
-    case "text":
+    case parserType.slot:
+    case parserType.text:
       break
     default:
       throw new Error(`Unknown type:\n${value}`)
   }
 }
 console.log('variables', variables)
-// console.log('slotNames', slotNames)
 
-const withoutVariables = parsedVaribles.text
-
-// remove excess whitespace
-const withoutExcessWhiteSpace = withoutVariables.replace(/\n{3,}/g, '\n\n').trim()
-console.log(`final template to render:\n${withoutExcessWhiteSpace}`)
-
-// TODO reparse to get the correct locations of the slots & replace vars from the bottom up
-// const parsedSlots = variablesParser.parse(withoutExcessWhiteSpace).parsed.filter((p: any) => p.type === 'slot').reverse()
-// console.log('slots')
+// const withoutVariables = parsedVaribles.text
+//
+// // remove excess whitespace
+// const withoutExcessWhiteSpace = withoutVariables.replace(/\n{3,}/g, '\n\n').trim()
+// console.log(`final template to render:\n${withoutExcessWhiteSpace}`)
+//
+// // TODO reparse to get the correct locations of the slots & replace vars from the bottom up
+// const parsedSlots = variablesParser
+//   .parse(withoutExcessWhiteSpace)
+//   .parsed.filter((p: any) => p.type === 'slot')
+//   .reverse()
+// console.log('parsedSlots')
+// const currentTemplate = withoutExcessWhiteSpace
 // for (const slot of parsedSlots) {
-//   console.log(slot)
-//   // TODO find variable
-//   console.log(variables[slot.variableName])
-//   // TODO render variable
+//   console.log('slot', slot)
+//   const variable = variables[slot.variableName]
+//   console.log('variable', variable)
+//   if (!variable) continue
+//
+//   // TODO get contents of variable
+//
+//   // TODO replace slot with variable
+//
+//   break
 // }
-

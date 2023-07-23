@@ -1,32 +1,22 @@
 TOP PRIORITY
-- redo fucking everything
-- inline then multi line variable definitions
--- determine type at load (do isnumeric, some sort of check if string contains tags)
--- only try to render inside template variables
+- finish redoing in peg
+-- I fucked up and did unnamed params in slot calls, should I go back to the python style params (more verbose, but more robust)? both?
+-- nested tags & recursive render
+-- arithmetic
+-- syntax for outputting a function directly instead of loading to var: e.g. {load("file.txt")} or {@anotherFunction("foobar", 3.33)}
+-- support for escaped quotes & brackets
 - use variable as param
-
-granular test files and an automated suite to run them (each individual feature, error condition, etc)
-
-then...
-REDO RENDERING SO ITS FULLY RECURSIVE (starts at the top level and works down template/collection definitions and renders like a tree)
-- look for name conflicts
-// (old) TODO what steps to take in compilation?
-// remove comments
-// get/validate all slot definitions, error if there are unmatched opening or closing tags
-// remove slot definitions
-// check for collection defs, load them (error if referencing unknown snippets) and remove those from the page
-// render collections
-// render all variables (will need to be called recursively because snippets can contain vars)
-// we're done? (no we still need to run the gpt query)
-- this should correct parsing of variable tags inside variables
-- add explicit step to check for unpaired (or incorrectly ordered) tags before rendering
+- check for unpaired multilines (or just ignore them?)
+- check for incorrect nesting of multilines eg {a} {b} {/a} {/b}
+- granular test files and an automated suite to run them (each individual feature, error condition, etc)
 
 config
 - allow absolute/parent paths for template file load
 - show debug messages
 
-collection stuff? (low priority until I actually use them)
+collection stuff? (low priority until I actually need them)
 - pull collection stuff into a new branch until its ready
+- decide on best syntax
 - basic iterating
 - validate the names of collection vars
 - make collection variable name accessible
@@ -35,11 +25,10 @@ collection stuff? (low priority until I actually use them)
 - for loops?
 
 nice to haves
-- 1 liner for defining string/numeric vars
-- also 1 liner to load/render file inline
-- file templates with local parameters
+- file variables with parameters
+- partial file load (e.g. start/end line optional params for load)
 - tag for making gpt calls e.g. %gpt% (do they need an option to be deferred vs instant)
-- render against a json hash instead of inline/loaded variables
+- render against a json hash (handlebars style) instead of inline/loaded variables
 
 other random cool ideas
 - placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable

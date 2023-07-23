@@ -8,61 +8,63 @@ I'm a programmer and like many I've seen great productivity gains due to the ass
 See the `samples` directory and try running them with the parser.
 
 ### Terminology
-- Template - A file containing text that is rendered by the parser. I'm using the .ps.txt extension for the samples.
-- Variable - A value loaded from a template file, or defined inline in a template. Variables are defined using single brackets e.g. `{helloVariable="Hello World"}`
+- Template - A piece of text that is rendered by the parser. I'm using the .ps.txt extension for the samples.
+- Variable - A value loaded from a template file, or defined inline in a template. Variables are defined using single brackets e.g. `{helloVariable="Hello World"}`. String variables can be rendered as templates.
 - Slot - Renders the contents of a variable using double brackets e.g. `{{helloVariable}}`.
+- Parameters - One or more arguments passed to a slot or a function.
+- Function - Does "something" and the result is rendered on page, or assigned to a variable.
 
 TODO Redo everything below
 
-### Templates and Variables
-A template is a file or inline string that gets loaded into a variable by the PromptShape parser and is then rendered.
+### Templates, Slots, Variables
+A template is a file or string that gets loaded into a variable by the PromptShape parser and is then rendered.
 
-TODO single + multi line templates
-TODO multiline are always strings
-
-Here's an example of an inline template which is defined using single bracket tags (it will become a variable called `basicTemplate`):
+Templates can contain one or more inline variable definitions. They are defined using single brackets can be single line or multi line using tags.
 ```
-{basicTemplate}
-This is the most basic example of an inline variable with no parameters
-{/basicTemplate}
-```
+{stringVariable = "hello world"}
 
-### Slots and Parameters
-A slot is used to render a variable in a template e.g to render the above template. `{{basicTemplate}}`
+{numberVariable = 42.1}
 
-Inline templates can contain slots which will render content stored inside variables. Slots can reference a global definition (i.e. an inline template), or a variable specific to the current template which is called a parameter.
-
-```
-// example of defining the variable contactInfo, then another variable greeting which uses contactInfo as a global variable, then rendering it inline
-
-{contactInfo}
-Me
-me@hello.com
-555-555-5555
-{/contactInfo}
-
-{greeting}
-Here is my contact info:
-{{contactInfo}}
-{/greeting}
-
-{{greeting}}
+{multilineVariable}
+This is a variable spanning multiple lines, but the tags can be used on a single line if desired. Multiline variables are always strings.
+{/multilineVariable}
 ```
 
-Parameters can be strings or numbers
-
+A template can contain one or more slots which are rendered by replacing their content with variables.
 ```
-// example of a template with paramters used as slots. note that zipCode is a numeric parameter.
+This will render the contents of the string variable: {{stringVariable}}
 
-{contactInfo(name, email, zipCode}
-{{name}}
-{{email}}
-{{zipCode}}
-{/contactInfo}
+This will render the contents of the number variable: {{numberVariable}}
 
-{{contactInfo(name="Me", email="me@hello.com", zipCode=55555)}}
+This will render the contents of the multiline variable, and the @ symbol means it will be rendered as raw text (will not be parsed): {{@multilineVariable}}
 ```
 
+A multiline variable can contain slot tags, which will be rendered recursively when the template is rendered.
+```
+{variableWithSlots}
+This variable contains a slot which is defined in the outer scope: {{stringVariable}}
+{/variableWithSlots}
+```
+
+### Parameters and Functions
+A multiline variable can also be specified with parameters (which are required if no default is provided) which can be referenced using slots. Parameters are strings or numbers
+```
+{variableWithParameters(requiredParameter, optionaParameter="hello")}
+{{requiredParameter}}
+{{optionalParameter}}
+{/variableWithParameters}
+```
+
+A slot or variable can be assigned the contents of a function, which is called using a function name and one or more parameters in parentheses.
+```
+// this will assign the output of add(2,2) to a variable called sumOfTwoNumbers
+{sumOfTwoNumbers=add(2,2)}
+
+// this will load file.ps.txt and render it in place
+{{subTemplateToRender=load("file.ps.txt")}}
+```
+
+### String vs Number Parameters
 The only difference between string and number params is that numeric params can have basic arithmetic operations done on its output. Supported operations are `+ - * /`.
 ```
 {chapterTitle(chapterIndex)}
@@ -75,31 +77,7 @@ Chapter {{chapterIndex+1}}
 {{chapterTitle(chapterIndex="0")}}
 ```
 
-TODO ability to use variable as param
-
-### Variables
-The contents of templates will be loaded into variables which are available to render inside other templates.
-
-### Loading templates from files
-The parser can load files as templates inline from within templates
-```
-// this will load variable called fileTemplate from "file-template.ps.txt:
-{fileTemplate = "file-template.ps.txt.txt"}
-
-{{fileTemplate}}
-```
-
-### Raw text variables
-To render a variable as raw text (i.e. don't parse and execute the contents) use the @ symbol in front of the slot (local parameters will be ignored).
-
-```
-{rawText}
-This is what a slot looks like in PromptShape: {{slot}}
-{rawText}
-
-// the following will just display the exact contents of rawText
-{{@rawText}}
-```
+TODO ability to use function or variable as param
 
 ### Misc
 

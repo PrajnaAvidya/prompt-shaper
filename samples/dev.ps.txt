@@ -1,16 +1,17 @@
-I'm developing a templating engine in TS called PromptShape for efficient text-based gpt prompting. Here's my WIP readme/spec so far:
-
 {currentQuestion}
-It works great but how can I make it even cooler?
+current question/problem goes here
 {/currentQuestion}
 
-{spec = "spec.md"}
+I'm developing a templating engine in TS called PromptShape for efficient text-based gpt prompting. Here's my WIP readme/spec so far:
+
+{spec = load("spec.md")}
 {{@spec}}
 ===
 I'm using PEG.js for the parser and here's the source code for the inline variable parser:
 
-{parser = "parser.old.ts"}
+{parser = load("parser.old.ts")}
 {{@parser}}
 ===
 I would like some help developing it further.
+{{dummyVariable}}
 {{currentQuestion}}

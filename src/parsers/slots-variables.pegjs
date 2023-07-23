@@ -25,15 +25,15 @@ part
 variableDefinition
   = "{" _ variableName:variableName _ "(" _ variableParams:variableParams _ ")"? _ "}" _ content:(variableDefinition / slot / text)* _ "{/" _ variableName _ "}"
     {
-      return { type: 'variable', variableName, variableParams, content };
+      return { type: 'variable', variableName, params:variableParams, content:{ type:content[0].type, value:content[0].content } };
     }
-  / "{" _ variableName:variableName _ "}" _ content:(variableDefinition / slot / text)* _ "{/" _ variableName _ "}"
+  / "{" _ variableName:variableName _ "}" _ content:(variableDefinition / slot / text)*_ "{/" _ variableName _ "}"
     {
-      return { type: 'variable', variableName, variableParams: [], content };
+      return { type: 'variable', variableName, params:[], content:{ type:content[0].type, value:content[0].content } };
     }
   / "{" _ variableName:variableName _ "=" _ value:value _ "}"
     {
-      return { type: 'variable', variableName, value };
+      return { type: 'variable', variableName, content:value };
     }
 
 slot
@@ -52,9 +52,9 @@ variableParams
 
 defaultParam
   = variableName:variableName _ "=" _ value:value
-    { return { type: 'param', variableName, value, required: false }; }
+    { return { type: value.type, variableName, value: value.value, required: false }; }
   / variableName:variableName
-    { return { type: 'param', variableName, value: null, required: true }; }
+    { return { type: 'unknown', variableName, value: null, required: true }; }
 
 value
   = string
@@ -68,7 +68,7 @@ number
   = value:$([0-9]+ ("." [0-9]+)?) { return { type: 'number', value: parseFloat(value) }; }
 
 functionCall
-  = functionName:variableName "(" _ params:params _ ")" { return { type: 'function', functionName, params }; }
+  = functionName:variableName "(" _ params:params _ ")" { return { type: 'function', value: functionName, params }; }
 
 param
   = string
@@ -78,7 +78,7 @@ variableName
   = first:[a-zA-Z_] rest:$[a-zA-Z_0-9]* { return first + rest; }
 
 text
-  = chars:$[^{}]+ { return { type: 'text', value: chars }; }
+  = chars:$[^{}]+ { return { type: 'text', content: chars }; }
 
 _ "whitespace"
   = [ \t\n\r]*

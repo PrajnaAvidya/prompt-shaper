@@ -2,6 +2,7 @@ import { loadFileContent, replaceStringAtLocation } from './utils'
 import peg from 'pegjs'
 import { ParserSection, ParserType, ParserVariables, ValueType } from './types'
 import { functions } from './functions'
+import { writeFileSync } from 'fs'
 
 const variablesParser = peg.generate(loadFileContent('src/parsers/slots-variables.pegjs'))
 
@@ -96,4 +97,7 @@ for (const slot of parsedSlots as ParserSection[]) {
 
 // remove excess whitespace
 const withoutExcessWhiteSpace = currentTemplate.replace(/\n{3,}/g, '\n\n').trim()
-console.log(withoutExcessWhiteSpace)
+// console.log(withoutExcessWhiteSpace)
+
+writeFileSync('output.txt', withoutExcessWhiteSpace)
+console.log('final text rendered to output.txt')

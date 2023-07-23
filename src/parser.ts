@@ -25,11 +25,10 @@ const withoutComments = textToParse.replace(/\/\/.*$/gm, '')
 
 // 2a) match all variables/slots
 // TODO ignore variables/slots nested in multiline variables
-// TODO variable function params not working
 const variables: parserVariables = {}
-// store slots/variables
-const parsedVaribles = variablesParser.parse(withoutComments)
-for (const value of parsedVaribles.parsed as parserSection[]) {
+// store variables
+const parsedVariables = variablesParser.parse(withoutComments)
+for (const value of parsedVariables.parsed as parserSection[]) {
   console.log(value)
   switch (value.type) {
     case parserType.variable:
@@ -39,9 +38,8 @@ for (const value of parsedVaribles.parsed as parserSection[]) {
       variables[value.variableName!] = {
         name: value.variableName!,
         type: value.content!.type,
-        // value: value.content || { type: valueType.string, value: value.content },
         value: value.content!.value,
-        params: value.params || [],
+        params: (value.content!.type === 'function' ? value.content!.params : value.params) || []
       }
       break
     case parserType.slot:

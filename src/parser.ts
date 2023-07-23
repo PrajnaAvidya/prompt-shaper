@@ -29,7 +29,7 @@ const variables: parserVariables = {}
 // store variables
 const parsedVariables = variablesParser.parse(withoutComments)
 for (const value of parsedVariables.parsed as parserSection[]) {
-  console.log(value)
+  // console.log(value)
   switch (value.type) {
     case parserType.variable:
       if (value.variableName! in variables) {
@@ -51,28 +51,28 @@ for (const value of parsedVariables.parsed as parserSection[]) {
 }
 console.log('variables', variables)
 
-// const withoutVariables = parsedVaribles.text
-//
-// // remove excess whitespace
-// const withoutExcessWhiteSpace = withoutVariables.replace(/\n{3,}/g, '\n\n').trim()
-// console.log(`final template to render:\n${withoutExcessWhiteSpace}`)
-//
-// // TODO reparse to get the correct locations of the slots & replace vars from the bottom up
-// const parsedSlots = variablesParser
-//   .parse(withoutExcessWhiteSpace)
-//   .parsed.filter((p: any) => p.type === 'slot')
-//   .reverse()
-// console.log('parsedSlots')
-// const currentTemplate = withoutExcessWhiteSpace
-// for (const slot of parsedSlots) {
-//   console.log('slot', slot)
-//   const variable = variables[slot.variableName]
-//   console.log('variable', variable)
-//   if (!variable) continue
-//
-//   // TODO get contents of variable
-//
-//   // TODO replace slot with variable
-//
-//   break
-// }
+const withoutVariables = parsedVariables.text
+
+// remove excess whitespace
+const withoutExcessWhiteSpace = withoutVariables.replace(/\n{3,}/g, '\n\n').trim()
+console.log(`final template to render:\n${withoutExcessWhiteSpace}`)
+
+// reparse to get the correct locations of the slots & replace vars from the bottom up
+const parsedSlots = variablesParser
+  .parse(withoutExcessWhiteSpace)
+  .parsed.filter((p: any) => p.type === 'slot')
+  .reverse()
+console.log('parsedSlots')
+let currentTemplate = withoutExcessWhiteSpace
+for (const slot of parsedSlots) {
+  console.log('slot', slot)
+  const variable = variables[slot.variableName]
+  console.log('variable', variable)
+  if (!variable) continue
+
+  // TODO get contents of variable
+
+  // TODO replace slot with variable
+
+  break
+}

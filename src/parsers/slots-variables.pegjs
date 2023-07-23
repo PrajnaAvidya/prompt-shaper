@@ -1,17 +1,18 @@
 {
-  function buildText(parts) {
-    return parts.map(part => {
-      if (part.type === 'text') {
-        return part.value;
-      } else if (part.type === 'slot') {
-        let params = part.params ? "(" + part.params.map(p => p.type === 'string' ? `"${p.value}"` : p.value).join(', ') + ")" : "";
-        let raw = part.raw ? "@" : "";
-        return "{{" + raw + part.variableName + params + "}}";
-      } else {
-        return '';
-      }
-    }).join('');
-  }
+    function buildText(parts) {
+        return parts.map(part => {
+            if (part.type === 'text') {
+                // Preserve newlines and other whitespace characters
+                return part.content;
+            } else if (part.type === 'slot') {
+                let params = part.params ? "(" + part.params.map(p => p.type === 'string' ? `"${p.value}"` : p.value).join(', ') + ")" : "";
+                let raw = part.raw ? "@" : "";
+                return "{{" + raw + part.variableName + params + "}}";
+            } else {
+                return '';
+            }
+        }).join('');
+    }
 }
 
 start

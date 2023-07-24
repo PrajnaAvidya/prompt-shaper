@@ -18,11 +18,24 @@ export interface ParserParam {
   required?: boolean
 }
 
+export interface ParserOperation {
+  operator: ParserOperator
+  value: number
+}
+
+export enum ParserOperator {
+  Add = "+",
+  Subtract = "-",
+  Multiply = "*",
+  Divide = "/",
+}
+
 export interface ParserSection {
   type: ParserType
   variableName?: string
   params?: ParserParam[]
   content?: ParserParam
+  operation?: ParserOperation
   raw?: boolean
   location?: {
     start: TextLocation

@@ -82,3 +82,11 @@ TODO ability to use function or variable as param
 ### Misc
 
 Comments are marked with double slashes `// this is a comment` and are removed before rendering.
+
+### Template parsing/rendering order
+1) remove comments
+2) match and validate all variables and slots
+3) remove variables
+4) remove excess whitespace
+5) render slots with variable data from the bottom up
+6) string variables will be parsed recursively (variables/slots within them will be rendered)

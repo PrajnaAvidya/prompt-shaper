@@ -7,7 +7,7 @@ import { writeFileSync } from 'fs'
 const variablesParser = peg.generate(loadFileContent('src/parsers/slots-variables.pegjs'))
 
 /*
-parsing order
+parsing/rendering order
 - 1) remove comments
 - 2a) match and validate all variables and slots
 - 2b) remove variables
@@ -18,8 +18,9 @@ parsing order
  */
 
 // const textToParse = loadFileContent('samples/multiline-variable-definitions.ps.txt')
-const textToParse = loadFileContent('samples/dev.ps.txt')
+// const textToParse = loadFileContent('samples/dev.ps.txt')
 // const textToParse = loadFileContent('samples/scratch.ps.txt')
+const textToParse = loadFileContent('samples/number-operators.ps.txt')
 
 // 1) remove comments using regex
 const withoutComments = textToParse.replace(/\/\/.*$/gm, '')

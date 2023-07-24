@@ -38,10 +38,13 @@ variableDefinition
     }
 
 slot
-  = "{{" _ "@"? _ variableName:variableName _ "("? _ params:params? _ ")"? _ "}}"
+  = "{{" _ "@"? _ variableName:variableName _ "("? _ params:params? _ ")"? _ operator:operator? _ value:value? _ "}}"
     {
-      return { type: 'slot', variableName, params, raw: text().includes('@'), location: location() };
+      return { type: 'slot', variableName, params, operation: operator ? { operator:operator, value: value.value } : null, raw: text().includes('@'), location: location() };
     }
+
+operator
+  = "+" / "-" / "*" / "/"
 
 params
   = head:param tail:(_ "," _ param)*

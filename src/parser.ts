@@ -1,10 +1,10 @@
 import { loadFileContent, replaceStringAtLocation } from './utils'
 import peg from 'pegjs'
-import { ParserSection, ParserType, ParserVariables, ValueType } from './types'
+import { ParserOperator, ParserSection, ParserType, ParserVariables, ValueType } from './types'
 import { functions } from './functions'
 import { writeFileSync } from 'fs'
 
-const variablesParser = peg.generate(loadFileContent('src/parsers/slots-variables.pegjs'))
+const variablesParser = peg.generate(loadFileContent('src/template-parser.pegjs'))
 
 /*
 parsing/rendering order
@@ -83,7 +83,6 @@ for (const slot of parsedSlots as ParserSection[]) {
   if (!variable) continue
 
   // get contents of variable
-  // TODO when do we do arithmetic
   let variableValue: string | number
   switch (variable.type) {
     case ValueType.string:
@@ -100,6 +99,24 @@ for (const slot of parsedSlots as ParserSection[]) {
       break
     default:
       throw new Error(`Unknown variable type: ${variable.type}`)
+  }
+
+  // perform arithmetic if necessary
+  if (slot.operation && typeof variableValue === 'number') {
+    switch (slot.operation.operator) {
+      case ParserOperator.Add:
+        variableValue += slot.operation.value
+        break
+      case ParserOperator.Subtract:
+        variableValue -= slot.operation.value
+        break
+      case ParserOperator.Multiply:
+        variableValue *= slot.operation.value
+        break
+      case ParserOperator.Divide:
+        variableValue /= slot.operation.value
+        break
+    }
   }
 
   // replace slot with variable

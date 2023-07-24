@@ -8,4 +8,6 @@
 {{three*3}}
 {{four/4}}
 
-// TODO string variable
+// arithmetic doesn't work on string variables
+{stringVar="asdf"}
+{{stringVar+2}}

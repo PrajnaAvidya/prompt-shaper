@@ -18,7 +18,7 @@
     "typescript": "^5.1.6"
   },
   "scripts": {
-    "compile": "pegjs src/parsers/slots-variables.pegjs",
+    "compile": "pegjs src/template-parser.pegjs",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "parse": "ts-node src/parser.ts"

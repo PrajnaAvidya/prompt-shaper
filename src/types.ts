@@ -24,10 +24,10 @@ export interface ParserOperation {
 }
 
 export enum ParserOperator {
-  Add = "+",
-  Subtract = "-",
-  Multiply = "*",
-  Divide = "/",
+  Add = '+',
+  Subtract = '-',
+  Multiply = '*',
+  Divide = '/',
 }
 
 export interface ParserSection {

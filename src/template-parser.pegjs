@@ -7,7 +7,8 @@
             } else if (part.type === 'slot') {
                 let params = part.params ? "(" + part.params.map(p => p.type === 'string' ? `"${p.value}"` : p.value).join(', ') + ")" : "";
                 let raw = part.raw ? "@" : "";
-                return "{{" + raw + part.variableName + params + "}}";
+                let operation = part.operation ? `${part.operation.operator}${part.operation.value}` : "";
+                return "{{" + raw + part.variableName + params + operation + "}}";
             } else {
                 return '';
             }

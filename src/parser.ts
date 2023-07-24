@@ -18,9 +18,9 @@ parsing/rendering order
  */
 
 // const textToParse = loadFileContent('samples/multiline-variable-definitions.ps.txt')
-// const textToParse = loadFileContent('samples/dev.ps.txt')
+const textToParse = loadFileContent('samples/dev.ps.txt')
 // const textToParse = loadFileContent('samples/scratch.ps.txt')
-const textToParse = loadFileContent('samples/number-operators.ps.txt')
+// const textToParse = loadFileContent('samples/nested-tags.ps.txt')
 
 // 1) remove comments using regex
 const withoutComments = textToParse.replace(/\/\/.*$/gm, '')

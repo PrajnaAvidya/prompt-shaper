@@ -14,8 +14,6 @@ See the `samples` directory and try running them with the parser.
 - Parameters - One or more arguments passed to a slot or a function.
 - Function - Does "something" and the result is rendered on page, or assigned to a variable.
 
-TODO Redo everything below
-
 ### Templates, Slots, Variables
 A template is a file or string that gets loaded into a variable by the PromptShape parser and is then rendered.
 
@@ -65,19 +63,18 @@ A slot or variable can be assigned the contents of a function, which is called u
 ```
 
 ### String vs Number Parameters
-The only difference between string and number params is that numeric params can have basic arithmetic operations done on its output. Supported operations are `+ - * /`.
+The only difference between string and number params is that numeric params can have basic arithmetic operations done on their output. Supported operations are `+ - * /`.
 ```
 {chapterTitle(chapterIndex)}
 Chapter {{chapterIndex+1}}
 {/chapterTitle}
 
+// this will output "Chapter 1"
 {{chapterTitle(chapterIndex=0)}}
 
-// this will output "Chapter 0" because operations are ignored for string parameters.
+// this will output "Chapter 0" because operators are ignored for string parameters.
 {{chapterTitle(chapterIndex="0")}}
 ```
-
-TODO ability to use function or variable as param
 
 ### Misc
 

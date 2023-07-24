@@ -1,0 +1,9 @@
+{topLevelVariable}
+Top Level
+{secondLevelVariable}
+Middle Level
+{thirdLevelVariable}
+Bottom Level
+{/thirdLevelVariable}
+{/secondLevelVariable}
+{/topLevelVariable}

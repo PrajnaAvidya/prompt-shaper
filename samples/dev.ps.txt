@@ -1,6 +1,9 @@
 {currentQuestion}
-I'm implementing basic arithmetic on number & unknown type slots using these symbols: + - * /
-The matching works but the buildText that outputs the template with the variables removed is not including the operators/values in the slots
+I just finished implementing basic arithmetic on slots using these symbols: + - * /
+examples:
+
+
+It works great, but I'm wondering how hard it would be to expand it to also allow arithmetic between two variables or functions instead of just with a number?
 {/currentQuestion}
 
 I'm developing a templating engine in TS called PromptShape for efficient text-based gpt prompting. Here's my WIP readme/spec so far:
@@ -9,7 +12,7 @@ I'm developing a templating engine in TS called PromptShape for efficient text-b
 ===
 I'm using PEG.js for the parser and here's the source code for the inline variable parser:
 
-{{@load("src/parsers/slots-variables.pegjs")}}
+{{@load("src/template-parser.pegjs")}}
 ===
 Here's the current source code for the TS parser:
 

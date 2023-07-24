@@ -11,3 +11,6 @@
 // arithmetic doesn't work on string variables
 {stringVar="asdf"}
 {{stringVar+2}}
+
+// you can do arithmetic on the result of a function (as long as it's a number)
+{{add(1,1) + 2}}

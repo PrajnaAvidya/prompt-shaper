@@ -1,8 +1,8 @@
 TOP PRIORITY
 - finish redoing in peg
--- get correct slot positions during buildText so we don't have to run the parser twice
 -- recursive render
 -- support for escaped quotes & brackets
+- nested tag issues: slot function params, arithmetic
 - check for unpaired multilines (or just ignore them?)
 - check for incorrect nesting of multilines eg {a} {b} {/a} {/b}
 - granular test files and an automated suite to run them (each individual feature, error condition, etc)

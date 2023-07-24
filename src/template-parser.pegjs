@@ -1,16 +1,17 @@
 {
+    // build text from parsed parts
     function buildText(parts) {
         let offset = 0
         return parts.map(part => {
             if (part.type === 'text') {
-                // Preserve newlines and other whitespace characters
                 offset += part.content.length
                 return part.content
             } else if (part.type === 'slot') {
-                let params = part.params ? "(" + part.params.map(p => p.type === 'string' ? `"${p.value}"` : p.value).join(', ') + ")" : ""
-                let raw = part.raw ? "@" : ""
-                let operation = part.operation ? `${part.operation.operator}${part.operation.value}` : ""
-                let slot = "{{" + raw + part.variableName + params + operation + "}}"
+                // re-construct the slot string with its parameters and optional raw marker (@)
+                const params = part.params ? "(" + part.params.map(p => p.type === 'string' ? `"${p.value}"` : p.value).join(', ') + ")" : ""
+                const raw = part.raw ? "@" : ""
+                const operation = part.operation ? `${part.operation.operator}${part.operation.value}` : ""
+                const slot = "{{" + raw + part.variableName + params + operation + "}}"
                 // adjust the slot location based on the current offset
                 part.location.start.offset = offset
                 part.location.end.offset = part.location.start.offset + slot.length
@@ -22,12 +23,14 @@
         }).join('')
     }
 
+    // recursively join element content
     function joinContent(content) {
       if (typeof content === 'string') return content
       return content.map(section => {
         switch (section.type) {
           case 'slot':
-            return `{{${section.variableName}${section.params ? '(' + section.params.join(', ') + ')' : ''}}}`
+            const raw = section.raw ? "@" : ""
+            return `{{${raw}${section.variableName}${section.params ? '(' + section.params.join(', ') + ')' : ''}}}`
           case 'variable':
             return `{${section.variableName}}${joinContent(section.content.value)}{/${section.variableName}}`
           case 'text':
@@ -50,14 +53,17 @@ part
 variableDefinition
   = "{" _ variableName:variableName _ "(" _ variableParams:variableParams _ ")"? _ "}" _ content:(variableDefinition / slot / text)* _ "{/" _ variableName _ "}"
     {
+      // variable with name, parameters, and content
       return { type: 'variable', variableName, params:variableParams, content:{ type:'string', value:joinContent(content) } }
     }
   / "{" _ variableName:variableName _ "}" _ content:(variableDefinition / slot / text)* _ "{/" _ variableName _ "}"
     {
+      // variable with name and content, but no parameters
       return { type: 'variable', variableName, params:[], content:{ type:'string', value:joinContent(content) } }
     }
   / "{" _ variableName:variableName _ "=" _ value:value _ "}"
     {
+      // variable with name and value
       return { type: 'variable', variableName, content:value }
     }
 

@@ -1,7 +1,7 @@
 TOP PRIORITY
 - finish redoing in peg
--- recursive render
 -- fix nested slot bugs: function params & arithmetic
+-- recursive render
 -- support for escaped quotes & brackets
 - ability to hook into an openai library and auto-send the response & save that somewhere
 

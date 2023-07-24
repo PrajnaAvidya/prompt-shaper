@@ -76,7 +76,7 @@ for (const slot of slots as ParserSection[]) {
   }
 
   const variable = variables[slot.variableName!]
-  console.log('variable', variable)
+  // console.log('variable', variable)
   if (!variable) continue
 
   // get contents of variable

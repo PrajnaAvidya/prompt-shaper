@@ -30,7 +30,8 @@
         switch (section.type) {
           case 'slot':
             const raw = section.raw ? "@" : ""
-            return `{{${raw}${section.variableName}${section.params ? '(' + section.params.join(', ') + ')' : ''}}}`
+            const params = section.params ? "(" + section.params.map(p => p.type === 'string' ? `"${p.value}"` : p.value).join(', ') + ")" : ""
+            return `{{${raw}${section.variableName}${params}}}`
           //case 'variable':
           //  return `{${section.variableName}}${joinContent(section.content.value)}{/${section.variableName}}`
           case 'variable':

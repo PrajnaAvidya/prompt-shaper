@@ -16,6 +16,6 @@ Here's my types
 ===
 I would like some help developing it further.
 {currentQuestion}
-Please add detailed comments to the peg parser code
+TODO
 {/currentQuestion}
 {{@currentQuestion}}

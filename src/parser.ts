@@ -58,14 +58,11 @@ console.log('variables', variables)
 const withoutVariables = parsedVariables.text
 console.log(`final template to render:\n${withoutVariables}`)
 
-// reparse to get the correct locations of the slots & replace vars from the bottom up
-const parsedSlots = variablesParser
-  .parse(withoutVariables)
-  .parsed.filter((p: ParserSection) => p.type === ParserType.slot)
-  .reverse()
-console.log('parsedSlots')
+// render slots from the bottom up
+const slots = parsedVariables.parsed.filter((p: ParserSection) => p.type === ParserType.slot).reverse()
+console.log('rendering slots')
 let currentTemplate = withoutVariables
-for (const slot of parsedSlots as ParserSection[]) {
+for (const slot of slots as ParserSection[]) {
   console.log('slot', slot)
 
   // look for inline function call
@@ -127,7 +124,6 @@ for (const slot of parsedSlots as ParserSection[]) {
 
 // remove excess whitespace
 const withoutExcessWhiteSpace = currentTemplate.replace(/\n{3,}/g, '\n\n').trim()
-// console.log(withoutExcessWhiteSpace)
 
 writeFileSync('output.txt', withoutExcessWhiteSpace)
 console.log('final text rendered to output.txt')

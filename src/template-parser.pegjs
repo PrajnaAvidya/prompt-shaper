@@ -1,14 +1,21 @@
 {
     function buildText(parts) {
+        let offset = 0
         return parts.map(part => {
             if (part.type === 'text') {
                 // Preserve newlines and other whitespace characters
+                offset += part.content.length
                 return part.content
             } else if (part.type === 'slot') {
                 let params = part.params ? "(" + part.params.map(p => p.type === 'string' ? `"${p.value}"` : p.value).join(', ') + ")" : ""
                 let raw = part.raw ? "@" : ""
                 let operation = part.operation ? `${part.operation.operator}${part.operation.value}` : ""
-                return "{{" + raw + part.variableName + params + operation + "}}"
+                let slot = "{{" + raw + part.variableName + params + operation + "}}"
+                // adjust the slot location based on the current offset
+                part.location.start.offset = offset
+                part.location.end.offset = part.location.start.offset + slot.length
+                offset += slot.length
+                return slot
             } else {
                 return ''
             }

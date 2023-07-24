@@ -16,6 +16,6 @@ Here's my types
 ===
 I would like some help developing it further.
 {currentQuestion}
-TODO
+TODO current question
 {/currentQuestion}
 {{@currentQuestion}}

@@ -3,11 +3,14 @@ TOP PRIORITY
 -- recursively capture all variables on first pass (modify join stuff)
 -- recursive render
 -- support for escaped quotes & brackets
-- nested tag issues: slot function params & arithmetic
+- nested slot issues: function params & arithmetic
+- ability to hook into an openai library and auto-send the response & save that somewhere
+
+testing/error handling
 - check for unpaired multilines (or just ignore them?)
 - check for incorrect nesting of multilines eg {a} {b} {/a} {/b}
 - granular test files and an automated suite to run them (each individual feature, error condition, etc)
-- ability to hook into an openai library and auto-send the response & save that somewhere
+- full test suite
 
 config
 - allow absolute/parent paths for template file load (for security)
@@ -30,20 +33,9 @@ build/infra stuff
 
 nice to haves
 - use variable or function as param
-- file variables with parameters
-- partial file load (e.g. start/end line optional params for load)
+- file variables with parameters -- more specifically, allow parameters to be passed when calling load()
+- partial file load (e.g. optional start/end line params for load)
 - tag for making gpt calls e.g. %gpt% (do they need an option to be deferred vs instant)
 - render against a json hash (handlebars style) instead of inline/loaded variables
 - arithmetic between 2 vars
 - placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable
-
-tests
-- once stuff is a bit more stable/mature
-
-other random cool ideas
-===
-
-if I were to use this to aid myself in writing this very app what would I need?
-- loading variables from files (params not needed) -- for including code/text samples
--- is this really it? I don't think I need collections, are they more useful for writing? I guess I can have a collection of code samples
-- ability to auto feed final output to gpt. I should look into using an existing openai library, no need to write my own thing for that.

@@ -1,9 +1,15 @@
 {topLevelVariable}
 Top Level
+{{slotInTopLevel}}
+
 {secondLevelVariable}
 Middle Level
+{{slotInMiddleLevel}}
+
 {thirdLevelVariable}
 Bottom Level
+{{slotInBottomLevel}}
+
 {/thirdLevelVariable}
 {/secondLevelVariable}
 {/topLevelVariable}

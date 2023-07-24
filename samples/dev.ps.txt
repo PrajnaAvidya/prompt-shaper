@@ -1,11 +1,3 @@
-{currentQuestion}
-I just finished implementing basic arithmetic on slots using these symbols: + - * /
-examples:
-
-
-It works great, but I'm wondering how hard it would be to expand it to also allow arithmetic between two variables or functions instead of just with a number?
-{/currentQuestion}
-
 I'm developing a templating engine in TS called PromptShape for efficient text-based gpt prompting. Here's my WIP readme/spec so far:
 
 {{@load("spec.md")}}
@@ -23,4 +15,7 @@ Here's my types
 {{@load("src/types.ts")}}
 ===
 I would like some help developing it further.
+{currentQuestion}
+TODO
+{/currentQuestion}
 {{@currentQuestion}}

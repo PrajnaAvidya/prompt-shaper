@@ -1,10 +1,12 @@
 TOP PRIORITY
 - finish redoing in peg
--- nested tags & recursive render
+-- get correct slot positions during buildText so we don't have to run the parser twice
+-- recursive render
 -- support for escaped quotes & brackets
 - check for unpaired multilines (or just ignore them?)
 - check for incorrect nesting of multilines eg {a} {b} {/a} {/b}
 - granular test files and an automated suite to run them (each individual feature, error condition, etc)
+- ability to hook into an openai library and auto-send the response & save that somewhere
 
 config
 - allow absolute/parent paths for template file load (for security)
@@ -20,6 +22,11 @@ collection stuff? (low priority until I actually need them)
 - appending
 - for loops?
 
+build/infra stuff
+- what's my ideal workflow? user could either use npx or install it globally and run command line.
+- I want something easily triggered from an IDE, so probably linked to a macro
+- how do I have it get the result into the user's clipboard or whatever way to get it into their gpt client the fastest?
+
 nice to haves
 - use variable or function as param
 - file variables with parameters
@@ -27,11 +34,12 @@ nice to haves
 - tag for making gpt calls e.g. %gpt% (do they need an option to be deferred vs instant)
 - render against a json hash (handlebars style) instead of inline/loaded variables
 - arithmetic between 2 vars
-
-
-other random cool ideas
 - placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable
 
+tests
+- once stuff is a bit more stable/mature
+
+other random cool ideas
 ===
 
 if I were to use this to aid myself in writing this very app what would I need?

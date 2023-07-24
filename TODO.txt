@@ -1,9 +1,8 @@
 TOP PRIORITY
 - finish redoing in peg
--- recursively capture all variables on first pass (modify join stuff)
 -- recursive render
+-- fix nested slot bugs: function params & arithmetic
 -- support for escaped quotes & brackets
-- nested slot issues: function params & arithmetic
 - ability to hook into an openai library and auto-send the response & save that somewhere
 
 testing/error handling
@@ -39,3 +38,4 @@ nice to haves
 - render against a json hash (handlebars style) instead of inline/loaded variables
 - arithmetic between 2 vars
 - placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable
+- capture nested variables

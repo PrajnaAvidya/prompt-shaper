@@ -16,6 +16,6 @@ Here's my types
 ===
 I would like some help developing it further.
 {currentQuestion}
-TODO
+I've decided I want to capture all variables on the first pass, and stop rendering nested variables inside variables (but keep rendering nested slots)
 {/currentQuestion}
 {{@currentQuestion}}

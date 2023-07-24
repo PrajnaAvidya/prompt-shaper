@@ -76,6 +76,10 @@ Chapter {{chapterIndex+1}}
 {{chapterTitle(chapterIndex="0")}}
 ```
 
+## Current Bugs/Limitations
+- Nested slots with parameters or arithmetic currently don't render correctly
+- Nested variables are ignored, define all variables at the top level of templates
+
 ### Misc
 
 Comments are marked with double slashes `// this is a comment` and are removed before rendering.

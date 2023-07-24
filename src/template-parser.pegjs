@@ -31,8 +31,10 @@
           case 'slot':
             const raw = section.raw ? "@" : ""
             return `{{${raw}${section.variableName}${section.params ? '(' + section.params.join(', ') + ')' : ''}}}`
+          //case 'variable':
+          //  return `{${section.variableName}}${joinContent(section.content.value)}{/${section.variableName}}`
           case 'variable':
-            return `{${section.variableName}}${joinContent(section.content.value)}{/${section.variableName}}`
+            return ''
           case 'text':
             return section.content
           default:

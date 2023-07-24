@@ -14,5 +14,9 @@ Here's the current source code for the TS parser:
 
 {{@load("src/parser.ts")}}
 ===
+Here's my types
+
+{{@load("src/types.ts")}}
+===
 I would like some help developing it further.
-{{currentQuestion}}
+{{@currentQuestion}}

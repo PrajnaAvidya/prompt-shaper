@@ -68,7 +68,7 @@ for (const slot of parsedSlots as ParserSection[]) {
   console.log('slot', slot)
 
   // look for inline function call
-  if (!variables[slot.variableName!] && slot.variableName! in functions) {
+  if (slot.variableName! in functions) {
     variables[slot.variableName!] = {
       name: slot.variableName!,
       type: ValueType.function,
@@ -76,6 +76,7 @@ for (const slot of parsedSlots as ParserSection[]) {
       params: slot.params || [],
     }
   }
+
   const variable = variables[slot.variableName!]
   console.log('variable', variable)
   if (!variable) continue

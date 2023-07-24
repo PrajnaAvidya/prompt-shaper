@@ -1,8 +1,7 @@
 TOP PRIORITY
 - finish redoing in peg
 -- nested tags & recursive render
--- arithmetic
--- syntax for outputting a function directly instead of loading to var: e.g. {load("file.txt")} or {@anotherFunction("foobar", 3.33)}
+-- arithmetic on numeric slots
 -- support for escaped quotes & brackets
 - use variable as param
 - check for unpaired multilines (or just ignore them?)

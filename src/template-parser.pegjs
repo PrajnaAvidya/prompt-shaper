@@ -31,7 +31,7 @@
           case 'slot':
             const raw = section.raw ? "@" : ""
             const params = section.params ? "(" + section.params.map(p => p.type === 'string' ? `"${p.value}"` : p.value).join(', ') + ")" : ""
-            const operation = section.operation ? `${section.operation.operator}${section.operation.value}` : ""
+            const operation = section.operation ? ` ${section.operation.operator} ${section.operation.value}` : ""
             return `{{${raw}${section.variableName}${params}${operation}}}`
           //case 'variable':
           //  return `{${section.variableName}}${joinContent(section.content.value)}{/${section.variableName}}`

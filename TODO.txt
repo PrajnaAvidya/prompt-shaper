@@ -1,5 +1,6 @@
 TOP PRIORITY
 - granular test files and an automated suite to run them (each individual feature, error condition, etc)
+- command line runner for parser (takes basic input, can output to buffer or file)
 - hook into an openai library and auto-send the response & save that somewhere
 
 syntax/error checking
@@ -40,3 +41,4 @@ nice to haves
 - granular test templates for every possible feature/error condition/etc and an automated suite to run them
 - python style named params
 - configurable tag char for people who don't like {}
+- better messages for syntax errors

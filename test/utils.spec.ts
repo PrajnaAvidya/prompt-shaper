@@ -19,7 +19,6 @@ describe('loadFileContent', () => {
 	it('loads file content and uses cached', () => {
 		const filePath = join(__dirname, 'test.txt')
 		const fileContent = 'This is a test file'
-
 		readFileSyncStub.returns(fileContent)
 
 		const content1 = loadFileContent(filePath)

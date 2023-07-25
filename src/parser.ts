@@ -1,14 +1,19 @@
-import { loadFileContent, replaceStringAtLocation } from './utils'
 import peg from 'pegjs'
-import { ParserOperator, ParserSection, ParserType, ParserVariables, ValueType } from './types'
+
+import { loadFileContent, replaceStringAtLocation } from './utils'
+import { ParserOperator, ParserOptions, ParserSection, ParserType, ParserVariables, ValueType } from './types'
 import { functions } from './functions'
-import { writeFileSync } from 'fs'
 
 const templateParser = peg.generate(loadFileContent('src/template-parser.pegjs'))
 const maxRecursionDepth = 5
 
-const parseTemplate = (template: string, variables: ParserVariables = {}, showDebug: boolean = false, recursionDepth: number = 0): string => {
-	if (typeof template !== 'string' || template.trim() === '' || recursionDepth > maxRecursionDepth) return template
+export function parseTemplate(template: string, variables: ParserVariables, options?: ParserOptions & { returnParserMatches: false }, recursionDepth?: number): string
+export function parseTemplate(template: string, variables: ParserVariables, options?: ParserOptions & { returnParserMatches: true }, recursionDepth?: number): ParserSection[]
+
+export function parseTemplate(template: string, variables: ParserVariables = {}, options?: ParserOptions, recursionDepth?: number): ParserSection[] | string {
+	if (typeof template !== 'string' || template.trim() === '' || recursionDepth && recursionDepth > maxRecursionDepth) return <string>template
+
+	const showDebug = options?.showDebugMessages || false
 
 	// remove comments using regex
 	const withoutComments = template.replace(/\/\/.*$/gm, '')
@@ -17,9 +22,12 @@ const parseTemplate = (template: string, variables: ParserVariables = {}, showDe
 	// match all outer tags
 	showDebug && console.log('Matching all outer tags')
 	const parsedVariables = templateParser.parse(withoutComments)
+	if (options?.returnParserMatches === true) {
+		return <ParserSection[]>parsedVariables.parsed
+	}
 	if (parsedVariables.parsed.length === 1 && parsedVariables.parsed[0].type === 'text') {
 		showDebug && console.log('No tags to parse, returning original template')
-		return template
+		return <string>template
 	}
 	for (const value of parsedVariables.parsed as ParserSection[]) {
 		showDebug && console.log('Match: ', value)
@@ -103,8 +111,11 @@ const parseTemplate = (template: string, variables: ParserVariables = {}, showDe
 						return obj
 					}, {})
 					showDebug && console.log(`Slot variables for ${slot.variableName}:`, slotVariables)
+					if (!recursionDepth) {
+						recursionDepth = 0
+					}
 					recursionDepth++
-					variableValue = parseTemplate(variable.value as string, { ...variables, ...slotVariables }, showDebug, recursionDepth)
+					variableValue = parseTemplate(variable.value as string, { ...variables, ...slotVariables }, { ...options, returnParserMatches: options?.returnParserMatches || false }, recursionDepth) as string
 				}
 				break
 			case ValueType.function:
@@ -143,15 +154,5 @@ const parseTemplate = (template: string, variables: ParserVariables = {}, showDe
 	}
 
 	// remove excess whitespace
-	return currentTemplate.replace(/\n{3,}/g, '\n\n').trim()
+	return <string>currentTemplate.replace(/\n{3,}/g, '\n\n').trim()
 }
-
-// const textToParse = loadFileContent('samples/multiline-variable-definitions.ps.txt')
-const textToParse = loadFileContent('samples/dev.ps.txt')
-// const textToParse = loadFileContent('samples/scratch.ps.txt')
-// const textToParse = loadFileContent('samples/escaped-chars.ps.txt')
-// const textToParse = loadFileContent('samples/nested-with-params.ps.txt')
-
-const parsed = parseTemplate(textToParse, {}, true)
-writeFileSync('output.txt', parsed)
-console.log('final text rendered to output.txt')

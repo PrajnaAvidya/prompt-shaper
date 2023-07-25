@@ -1,41 +1,43 @@
 TOP PRIORITY
 - finish redoing in peg
--- recursive render (run parser on each string var)
+-- re-introduce regex for capturing the contents of multiline variables (I think peg is fine for everything else and this would solve all my current problems)
+-- recursive render (run parser on each string var) -- really more of a tree render
 --- params/local namespace for recursive render
 -- support for escaped quotes & brackets
-- ability to hook into an openai library and auto-send the response & save that somewhere
+- hook into an openai library and auto-send the response & save that somewhere'
+- tests (once all slot/var stuff is stable and before doing collections)
 
-testing/error handling
+syntax/error checking
 - check for unpaired multilines (or just ignore them?)
 - check for incorrect nesting of multilines eg {a} {b} {/a} {/b}
-- granular test files and an automated suite to run them (each individual feature, error condition, etc)
-- full test suite
 
 config
 - allow absolute/parent paths for template file load (for security)
 - show debug messages
 
 collection stuff? (low priority until I actually need them)
-- pull collection stuff into a new branch until its ready
 - decide on best syntax
 - basic iterating
 - validate the names of collection vars
-- make collection variable name accessible
+- make collection variable name accessible in the loop
 - index access
 - appending
 - for loops?
 
-build/infra stuff
+ux stuff
 - what's my ideal workflow? user could either use npx or install it globally and run command line.
 - I want something easily triggered from an IDE, so probably linked to a macro
+- by default it should just output to buffer so it can be redirected or saved or whatever
 - how do I have it get the result into the user's clipboard or whatever way to get it into their gpt client the fastest?
 
 nice to haves
 - use variable or function as param
 - file variables with parameters -- more specifically, allow parameters to be passed when calling load()
-- partial file load (e.g. optional start/end line params for load)
+- partial file load (e.g. optional start/end line params for load. except that sucks for when files change, what if there's a symbol start/escape sequence type thing?)
 - tag for making gpt calls e.g. %gpt% (do they need an option to be deferred vs instant)
 - render against a json hash (handlebars style) instead of inline/loaded variables
 - arithmetic between 2 vars
 - placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable
-- capture nested variables
+- capture nested variables & render in that tree only
+- operators could just be registered aliases for functions, so they could be extended/customized
+- granular test templates for every possible feature/error condition/etc and an automated suite to run them

@@ -11,7 +11,10 @@ Bottom Level
 {{slotInBottomLevel}}
 
 {/thirdLevelVariable}
-{/secondLevelVariable}
-{/topLevelVariable}
+{{thirdLevelVariable}}
 
+{/secondLevelVariable}
+{{secondLevelVariable}}
+
+{/topLevelVariable}
 {{topLevelVariable}}

@@ -5,16 +5,22 @@ import { functions } from './functions'
 import { writeFileSync } from 'fs'
 
 const templateParser = peg.generate(loadFileContent('src/template-parser.pegjs'))
+const maxRecursionDepth = 5
 
-const parseTemplate = (template: string, showDebug: boolean = false): string => {
+const parseTemplate = (template: string, variables: ParserVariables = {}, showDebug: boolean = false, recursionDepth: number = 0): string => {
+	if (recursionDepth > maxRecursionDepth) return template;
+
 	// remove comments using regex
 	const withoutComments = template.replace(/\/\/.*$/gm, '')
 	showDebug && console.log(`Parsing template:\n${withoutComments}`)
 
 	// match all outer tags
 	showDebug && console.log('Matching all outer tags')
-	const variables: ParserVariables = {}
 	const parsedVariables = templateParser.parse(withoutComments)
+	if (parsedVariables.parsed.length === 1 && parsedVariables.parsed[0].type === 'text') {
+		showDebug && console.log('No tags to parse, returning original template')
+		return template
+	}
 	for (const value of parsedVariables.parsed as ParserSection[]) {
 		showDebug && console.log('Match: ', value)
 		switch (value.type) {
@@ -73,8 +79,10 @@ const parseTemplate = (template: string, showDebug: boolean = false): string => 
 				variableValue = variable.value
 				break
 			case ValueType.string:
-				// TODO recursive render happens here
-				variableValue = variable.value
+				// recursively render strings as templates
+				// TODO pass variable params along
+				recursionDepth ++;
+				variableValue = parseTemplate(variable.value as string, variables, showDebug, recursionDepth)
 				break
 			case ValueType.function:
 				const func = functions[variable.value]
@@ -112,15 +120,15 @@ const parseTemplate = (template: string, showDebug: boolean = false): string => 
 	}
 
 	// remove excess whitespace
-	const withoutExcessWhiteSpace = currentTemplate.replace(/\n{3,}/g, '\n\n').trim()
-
-	return withoutExcessWhiteSpace
+	return currentTemplate.replace(/\n{3,}/g, '\n\n').trim()
 }
 
 // const textToParse = loadFileContent('samples/multiline-variable-definitions.ps.txt')
 // const textToParse = loadFileContent('samples/dev.ps.txt')
 // const textToParse = loadFileContent('samples/scratch.ps.txt')
 const textToParse = loadFileContent('samples/nested-tags.ps.txt')
+// const textToParse = loadFileContent('samples/0.simple-template.ps.txt')
 
-writeFileSync('output.txt', parseTemplate(textToParse, true))
+const parsed = parseTemplate(textToParse, {}, true)
+writeFileSync('output.txt', parsed)
 console.log('final text rendered to output.txt')

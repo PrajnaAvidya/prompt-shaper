@@ -1,8 +1,6 @@
 TOP PRIORITY
 - finish redoing in peg
--- recursive render (run parser on each string var) -- really more of a tree render
---- params/local namespace for recursive render
---- how to determine if a string should be recursively rendered - no if @ or if no variable/slot matches
+-- params/local namespace for recursive render
 -- support for escaped quotes & brackets
 - hook into an openai library and auto-send the response & save that somewhere
 - tests (once all slot/var stuff is stable and before doing collections)

@@ -1,6 +1,6 @@
 TOP PRIORITY
 - finish redoing in peg
--- support for escaped quotes in params
+-- support for escaped quotes and brackets in params
 - hook into an openai library and auto-send the response & save that somewhere
 - tests (once all slot/var stuff is stable and before doing collections)
 

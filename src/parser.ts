@@ -8,7 +8,7 @@ const templateParser = peg.generate(loadFileContent('src/template-parser.pegjs')
 const maxRecursionDepth = 5
 
 const parseTemplate = (template: string, variables: ParserVariables = {}, showDebug: boolean = false, recursionDepth: number = 0): string => {
-	if (typeof template !== 'string' || template.trim() === "" || recursionDepth > maxRecursionDepth) return template;
+	if (typeof template !== 'string' || template.trim() === '' || recursionDepth > maxRecursionDepth) return template
 
 	// remove comments using regex
 	const withoutComments = template.replace(/\/\/.*$/gm, '')
@@ -79,28 +79,33 @@ const parseTemplate = (template: string, variables: ParserVariables = {}, showDe
 				variableValue = variable.value
 				break
 			case ValueType.string:
-				// recursively render strings as templates
-				showDebug && console.log(`Recursively rendering ${slot.variableName}`)
+				if (slot.raw) {
+					// raw strings don't get parsed
+					variableValue = variable.value
+				} else {
+					// recursively render string as template
+					showDebug && console.log(`Recursively rendering ${slot.variableName}`)
 
-				// map slot/variable params
-				const slotVariables: ParserVariables = variable.params.reduce((obj: ParserVariables, item, index) => {
-					// find matching slot param/value
-					const slotParam = (slot.params && index in slot.params) ? slot.params[index] : null
-					if (!slotParam && item.required) {
-						throw new Error(`Required param for ${slot.variableName} not found: ${item.variableName}`)
-					}
+					// map slot/variable params
+					const slotVariables: ParserVariables = variable.params.reduce((obj: ParserVariables, item, index) => {
+						// find matching slot param/value
+						const slotParam = slot.params && index in slot.params ? slot.params[index] : null
+						if (!slotParam && item.required) {
+							throw new Error(`Required param for ${slot.variableName} not found: ${item.variableName}`)
+						}
 
-					obj[item.variableName!] = {
-						name: item.variableName!,
-						type: slotParam?.value === 'number' ? ValueType.number : ValueType.string,
-						value: slotParam ? slotParam.value : item.value,
-						params: [], // this will be used in the future when a function can be passed as a param
-					}
-					return obj
-				}, {})
-				showDebug && console.log(`Slot variables for ${slot.variableName}:`,slotVariables)
-				recursionDepth ++;
-				variableValue = parseTemplate(variable.value as string, {...variables, ...slotVariables}, showDebug, recursionDepth)
+						obj[item.variableName!] = {
+							name: item.variableName!,
+							type: slotParam?.value === 'number' ? ValueType.number : ValueType.string,
+							value: slotParam ? slotParam.value : item.value,
+							params: [], // this will be used in the future when a function can be passed as a param
+						}
+						return obj
+					}, {})
+					showDebug && console.log(`Slot variables for ${slot.variableName}:`, slotVariables)
+					recursionDepth++
+					variableValue = parseTemplate(variable.value as string, { ...variables, ...slotVariables }, showDebug, recursionDepth)
+				}
 				break
 			case ValueType.function:
 				const func = functions[variable.value]
@@ -142,9 +147,9 @@ const parseTemplate = (template: string, variables: ParserVariables = {}, showDe
 }
 
 // const textToParse = loadFileContent('samples/multiline-variable-definitions.ps.txt')
-// const textToParse = loadFileContent('samples/dev.ps.txt')
+const textToParse = loadFileContent('samples/dev.ps.txt')
 // const textToParse = loadFileContent('samples/scratch.ps.txt')
-const textToParse = loadFileContent('samples/escaped-brackets.ps.txt')
+// const textToParse = loadFileContent('samples/escaped-brackets.ps.txt')
 // const textToParse = loadFileContent('samples/nested-with-params.ps.txt')
 
 const parsed = parseTemplate(textToParse, {}, true)

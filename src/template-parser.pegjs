@@ -33,6 +33,7 @@ part
   / text
 
 // variables are defined with single brackets
+// for multiline variables, we need to extract the raw content using regex so it can be rendered recursively if necessary
 variableDefinition
   = "{" _ variableName:variableName _ "(" _ variableParams:variableParams _ ")"? _ "}" _ content:(variableDefinition / slot / text)* _ "{/" _ variableName _ "}"
     // multiline with parameters (always string)

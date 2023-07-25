@@ -18,16 +18,15 @@ parsing/rendering order
  */
 
 // const textToParse = loadFileContent('samples/multiline-variable-definitions.ps.txt')
-const textToParse = loadFileContent('samples/dev.ps.txt')
+// const textToParse = loadFileContent('samples/dev.ps.txt')
 // const textToParse = loadFileContent('samples/scratch.ps.txt')
-// const textToParse = loadFileContent('samples/nested-tags.ps.txt')
+const textToParse = loadFileContent('samples/nested-tags.ps.txt')
 
 // 1) remove comments using regex
 const withoutComments = textToParse.replace(/\/\/.*$/gm, '')
 // console.log(`Text to parse:\n${withoutComments}`)
 
 // 2a) match all variables/slots
-// TODO ignore variables/slots nested in multiline variables
 const variables: ParserVariables = {}
 // store variables
 const parsedVariables = variablesParser.parse(withoutComments)
@@ -35,8 +34,10 @@ for (const value of parsedVariables.parsed as ParserSection[]) {
   console.log(value)
   switch (value.type) {
     case ParserType.variable:
-      // TODO don't allow variables named after functions
-      if (value.variableName! in variables) {
+      // check for conflicts
+      if (value.variableName! in functions) {
+        throw new Error(`Variable name conflicts with function: ${value.variableName}`)
+      } else if (value.variableName! in variables) {
         throw new Error(`Variable name conflict: ${value.variableName}`)
       }
       variables[value.variableName!] = {
@@ -82,9 +83,12 @@ for (const slot of slots as ParserSection[]) {
   // get contents of variable
   let variableValue: string | number
   switch (variable.type) {
-    case ValueType.string:
     case ValueType.number:
-    case ValueType.unknown:
+      variableValue = variable.value
+      break
+    case ValueType.string:
+      // TODO recursive render happens here
+      console.log(variable.value)
       variableValue = variable.value
       break
     case ValueType.function:
@@ -94,6 +98,8 @@ for (const slot of slots as ParserSection[]) {
       }
       variableValue = func(...variable.params!)
       break
+    case ValueType.unknown:
+      throw new Error("Variable should never be unknown type (only params should be unknown)")
     default:
       throw new Error(`Unknown variable type: ${variable.type}`)
   }
@@ -118,8 +124,6 @@ for (const slot of slots as ParserSection[]) {
 
   // replace slot with variable
   currentTemplate = replaceStringAtLocation(currentTemplate, variableValue, slot.location!.start.offset, slot.location!.end.offset)
-
-  // console.log(currentTemplate)
 }
 
 // remove excess whitespace

@@ -39,3 +39,4 @@ nice to haves
 - operators could just be registered aliases for functions, so they could be extended/customized
 - granular test templates for every possible feature/error condition/etc and an automated suite to run them
 - python style named params
+- configurable tag char for people who don't like {}

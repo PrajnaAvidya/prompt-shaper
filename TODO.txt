@@ -1,14 +1,11 @@
 TOP PRIORITY
-- finish redoing in peg
--- support for escaped quotes and brackets in params
+- granular test files and an automated suite to run them (each individual feature, error condition, etc)
 - hook into an openai library and auto-send the response & save that somewhere
-- tests (once all slot/var stuff is stable and before doing collections)
 
 syntax/error checking
 - check for unpaired multilines (or just ignore them?)
 - check for incorrect nesting of multilines eg {a} {b} {/a} {/b}
 - check for optional params before required
-- granular test files and an automated suite to run them (each individual feature, error condition, etc)
 - full test suite
 
 config

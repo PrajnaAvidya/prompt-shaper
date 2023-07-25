@@ -87,7 +87,14 @@ value
   / functionCall
 
 string
-  = '"' chars:$[^"]* '"' { return { type: 'string', value: chars } }
+  = '"' chars:escapedChars* '"' { return { type: 'string', value: chars.join('') } }
+
+escapedChars
+  = escapedChar:escapedCharReturnSlash { return escapedChar }
+  / chars:$[^"\\] { return chars }
+
+escapedCharReturnSlash
+  = "\\" char:$["{}\""] { return "\\" + char; }
 
 number
   = value:$([0-9]+ ("." [0-9]+)?) { return { type: 'number', value: parseFloat(value) } }
@@ -109,7 +116,7 @@ text
   / chars:$[^{}\\]+ { return { type: 'text', content: chars } }
 
 escapedChar
-  = "\\" char:$["{}"] { return char; }
+  = "\\" char:$["{}\""] { return char; }
 
 _ "whitespace"
   = [ \t\n\r]*

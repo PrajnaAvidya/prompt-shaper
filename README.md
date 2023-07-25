@@ -81,7 +81,9 @@ Chapter {{chapterIndex+1}}
 ## Misc
 Comments are marked with double slashes `// this is a comment` and are removed before rendering.
 
-You can escape brackets with backslashes so they won't be parsed as tags `\{\{escapedSlot\}\}`
+You can escape brackets with backslashes so they won't be parsed as tags: `\{\{escapedSlot\}\}`
+
+You can escape brackets or double quotes in string parameters: `{{functionCall("param \" with \} special chars")}}`
 
 ## Template parsing/rendering order
 1) remove comments

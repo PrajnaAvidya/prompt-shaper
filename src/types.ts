@@ -1,61 +1,61 @@
 export enum ParserType {
-  text = 'text',
-  variable = 'variable',
-  slot = 'slot',
+	text = 'text',
+	variable = 'variable',
+	slot = 'slot',
 }
 
 export enum ValueType {
-  string = 'string',
-  number = 'number',
-  function = 'function',
-  unknown = 'unknown',
+	string = 'string',
+	number = 'number',
+	function = 'function',
+	unknown = 'unknown',
 }
 
 export interface ParserParam {
-  type: ValueType
-  value: string | number
-  params?: ParserParam[]
-  required?: boolean
+	type: ValueType
+	value: string | number
+	params?: ParserParam[]
+	required?: boolean
 }
 
 export interface ParserOperation {
-  operator: ParserOperator
-  value: number
+	operator: ParserOperator
+	value: number
 }
 
 export enum ParserOperator {
-  Add = '+',
-  Subtract = '-',
-  Multiply = '*',
-  Divide = '/',
+	Add = '+',
+	Subtract = '-',
+	Multiply = '*',
+	Divide = '/',
 }
 
 export interface ParserSection {
-  type: ParserType
-  variableName?: string
-  params?: ParserParam[]
-  content?: ParserParam
-  operation?: ParserOperation
-  raw?: boolean
-  location?: {
-    start: TextLocation
-    end: TextLocation
-  }
+	type: ParserType
+	variableName?: string
+	params?: ParserParam[]
+	content?: ParserParam
+	operation?: ParserOperation
+	raw?: boolean
+	location?: {
+		start: TextLocation
+		end: TextLocation
+	}
 }
 
 export interface TextLocation {
-  column: number
-  line: number
-  offset: number
+	column: number
+	line: number
+	offset: number
 }
 
 export interface ParserVariables {
-  [key: string]: {
-    name: string
-    type: ValueType
-    value: string | number
-    params: ParserParam[]
-  }
+	[key: string]: {
+		name: string
+		type: ValueType
+		value: string | number
+		params: ParserParam[]
+	}
 }
 
 export type PromptShapeFunction = (...args: ParserParam[]) => string | number

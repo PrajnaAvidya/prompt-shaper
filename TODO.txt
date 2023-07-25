@@ -8,7 +8,7 @@ TOP PRIORITY
 syntax/error checking
 - check for unpaired multilines (or just ignore them?)
 - check for incorrect nesting of multilines eg {a} {b} {/a} {/b}
-- check for optional params after required
+- check for optional params before required
 - granular test files and an automated suite to run them (each individual feature, error condition, etc)
 - full test suite
 

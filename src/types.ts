@@ -15,6 +15,7 @@ export interface ParserParam {
 	type: ValueType
 	value: string | number
 	params?: ParserParam[]
+	variableName?: string
 	required?: boolean
 }
 

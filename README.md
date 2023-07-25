@@ -81,6 +81,8 @@ Chapter {{chapterIndex+1}}
 ## Misc
 Comments are marked with double slashes `// this is a comment` and are removed before rendering.
 
+You can escape brackets with backslashes so they won't be parsed as tags `\{\{escapedSlot\}\}`
+
 ## Template parsing/rendering order
 1) remove comments
 2) match and validate all variables and slots

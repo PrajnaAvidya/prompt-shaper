@@ -1,6 +1,6 @@
 I'm developing a templating engine in TS called PromptShape for efficient text-based gpt prompting. Here's my WIP readme/spec so far:
 
-{{@load("spec.md")}}
+{{@load("README.md")}}
 ===
 I'm using PEG.js for the parser and here's the source code for the inline variable parser:
 

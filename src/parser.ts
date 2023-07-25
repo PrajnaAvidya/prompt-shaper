@@ -144,8 +144,8 @@ const parseTemplate = (template: string, variables: ParserVariables = {}, showDe
 // const textToParse = loadFileContent('samples/multiline-variable-definitions.ps.txt')
 // const textToParse = loadFileContent('samples/dev.ps.txt')
 // const textToParse = loadFileContent('samples/scratch.ps.txt')
-// const textToParse = loadFileContent('samples/nested-tags.ps.txt')
-const textToParse = loadFileContent('samples/nested-with-params.ps.txt')
+const textToParse = loadFileContent('samples/escaped-brackets.ps.txt')
+// const textToParse = loadFileContent('samples/nested-with-params.ps.txt')
 
 const parsed = parseTemplate(textToParse, {}, true)
 writeFileSync('output.txt', parsed)

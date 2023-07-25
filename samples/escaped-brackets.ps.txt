@@ -1,0 +1,7 @@
+{realVar=1}
+{anotherRealVar="asdf"}
+
+{{realSlot}}
+
+\{escapedVar=1\}
+\{\{escapedSlot\}\}

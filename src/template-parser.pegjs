@@ -105,7 +105,11 @@ variableName
 
 // matches anything that isn't a PromptShape tag
 text
-  = chars:$[^{}]+ { return { type: 'text', content: chars } }
+  = escapedChar:escapedChar { return { type: 'text', content: escapedChar } }
+  / chars:$[^{}\\]+ { return { type: 'text', content: chars } }
+
+escapedChar
+  = "\\" char:$["{}"] { return char; }
 
 _ "whitespace"
   = [ \t\n\r]*

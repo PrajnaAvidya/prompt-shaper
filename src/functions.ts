@@ -3,8 +3,16 @@ import { loadFileContent } from './utils'
 
 export const functions: Record<string, PromptShapeFunction> = {
   add: (a: ParserParam, b: ParserParam): number => {
-    // Note: You might want to add some error checking here to make sure the params are of the correct type
     return (a.value as number) + (b.value as number)
+  },
+  subtract: (a: ParserParam, b: ParserParam): number => {
+    return (a.value as number) - (b.value as number)
+  },
+  multiply: (a: ParserParam, b: ParserParam): number => {
+    return (a.value as number) * (b.value as number)
+  },
+  divide: (a: ParserParam, b: ParserParam): number => {
+    return (a.value as number) / (b.value as number)
   },
   load: (filePath: ParserParam): string => {
     return loadFileContent(filePath.value as string)

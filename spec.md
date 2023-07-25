@@ -87,6 +87,7 @@ Comments are marked with double slashes `// this is a comment` and are removed b
 1) remove comments
 2) match and validate all variables and slots
 3) remove variables
-4) remove excess whitespace
-5) render slots with variable data from the bottom up
-6) string variables will be parsed recursively (variables/slots within them will be rendered)
+4) render slots with variable data from the bottom up
+5) string variables will be parsed recursively (variables/slots within them will be rendered)
+6) remove excess whitespace
+7) 

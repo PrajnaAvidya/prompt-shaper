@@ -22,28 +22,6 @@
             }
         }).join('')
     }
-
-    // recursively join element content
-    function joinContent(content) {
-      if (typeof content === 'string') return content
-      return content.map(section => {
-        switch (section.type) {
-          case 'slot':
-            const raw = section.raw ? "@" : ""
-            const params = section.params ? "(" + section.params.map(p => p.type === 'string' ? `"${p.value}"` : p.value).join(', ') + ")" : ""
-            const operation = section.operation ? ` ${section.operation.operator} ${section.operation.value}` : ""
-            return `{{${raw}${section.variableName}${params}${operation}}}`
-          //case 'variable':
-          //  return `{${section.variableName}}${joinContent(section.content.value)}{/${section.variableName}}`
-          case 'variable':
-            return ''
-          case 'text':
-            return section.content
-          default:
-            throw new Error(`Unknown section type: ${section.type}`)
-        }
-      }).join('')
-    }
 }
 
 start
@@ -54,23 +32,31 @@ part
   / slot
   / text
 
+// variables are defined with single brackets
 variableDefinition
   = "{" _ variableName:variableName _ "(" _ variableParams:variableParams _ ")"? _ "}" _ content:(variableDefinition / slot / text)* _ "{/" _ variableName _ "}"
+    // multiline with parameters (always string)
     {
-      // variable with name, parameters, and content
-      return { type: 'variable', variableName, params:variableParams, content:{ type:'string', value:joinContent(content) } }
+      const varString = input.slice(location().start.offset, location().end.offset)
+      const regex = `(?<!{){${variableName}(?:\\(([^)]*)\\))?\\}([\\s\\S]*?){\\/${variableName}}(?!})`
+      const value = Array.from(varString.matchAll(new RegExp(regex, "g")))[0][2]
+      return { type: 'variable', variableName, params:variableParams, content:{ type:'string', value } }
     }
   / "{" _ variableName:variableName _ "}" _ content:(variableDefinition / slot / text)* _ "{/" _ variableName _ "}"
+    // multiline without params (always string)
     {
-      // variable with name and content, but no parameters
-      return { type: 'variable', variableName, params:[], content:{ type:'string', value:joinContent(content) } }
+      const varString = input.slice(location().start.offset, location().end.offset)
+      const regex = `(?<!{){${variableName}(?:\\(([^)]*)\\))?\\}([\\s\\S]*?){\\/${variableName}}(?!})`
+      const value = Array.from(varString.matchAll(new RegExp(regex, "g")))[0][2]
+      return { type: 'variable', variableName, params:[], content:{ type:'string', value } }
     }
   / "{" _ variableName:variableName _ "=" _ value:value _ "}"
+    // single line, content can be string or number or function (which may have params)
     {
-      // variable with name and value
       return { type: 'variable', variableName, content:value }
     }
 
+// slots are defined with double brackets
 slot
   = "{{" _ "@"? _ variableName:variableName _ "("? _ params:params? _ ")"? _ operator:operator? _ value:value? _ "}}"
     {
@@ -112,9 +98,11 @@ param
   = string
   / number
 
+// variable names must start with a letter and contain letters, numbers, underscores
 variableName
   = first:[a-zA-Z_] rest:$[a-zA-Z_0-9]* { return first + rest }
 
+// matches anything that isn't a PromptShape tag
 text
   = chars:$[^{}]+ { return { type: 'text', content: chars } }
 

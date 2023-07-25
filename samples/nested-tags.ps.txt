@@ -1,9 +1,6 @@
 {topLevelVariable}
 Top Level
 {{slotInTopLevel}}
-// TODO these are broken:
-//{{@topLevelFunction("asdf")+1}}
-//{{test/3}}
 
 {secondLevelVariable}
 Middle Level

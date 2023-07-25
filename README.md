@@ -82,7 +82,6 @@ Chapter {{chapterIndex+1}}
 - Nested variables are ignored, define all variables at the top level of templates
 
 ## Misc
-
 Comments are marked with double slashes `// this is a comment` and are removed before rendering.
 
 ## Template parsing/rendering order
@@ -92,4 +91,3 @@ Comments are marked with double slashes `// this is a comment` and are removed b
 4) render slots with variable data from the bottom up
 5) string variables will be parsed recursively (variables/slots within them will be rendered)
 6) remove excess whitespace
-7) 

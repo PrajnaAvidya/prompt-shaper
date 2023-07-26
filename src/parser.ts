@@ -7,12 +7,28 @@ import { functions } from './functions'
 const templateParser = peg.generate(loadFileContent('src/template-parser.pegjs'))
 const maxRecursionDepth = 5
 
-export function parseTemplate(template: string, variables: ParserVariables, options?: ParserOptions & { returnParserMatches: false }, recursionDepth?: number): string
-export function parseTemplate(template: string, variables: ParserVariables, options?: ParserOptions & { returnParserMatches: true }, recursionDepth?: number): ParserSection[]
+export function parseTemplate(
+	template: string,
+	variables?: ParserVariables,
+	options?: ParserOptions & { returnParserMatches: false },
+	recursionDepth?: number,
+): string
+export function parseTemplate(
+	template: string,
+	variables?: ParserVariables,
+	options?: ParserOptions & { returnParserMatches: true },
+	recursionDepth?: number,
+): ParserSection[]
 
-export function parseTemplate(template: string, variables: ParserVariables = {}, options?: ParserOptions, recursionDepth?: number): ParserSection[] | string {
-	if (typeof template !== 'string' || template.trim() === '' || recursionDepth && recursionDepth > maxRecursionDepth) return <string>template
+export function parseTemplate(
+	template: string,
+	variables?: ParserVariables,
+	options?: ParserOptions,
+	recursionDepth?: number,
+): ParserSection[] | string {
+	if (typeof template !== 'string' || template.trim() === '' || (recursionDepth && recursionDepth > maxRecursionDepth)) return <string>template
 
+	if (!variables) variables = {}
 	const showDebug = options?.showDebugMessages || false
 
 	// remove comments using regex
@@ -115,7 +131,12 @@ export function parseTemplate(template: string, variables: ParserVariables = {},
 						recursionDepth = 0
 					}
 					recursionDepth++
-					variableValue = parseTemplate(variable.value as string, { ...variables, ...slotVariables }, { ...options, returnParserMatches: options?.returnParserMatches || false }, recursionDepth) as string
+					variableValue = parseTemplate(
+						variable.value as string,
+						{ ...variables, ...slotVariables },
+						{ ...options, returnParserMatches: options?.returnParserMatches || false },
+						recursionDepth,
+					) as string
 				}
 				break
 			case ValueType.function:

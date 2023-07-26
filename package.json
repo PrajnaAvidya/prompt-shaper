@@ -1,9 +1,21 @@
 {
   "name": "prompt-shape",
   "description": "prompt scripting language",
-  "main": "index.js",
   "author": "Rafiq <r@neat.af>",
   "license": "MIT",
+  "main": "dist/cli.js",
+  "bin": {
+    "promptshape-parser": "./dist/cli.js"
+  },
+  "scripts": {
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "parse": "ts-node src/cli.ts",
+    "test": "mocha -r ts-node/register 'test/**/*.spec.ts'"
+  },
+  "dependencies": {
+    "commander": "^11.0.0"
+  },
   "devDependencies": {
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
@@ -22,11 +34,5 @@
     "sinon": "^15.2.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6"
-  },
-  "scripts": {
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix",
-    "parse": "ts-node src/parser.ts",
-    "test": "mocha -r ts-node/register 'test/**/*.spec.ts'"
   }
 }

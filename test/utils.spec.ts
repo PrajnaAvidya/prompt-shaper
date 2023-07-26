@@ -3,20 +3,12 @@ import { loadFileContent, replaceStringAtLocation } from '../src/utils'
 import { join } from 'path'
 import sinon from 'sinon'
 
-const fs= require('fs')
+const fs = require('fs')
 
 describe('loadFileContent', () => {
-	let readFileSyncStub: any
-
-	beforeEach(() => {
-		readFileSyncStub = sinon.stub(fs, 'readFileSync')
-	})
-
-	afterEach(() => {
-		readFileSyncStub.restore()
-	})
-
 	it('loads file content and uses cached', () => {
+		const readFileSyncStub = sinon.stub(fs, 'readFileSync')
+
 		const filePath = join(__dirname, 'test.txt')
 		const fileContent = 'This is a test file'
 		readFileSyncStub.returns(fileContent)
@@ -29,6 +21,8 @@ describe('loadFileContent', () => {
 		expect(readFileSyncStub.calledOnce).to.be.true
 		expect(content1).to.equal(fileContent)
 		expect(readFileSyncStub.calledWith(filePath, 'utf8')).to.be.true
+
+		readFileSyncStub.restore()
 	})
 })
 

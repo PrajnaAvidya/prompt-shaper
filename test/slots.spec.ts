@@ -16,6 +16,8 @@ describe('slots', () => {
 	it('should throw an error with malformed slot', () => {
 		const template = loadFileContent('./test/templates/slots/malformed.ps.txt')
 
-		expect(() => parseTemplate(template, {})).to.throw(`Expected "(", ")", "*", "+", "-", "/", "\\"", "}}", [0-9], [a-zA-Z_0-9], or [a-zA-Z_] but "}" found.`)
+		expect(() => parseTemplate(template, {})).to.throw(
+			`Expected "(", ")", "*", "+", "-", "/", "\\"", "}}", [0-9], [a-zA-Z_0-9], or [a-zA-Z_] but "}" found.`,
+		)
 	})
 })

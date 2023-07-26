@@ -1,6 +1,9 @@
 TOP PRIORITY
-- granular tests/templates for each individual feature, error condition, etc
-- command line runner for parser (takes basic input, can output to buffer or file)
+- arithmetic between any combo of numbers/vars/functions
+- finish tests
+- cli
+-- pipe input
+-- file output
 - hook into an openai library and auto-send the response & save that somewhere
 
 syntax/error checking
@@ -28,7 +31,7 @@ nice to haves
 - file variables with parameters -- more specifically, allow parameters to be passed when calling load()
 - partial file load (e.g. optional start/end line params for load. except that sucks for when files change, what if there's a symbol start/escape sequence type thing?)
 - tag for making gpt calls e.g. %gpt% (do they need an option to be deferred vs instant)
-- arithmetic between any combo of numbers/vars/functions
+- ability to save gpt call response to a var
 - placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable
 - operators could just be registered aliases for functions, so they could be extended/customized
 - python style named params

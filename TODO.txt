@@ -1,5 +1,5 @@
 TOP PRIORITY
-- granular test files and an automated suite to run them (each individual feature, error condition, etc)
+- granular tests/templates for each individual feature, error condition, etc
 - command line runner for parser (takes basic input, can output to buffer or file)
 - hook into an openai library and auto-send the response & save that somewhere
 
@@ -7,7 +7,6 @@ syntax/error checking
 - check for unpaired multilines (or just ignore them?)
 - check for incorrect nesting of multilines eg {a} {b} {/a} {/b}
 - check for optional params before required
-- full test suite
 
 config
 - allow absolute/parent paths for template file load (for security)

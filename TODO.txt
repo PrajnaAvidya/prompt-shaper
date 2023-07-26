@@ -8,10 +8,6 @@ syntax/error checking
 - check for incorrect nesting of multilines eg {a} {b} {/a} {/b}
 - check for optional params before required
 
-config
-- allow absolute/parent paths for template file load (for security)
-- show debug messages
-
 collection stuff? (low priority until I actually need them)
 - decide on best syntax
 - basic iterating
@@ -32,12 +28,11 @@ nice to haves
 - file variables with parameters -- more specifically, allow parameters to be passed when calling load()
 - partial file load (e.g. optional start/end line params for load. except that sucks for when files change, what if there's a symbol start/escape sequence type thing?)
 - tag for making gpt calls e.g. %gpt% (do they need an option to be deferred vs instant)
-- render against a json hash (handlebars style) instead of inline/loaded variables
-- arithmetic between 2 vars
+- arithmetic between any combo of numbers/vars/functions
 - placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable
-- capture nested variables & render in that tree only
 - operators could just be registered aliases for functions, so they could be extended/customized
-- granular test templates for every possible feature/error condition/etc and an automated suite to run them
 - python style named params
 - configurable tag char for people who don't like {}
 - better messages for syntax errors
+- option to show filename when rendering from load()
+- option to allow absolute/parent paths for template file load (for security)

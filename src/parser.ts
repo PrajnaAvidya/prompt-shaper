@@ -10,23 +10,10 @@ const maxRecursionDepth = 5
 export function parseTemplate(
 	template: string,
 	variables?: ParserVariables,
-	options?: ParserOptions & { returnParserMatches: false },
-	recursionDepth?: number,
-): string
-export function parseTemplate(
-	template: string,
-	variables?: ParserVariables,
-	options?: ParserOptions & { returnParserMatches: true },
-	recursionDepth?: number,
-): ParserSection[]
-
-export function parseTemplate(
-	template: string,
-	variables?: ParserVariables,
 	options?: ParserOptions,
 	recursionDepth?: number,
-): ParserSection[] | string {
-	if (typeof template !== 'string' || template.trim() === '' || (recursionDepth && recursionDepth > maxRecursionDepth)) return <string>template
+): string {
+	if (typeof template !== 'string' || template.trim() === '' || (recursionDepth && recursionDepth > maxRecursionDepth)) return template
 
 	if (!variables) variables = {}
 	const showDebug = options?.showDebugMessages || false
@@ -39,11 +26,11 @@ export function parseTemplate(
 	showDebug && console.log('Matching all outer tags')
 	const parsedVariables = templateParser.parse(withoutComments)
 	if (options?.returnParserMatches === true) {
-		return <ParserSection[]>parsedVariables.parsed
+		return parsedVariables.parsed
 	}
 	if (parsedVariables.parsed.length === 1 && parsedVariables.parsed[0].type === 'text') {
 		showDebug && console.log('No tags to parse, returning original template')
-		return <string>template
+		return template
 	}
 	for (const value of parsedVariables.parsed as ParserSection[]) {
 		showDebug && console.log('Match: ', value)
@@ -175,5 +162,5 @@ export function parseTemplate(
 	}
 
 	// remove excess whitespace
-	return <string>currentTemplate.replace(/\n{3,}/g, '\n\n').trim()
+	return currentTemplate.replace(/\n{3,}/g, '\n\n').trim()
 }

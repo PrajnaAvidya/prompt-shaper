@@ -6,9 +6,10 @@ import { program } from 'commander'
 import { loadFileContent } from './utils'
 import { parseTemplate } from './parser'
 
+// TODO provide input inline
 program
 	.description('Run the PromptShape parser CLI')
-	.argument('<string>', 'Input template path')
+	.argument('<filePath>', 'Input template file path')
 	.option('-d, --debug', 'Show debug messages')
 	.option('-s, --save <string>', 'Path to save output')
 	.action((inputPath, options) => {

@@ -27,6 +27,9 @@ ux stuff
 - make it run a web server able to receive snippets of text from the browser or other sources (what would be the best way to hook into something like github to assign a file to a var?)
 
 nice to haves
+- escaped slashes to preserve comments
+- mutli line /* */ comments
+- file/env var based config
 - use variable or function as param
 - file variables with parameters -- more specifically, allow parameters to be passed when calling load()
 - partial file load (e.g. optional start/end line params for load. except that sucks for when files change, what if there's a symbol start/escape sequence type thing?)

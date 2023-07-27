@@ -78,6 +78,8 @@ Chapter {{chapterIndex+1}}
 {{chapterTitle(chapterIndex="0")}}
 ```
 
+Strings must be double-quoted, and numbers are unquoted and can contain decimals.
+
 ## Misc
 Comments are marked with double slashes `// this is a comment` and are removed before rendering.
 

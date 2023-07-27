@@ -56,7 +56,7 @@ export function parseTemplate(
 				throw new Error(`Unknown type:\n${value}`)
 		}
 	}
-	showDebug && console.log('Found variables:', variables)
+	showDebug && console.log('Found single-line-variables:', variables)
 
 	// parser returns the template with variable definitions removed
 	const withoutVariables = parsedVariables.text

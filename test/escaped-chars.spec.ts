@@ -7,7 +7,7 @@ describe('escaped characters', () => {
 	it('should correctly handle escaped escaped-chars', () => {
 		const template = loadFileContent('./test/templates/escaped-chars/brackets.ps.txt')
 		const variables: ParserVariables = {
-			name: { name: 'name', type: ValueType.string, value: 'World', params: [] }
+			name: { name: 'name', type: ValueType.string, value: 'World', params: [] },
 		}
 
 		const result = parseTemplate(template, variables)
@@ -18,7 +18,7 @@ describe('escaped characters', () => {
 	it('should correctly handle escaped double quotes', () => {
 		const template = loadFileContent('./test/templates/escaped-chars/double-quotes.ps.txt')
 		const variables: ParserVariables = {
-			quote: { name: 'quote', type: ValueType.string, value: 'It\'s a beautiful day', params: [] }
+			quote: { name: 'quote', type: ValueType.string, value: "It's a beautiful day", params: [] },
 		}
 
 		const result = parseTemplate(template, variables)

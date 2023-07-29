@@ -35,6 +35,6 @@ program
 				console.error(`An unknown error occurred: ${error}`)
 			}
 		}
- })
+	})
 
 program.parse()

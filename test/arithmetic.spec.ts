@@ -9,7 +9,7 @@ describe.skip('arithmetic', () => {
 		const template = loadFileContent('./test/templates/arithmetic/add.ps.txt')
 		const variables: ParserVariables = {
 			num1: { name: 'num1', type: ValueType.number, value: 5, params: [] },
-			num2: { name: 'num2', type: ValueType.number, value: 7, params: [] }
+			num2: { name: 'num2', type: ValueType.number, value: 7, params: [] },
 		}
 
 		const result = parseTemplate(template, variables)
@@ -21,7 +21,7 @@ describe.skip('arithmetic', () => {
 		const template = loadFileContent('./test/templates/arithmetic/subtract.ps.txt')
 		const variables: ParserVariables = {
 			num1: { name: 'num1', type: ValueType.number, value: 10, params: [] },
-			num2: { name: 'num2', type: ValueType.number, value: 6, params: [] }
+			num2: { name: 'num2', type: ValueType.number, value: 6, params: [] },
 		}
 
 		const result = parseTemplate(template, variables)
@@ -33,7 +33,7 @@ describe.skip('arithmetic', () => {
 		const template = loadFileContent('./test/templates/arithmetic/multiply.ps.txt')
 		const variables: ParserVariables = {
 			num1: { name: 'num1', type: ValueType.number, value: 3, params: [] },
-			num2: { name: 'num2', type: ValueType.number, value: 4, params: [] }
+			num2: { name: 'num2', type: ValueType.number, value: 4, params: [] },
 		}
 
 		const result = parseTemplate(template, variables)
@@ -45,7 +45,7 @@ describe.skip('arithmetic', () => {
 		const template = loadFileContent('./test/templates/arithmetic/divide.ps.txt')
 		const variables: ParserVariables = {
 			num1: { name: 'num1', type: ValueType.number, value: 20, params: [] },
-			num2: { name: 'num2', type: ValueType.number, value: 5, params: [] }
+			num2: { name: 'num2', type: ValueType.number, value: 5, params: [] },
 		}
 
 		const result = parseTemplate(template, variables)
@@ -57,7 +57,7 @@ describe.skip('arithmetic', () => {
 		const template = loadFileContent('./test/templates/arithmetic/divide.ps.txt')
 		const variables: ParserVariables = {
 			num1: { name: 'num1', type: ValueType.number, value: 20, params: [] },
-			num2: { name: 'num2', type: ValueType.number, value: 0, params: [] }
+			num2: { name: 'num2', type: ValueType.number, value: 0, params: [] },
 		}
 
 		expect(() => parseTemplate(template, variables)).to.throw('Division by zero')

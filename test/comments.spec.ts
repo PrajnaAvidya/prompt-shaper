@@ -7,7 +7,7 @@ describe('comments', () => {
 	it('should remove single line comments', () => {
 		const template = loadFileContent('./test/templates/comments/single-line.ps.txt')
 		const variables: ParserVariables = {
-			name: { name: 'name', type: ValueType.string, value: 'World', params: [] }
+			name: { name: 'name', type: ValueType.string, value: 'World', params: [] },
 		}
 
 		const result = parseTemplate(template, variables)
@@ -18,7 +18,7 @@ describe('comments', () => {
 	it('should remove inline comments', () => {
 		const template = loadFileContent('./test/templates/comments/inline.ps.txt')
 		const variables: ParserVariables = {
-			name: { name: 'name', type: ValueType.string, value: 'World', params: [] }
+			name: { name: 'name', type: ValueType.string, value: 'World', params: [] },
 		}
 
 		const result = parseTemplate(template, variables)

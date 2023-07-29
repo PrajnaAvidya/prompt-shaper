@@ -7,12 +7,7 @@ import { functions } from './functions'
 const templateParser = peg.generate(loadFileContent('src/template-parser.pegjs'))
 const maxRecursionDepth = 5
 
-export function parseTemplate(
-	template: string,
-	variables?: ParserVariables,
-	options?: ParserOptions,
-	recursionDepth?: number,
-): string {
+export function parseTemplate(template: string, variables?: ParserVariables, options?: ParserOptions, recursionDepth?: number): string {
 	if (typeof template !== 'string' || template.trim() === '' || (recursionDepth && recursionDepth > maxRecursionDepth)) return template
 
 	if (!variables) variables = {}

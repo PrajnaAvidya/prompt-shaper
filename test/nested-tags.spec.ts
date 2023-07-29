@@ -9,6 +9,6 @@ describe('nested tags', () => {
 
 		const result = parseTemplate(template)
 
-		expect(result).to.equal("Outer\n\nInner")
+		expect(result).to.equal('Outer\n\nInner')
 	})
 })

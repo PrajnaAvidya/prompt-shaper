@@ -7,7 +7,7 @@ describe('slots', () => {
 	it('should correctly render a slot with string variable', () => {
 		const template = loadFileContent('./test/templates/slots/string.ps.txt')
 		const variables: ParserVariables = {
-			name: { name: 'name', type: ValueType.string, value: 'World', params: [] }
+			name: { name: 'name', type: ValueType.string, value: 'World', params: [] },
 		}
 
 		const result = parseTemplate(template, variables)
@@ -18,7 +18,7 @@ describe('slots', () => {
 	it('should correctly render a slot with number variable', () => {
 		const template = loadFileContent('./test/templates/slots/number.ps.txt')
 		const variables: ParserVariables = {
-			age: { name: 'age', type: ValueType.number, value: 25, params: [] }
+			age: { name: 'age', type: ValueType.number, value: 25, params: [] },
 		}
 
 		const result = parseTemplate(template, variables)
@@ -29,7 +29,15 @@ describe('slots', () => {
 	it('should correctly render a slot with function variable', () => {
 		const template = loadFileContent('./test/templates/slots/function.ps.txt')
 		const variables: ParserVariables = {
-			sum: { name: 'sum', type: ValueType.function, value: 'add', params: [{ type: ValueType.number, value: 1 }, { type: ValueType.number, value: 2 }] }
+			sum: {
+				name: 'sum',
+				type: ValueType.function,
+				value: 'add',
+				params: [
+					{ type: ValueType.number, value: 1 },
+					{ type: ValueType.number, value: 2 },
+				],
+			},
 		}
 
 		const result = parseTemplate(template, variables)

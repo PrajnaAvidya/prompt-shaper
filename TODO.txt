@@ -1,6 +1,5 @@
 TOP PRIORITY
 - arithmetic between any combo of numbers/vars/functions
-- finish tests
 - hook into an openai library and auto-send the response & save that somewhere
 - build/infra stuff to make it usable without downloading repo
 -- and github workflow stuff (run tests, check types, lint, etc)

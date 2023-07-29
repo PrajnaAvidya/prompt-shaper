@@ -24,12 +24,10 @@ I'm currently writing tests for everything. a few of them:
 
 {{@load("test/slots.spec.ts")}}
 {{@load("test/single-line-variables.spec.ts"}}
-{{@load("test/comments.spec.ts"}}
+{{@load("test/functions.spec.ts"}}
 
-Can you write the tests for escaped-chars.spec.ts
-// Can you write the tests for multi-line-variables.spec.ts
-// Can you write the tests for functions.spec.ts
+Can you write the tests for multi-line-variables.spec.ts
 // Can you write the tests for nested-tags.spec.ts
-// Can you write the tests for escaped-chars.spec.ts
+Please include both the tests and the templates for them
 {/currentQuestion}
 {{currentQuestion}}

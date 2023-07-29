@@ -1,0 +1,1 @@
+The quotient of 10 and 2 is {{divide(10,2)}}

@@ -7,6 +7,7 @@ import { loadFileContent } from './utils'
 import { parseTemplate } from './parser'
 
 // TODO provide input inline
+// TODO json string/file for input vars
 program
 	.description('Run the PromptShape parser CLI')
 	.argument('<filePath>', 'Input template file path')

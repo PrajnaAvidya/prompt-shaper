@@ -12,6 +12,7 @@ CLI command format: `promptshape-parser <input> <options>`
 - `<input>` is treated as a path by default, use `-i` or `--is-string` to treat input as a template string
 - Save output to a file: `-s <outputPath>` or `--save <outputPath>`
 - Show verbose debug messages: `-d` or `--debug`
+- You can provide a variables via a JSON string using `-j` or `--json` or via a JSON file path using `-f` or `--json-file`
 
 ## Examples
 See the `samples` directory and try running them with the parser.

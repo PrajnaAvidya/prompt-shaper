@@ -1,7 +1,8 @@
 import { expect } from 'chai'
-import { loadFileContent, replaceStringAtLocation } from '../src/utils'
+import { loadFileContent, replaceStringAtLocation, transformJsonToVariables } from '../src/utils'
 import { join } from 'path'
 import sinon from 'sinon'
+import { ParserVariables, ValueType } from '../src/types'
 
 const fs = require('fs')
 
@@ -36,5 +37,27 @@ describe('replaceStringAtLocation', () => {
 		const result = replaceStringAtLocation(str, replacement, start, end)
 
 		expect(result).to.equal('Hello, everyone!')
+	})
+})
+
+describe('transformJsonToVariables', () => {
+	it('should transform a JSON object to a ParserVariables object', () => {
+		const json = { var1: 'hello', var2: 42 }
+		const expected: ParserVariables = {
+			var1: {
+				name: 'var1',
+				type: ValueType.string,
+				value: 'hello',
+				params: [],
+			},
+			var2: {
+				name: 'var2',
+				type: ValueType.number,
+				value: 42,
+				params: [],
+			},
+		}
+		const result = transformJsonToVariables(json)
+		expect(result).to.deep.equal(expected)
 	})
 })

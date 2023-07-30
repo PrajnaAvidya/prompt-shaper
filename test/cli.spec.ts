@@ -26,7 +26,7 @@ describe('CLI', () => {
 
 	it('should save output to a file', done => {
 		const outputPath = path.resolve(__dirname, '../output.txt')
-		exec(`ts-node src/cli.ts "{variable = \\\"hello world\\\"}{{variable}}" -i -s output.txt`, error => {
+		exec(`ts-node src/cli.ts "{variable = \\"hello world\\"}{{variable}}" -i -s output.txt`, error => {
 			if (error) {
 				throw new Error(error.message)
 			}
@@ -41,6 +41,27 @@ describe('CLI', () => {
 				throw new Error(error.message)
 			}
 			expect(stdout).to.include('DEBUG:')
+			done()
+		})
+	})
+
+	it('should parse variables from a JSON string', done => {
+		exec('ts-node src/cli.ts "{{test}}" -i -j \'{ "test": "hello world" }\'', (error, stdout) => {
+			if (error) {
+				throw new Error(error.message)
+			}
+			expect(stdout.trim()).to.equal('hello world')
+			done()
+		})
+	})
+
+	it('should parse variables from a JSON file', done => {
+		const jsonFilePath = path.resolve(__dirname, './templates/cli/variables.json')
+		exec(`ts-node src/cli.ts "{{test}}" -i -f ${jsonFilePath}`, (error, stdout) => {
+			if (error) {
+				throw new Error(error.message)
+			}
+			expect(stdout.trim()).to.equal('hello world')
 			done()
 		})
 	})

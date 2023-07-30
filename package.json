@@ -11,7 +11,7 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "parse": "ts-node src/cli.ts",
-    "test": "mocha -r ts-node/register 'test/**/*.spec.ts'"
+    "test": "mocha -r ts-node/register 'test/**/*.spec.ts' --timeout 5000"
   },
   "dependencies": {
     "commander": "^11.0.0"

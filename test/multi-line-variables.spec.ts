@@ -1,6 +1,5 @@
 import { expect } from 'chai'
 import { parseTemplate } from '../src/parser'
-import { ParserVariables, ValueType } from '../src/types'
 import { loadFileContent } from '../src/utils'
 
 describe('multi-line variables', () => {

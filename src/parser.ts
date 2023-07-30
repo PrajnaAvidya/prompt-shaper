@@ -121,13 +121,14 @@ export function parseTemplate(template: string, variables?: ParserVariables, opt
 					) as string
 				}
 				break
-			case ValueType.function:
+			case ValueType.function: {
 				const func = functions[variable.value]
 				if (!func) {
 					throw new Error(`Unknown function: ${variable.value}`)
 				}
 				variableValue = func(...variable.params!)
 				break
+			}
 			case ValueType.unknown:
 				throw new Error('Variable should never be unknown type (only params should be unknown)')
 			default:

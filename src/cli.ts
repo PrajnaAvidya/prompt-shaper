@@ -6,22 +6,25 @@ import { program } from 'commander'
 import { loadFileContent } from './utils'
 import { parseTemplate } from './parser'
 
-// TODO provide input inline
-// TODO json string/file for input vars
 program
 	.description('Run the PromptShape parser CLI')
-	.argument('<filePath>', 'Input template file path')
+	.argument('<input>', 'Input template file path')
+	.option('-i, --is-string', 'Indicate that the input is a string, not a file path')
 	.option('-d, --debug', 'Show debug messages')
-	.option('-s <string>, --save <string>', 'Path to save output')
-	.action((inputPath, options) => {
-		// validate paths
-		inputPath = path.resolve(inputPath)
+	.option('-s, --save <string>', 'Path to save output')
+	.action((input, options) => {
+		let template: string;
+		if (options.isString) {
+			template = input;
+		} else {
+			template = loadFileContent(path.resolve(input));
+		}
+
 		if (options.save) options.save = path.resolve(options.save)
 
 		try {
 			const parserOptions = { returnParserMatches: false, showDebugMessages: options.debug as boolean }
 
-			const template = loadFileContent(inputPath)
 			const parsed = parseTemplate(template, {}, parserOptions)
 			if (options.save) {
 				fs.writeFileSync(options.save, parsed)

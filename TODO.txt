@@ -1,5 +1,5 @@
 TOP PRIORITY (stuff to do before first npm release)
-- todos in cli
+- cli: json string/file for input vars
 - build+docs for use through npx+global install
 - docs for contributing/support
 - arithmetic between any combo of numbers/vars/functions

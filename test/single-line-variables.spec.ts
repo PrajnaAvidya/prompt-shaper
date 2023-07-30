@@ -1,10 +1,21 @@
 import { expect } from 'chai'
 import { parseTemplate } from '../src/parser'
-import { ParserVariables, ValueType } from '../src/types'
 import { loadFileContent } from '../src/utils'
 
 describe('single-line-variables', () => {
-	it('should parse string variables defined in the template', () => {})
+	it('should correctly parse single-line string variables', () => {
+		const template = loadFileContent('./test/templates/single-line-variables/string.ps.txt')
 
-	it('should parse number variables defined in the template', () => {})
+		const result = parseTemplate(template)
+
+		expect(result).to.equal('Hello World')
+	})
+
+	it('should correctly parse single-line number variables', () => {
+		const template = loadFileContent('./test/templates/single-line-variables/number.ps.txt')
+
+		const result = parseTemplate(template)
+
+		expect(result).to.equal('42')
+	})
 })

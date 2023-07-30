@@ -28,7 +28,7 @@ program
 			} else {
 				console.log(parsed)
 			}
-		} catch (error: any) {
+		} catch (error: Error | unknown) {
 			if (error instanceof Error) {
 				console.error(`Error: ${error.message}`)
 			} else {

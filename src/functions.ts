@@ -15,6 +15,9 @@ export const functions: Record<string, PromptShapeFunction> = {
 		return (a.value as number) / (b.value as number)
 	},
 	load: (filePath: ParserParam): string => {
+		if (!filePath.value || typeof filePath.value !== 'string') {
+			throw new Error('Invalid file path')
+		}
 		return loadFileContent(filePath.value as string)
 	},
 }

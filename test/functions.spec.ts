@@ -38,4 +38,10 @@ describe('functions', () => {
 		const expectedOutput = loadFileContent('./test/templates/functions/load-content.ps.txt')
 		expect(result).to.equal(expectedOutput)
 	})
+
+	it('should throw error with invalid load param', () => {
+		const template = loadFileContent('./test/templates/functions/load-broken.ps.txt')
+
+		expect(() => parseTemplate(template)).to.throw('Invalid file path')
+	})
 })

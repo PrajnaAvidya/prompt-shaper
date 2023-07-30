@@ -48,7 +48,7 @@ describe('slots', () => {
 	it('should not render slots that have no variable', () => {
 		const template = loadFileContent('./test/templates/slots/undefined.ps.txt')
 
-		const result = parseTemplate(template, {})
+		const result = parseTemplate(template)
 
 		expect(result).to.equal('Hello, {{undefinedVariable}}')
 	})
@@ -56,8 +56,16 @@ describe('slots', () => {
 	it('should throw an error with malformed slot', () => {
 		const template = loadFileContent('./test/templates/slots/malformed.ps.txt')
 
-		expect(() => parseTemplate(template, {})).to.throw(
+		expect(() => parseTemplate(template)).to.throw(
 			`Expected "(", ")", "*", "+", "-", "/", "\\"", "}}", [0-9], [a-zA-Z_0-9], or [a-zA-Z_] but "}" found.`,
 		)
+	})
+
+	it('should render raw text when the @ symbol is used', () => {
+		const template = loadFileContent('./test/templates/slots/raw-text.ps.txt')
+
+		const result = parseTemplate(template)
+
+		expect(result).to.equal('{{hello}}')
 	})
 })

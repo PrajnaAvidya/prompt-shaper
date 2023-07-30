@@ -1,0 +1,2 @@
+{singleLineStringVar="Hello World"}
+{{singleLineStringVar}}

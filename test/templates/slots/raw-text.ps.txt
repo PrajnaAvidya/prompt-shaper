@@ -1,0 +1,4 @@
+{rawText}
+{{hello}}
+{/rawText}
+{{@rawText}}

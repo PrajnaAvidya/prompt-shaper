@@ -3,6 +3,7 @@ TOP PRIORITY
 - hook into an openai library and auto-send the response & save that somewhere
 - build/infra stuff to make it usable without downloading repo
 -- and github workflow stuff (run tests, check types, lint, etc)
+- redo/order samples
 
 syntax/error checking
 - check for unpaired multilines (or just ignore them?)
@@ -23,7 +24,7 @@ ux stuff
 - I want something easily triggered from an IDE, so probably linked to a macro
 - by default it should just output to buffer so it can be redirected or saved or whatever
 - how do I have it get the result into the user's clipboard or whatever way to get it into their gpt client the fastest?
-- make it run a web server able to receive snippets of text from the browser or other sources (what would be the best way to hook into something like github to assign a file to a var?)
+- make it run a web server able to receive snippets of text from the browser or other sources (what would be the best way to hook into something like github to assign a repo file/snippet to a var?)
 
 nice to haves
 - escaped slashes to preserve comments

@@ -2,7 +2,6 @@ TOP PRIORITY
 - arithmetic between any combo of numbers/vars/functions
 - hook into an openai library and auto-send the response & save that somewhere
 - build/infra stuff to make it usable without downloading repo
--- and github workflow stuff (run tests, check types, lint, etc)
 - redo/order samples
 
 syntax/error checking
@@ -28,17 +27,15 @@ ux stuff
 
 nice to haves
 - escaped slashes to preserve comments
-- mutli line /* */ comments
+- multi line /* */ comments
 - file/env var based config
 - use variable or function as param
-- file variables with parameters -- more specifically, allow parameters to be passed when calling load()
 - partial file load (e.g. optional start/end line params for load. except that sucks for when files change, what if there's a symbol start/escape sequence type thing?)
 - tag for making gpt calls e.g. %gpt% (do they need an option to be deferred vs instant)
 - ability to save gpt call response to a var
 - placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable
 - operators could just be registered aliases for functions, so they could be extended/customized
 - python style named params
-- configurable tag char for people who don't like {}
 - better messages for syntax errors
-- option to show filename when rendering from load()
+- param to show filename with load()
 - option to allow absolute/parent paths for template file load (for security)

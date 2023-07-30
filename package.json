@@ -5,7 +5,7 @@
   "license": "MIT",
   "main": "dist/cli.js",
   "bin": {
-    "promptshape-parser": "./dist/cli.js"
+    "prompt-shape-parser": "./dist/cli.js"
   },
   "scripts": {
     "lint": "eslint . --ext .ts",

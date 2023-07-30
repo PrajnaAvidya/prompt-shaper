@@ -4,6 +4,14 @@ Working draft of my prompt construction scripting language
 ## Why
 I'm a programmer and like many I've seen great productivity gains due to the assistance of LLMs. the standard way of interacting with model through a chat interface works great for a lot of things, but I do a lot of what I call "non-linear" workflows and find myself spending a lot of time copying and pasting out of text files to construct the exact prompts I want to run. I wanted to add a UI to do some of these tasks in Prajna Chat (my custom GPT client) but decided that first I needed some kind of text/templating engine to run all this. Inspired by templating engines like Mustache/Handlebars I decided to build my own variant specifically designed for running GPT/LLM prompts. The idea is that you can just work out of a text editor/IDE and save a lot of time vs doing a bunch of copy/pasting of repeatedly used text fragments. Or you could build a UI around it and make it even more powerful.
 
+## Usage
+At this exact moment I'm wrapping up a few more things before I publish version 0.0.1 to npm, so you will need to download the repo and run `yarn parse` the CLI. Once things are slightly more stable you will be able to run it through npx or downloading the library globally through npm.
+
+### CLI Options
+CLI command format: `yarn parse [filePath] <options>`
+- Save output to a file: `-s <outputPath>` or `--save <outputPath>`
+- Show verbose debug messages: `-d` or `--debug`
+
 ## Examples
 See the `samples` directory and try running them with the parser.
 

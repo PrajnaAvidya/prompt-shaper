@@ -12,7 +12,7 @@ program
 	.description('Run the PromptShape parser CLI')
 	.argument('<filePath>', 'Input template file path')
 	.option('-d, --debug', 'Show debug messages')
-	.option('-s, --save <string>', 'Path to save output')
+	.option('-s <string>, --save <string>', 'Path to save output')
 	.action((inputPath, options) => {
 		// validate paths
 		inputPath = path.resolve(inputPath)

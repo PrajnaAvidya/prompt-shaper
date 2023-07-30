@@ -1,4 +1,7 @@
-TOP PRIORITY
+TOP PRIORITY (stuff to do before first npm release)
+- todos in cli
+- build+docs for use through npx+global install
+- docs for contributing/support
 - arithmetic between any combo of numbers/vars/functions
 - hook into an openai library and auto-send the response & save that somewhere
 - build/infra stuff to make it usable without downloading repo

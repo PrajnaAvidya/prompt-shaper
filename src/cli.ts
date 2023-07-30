@@ -13,11 +13,11 @@ program
 	.option('-d, --debug', 'Show debug messages')
 	.option('-s, --save <string>', 'Path to save output')
 	.action((input, options) => {
-		let template: string;
+		let template: string
 		if (options.isString) {
-			template = input;
+			template = input
 		} else {
-			template = loadFileContent(path.resolve(input));
+			template = loadFileContent(path.resolve(input))
 		}
 
 		if (options.save) options.save = path.resolve(options.save)

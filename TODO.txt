@@ -42,3 +42,4 @@ nice to haves
 - better messages for syntax errors
 - param to show filename with load()
 - option to allow absolute/parent paths for template file load (for security)
+- syntax highlighting for clis

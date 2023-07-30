@@ -15,20 +15,20 @@ export function parseTemplate(template: string, variables?: ParserVariables, opt
 
 	// remove comments using regex
 	const withoutComments = template.replace(/\/\/.*$/gm, '')
-	showDebug && console.log(`Parsing template:\n${withoutComments}`)
+	showDebug && console.log(`DEBUG: Parsing template:\n${withoutComments}`)
 
 	// match all outer tags
-	showDebug && console.log('Matching all outer tags')
+	showDebug && console.log('DEBUG: Matching all outer tags')
 	const parsedVariables = templateParser.parse(withoutComments)
 	if (options?.returnParserMatches === true) {
 		return parsedVariables.parsed
 	}
 	if (parsedVariables.parsed.length === 1 && parsedVariables.parsed[0].type === 'text') {
-		showDebug && console.log('No tags to parse, returning original template')
+		showDebug && console.log('DEBUG: No tags to parse, returning original template')
 		return template
 	}
 	for (const value of parsedVariables.parsed as ParserSection[]) {
-		showDebug && console.log('Match: ', value)
+		showDebug && console.log('DEBUG: Match: ', value)
 		switch (value.type) {
 			case ParserType.variable:
 				// check for conflicts
@@ -51,18 +51,18 @@ export function parseTemplate(template: string, variables?: ParserVariables, opt
 				throw new Error(`Unknown type:\n${value}`)
 		}
 	}
-	showDebug && console.log('Found single-line-variables:', variables)
+	showDebug && console.log('DEBUG: Found single-line-variables:', variables)
 
 	// parser returns the template with variable definitions removed
 	const withoutVariables = parsedVariables.text
-	showDebug && console.log(`Final template to render:\n${withoutVariables}`)
+	showDebug && console.log(`DEBUG: Final template to render:\n${withoutVariables}`)
 
 	// render slots from the bottom up
-	showDebug && console.log('Rendering slots')
+	showDebug && console.log('DEBUG: Rendering slots')
 	const slots = parsedVariables.parsed.filter((p: ParserSection) => p.type === ParserType.slot).reverse()
 	let currentTemplate = withoutVariables
 	for (const slot of slots as ParserSection[]) {
-		showDebug && console.log('Rendering slot:', slot)
+		showDebug && console.log('DEBUG: Rendering slot:', slot)
 
 		// look for inline function call
 		if (slot.variableName! in functions) {
@@ -75,7 +75,7 @@ export function parseTemplate(template: string, variables?: ParserVariables, opt
 		}
 
 		const variable = variables[slot.variableName!]
-		showDebug && console.log('Slot variable:', variable)
+		showDebug && console.log('DEBUG: Slot variable:', variable)
 		if (!variable) continue
 
 		// get contents of variable
@@ -90,7 +90,7 @@ export function parseTemplate(template: string, variables?: ParserVariables, opt
 					variableValue = variable.value
 				} else {
 					// recursively render string as template
-					showDebug && console.log(`Recursively rendering ${slot.variableName}`)
+					showDebug && console.log(`DEBUG: Recursively rendering ${slot.variableName}`)
 
 					// map slot/variable params
 					const slotVariables: ParserVariables = variable.params.reduce((obj: ParserVariables, item, index) => {
@@ -108,7 +108,7 @@ export function parseTemplate(template: string, variables?: ParserVariables, opt
 						}
 						return obj
 					}, {})
-					showDebug && console.log(`Slot variables for ${slot.variableName}:`, slotVariables)
+					showDebug && console.log(`DEBUG: Slot variables for ${slot.variableName}:`, slotVariables)
 					if (!recursionDepth) {
 						recursionDepth = 0
 					}

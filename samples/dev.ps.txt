@@ -6,9 +6,13 @@ I'm using PEG.js for the parser and here's the source code for the inline variab
 
 {{@load("src/template-parser.pegjs")}}
 ===
-Here's the current source code for the TS parser:
+Here's the source code for the TS parser:
 
 {{@load("src/parser.ts")}}
+===
+Here's the source code for the CLI:
+
+{{@load("src/cli.ts")}}
 ===
 Here's the functions.ts file
 
@@ -23,6 +27,7 @@ I would like some help developing it further.
 I'm currently writing tests for everything. Here they are:
 
 {{@load("test/arithmetic.spec.ts")}}
+{{@load("test/cli.spec.ts")}}
 {{@load("test/comments.spec.ts")}}
 {{@load("test/escaped-chars.spec.ts")}}
 {{@load("test/functions.spec.ts"}}

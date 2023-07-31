@@ -3,6 +3,7 @@ TOP PRIORITY (stuff to do before first npm release)
 -- automatic change/release logs
 - docs for contributing/support
 - arithmetic between any combo of numbers/vars/functions
+-- merge the code/logic for arithmetic and functions
 - hook into an openai library and auto-send the response & save that somewhere
 - build/infra stuff to make it usable without downloading repo
 - redo/order samples

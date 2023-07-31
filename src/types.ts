@@ -67,9 +67,9 @@ export interface ParserOptions {
 }
 
 export interface CLIOptions {
-	isString?: boolean;
-	debug?: boolean;
-	save?: string;
-	json?: string;
-	jsonFile?: string;
+	isString?: boolean
+	debug?: boolean
+	save?: string
+	json?: string
+	jsonFile?: string
 }

@@ -1,5 +1,6 @@
 TOP PRIORITY (stuff to do before first npm release)
 - build+docs for use through npx+global install
+-- automatic change/release logs
 - docs for contributing/support
 - arithmetic between any combo of numbers/vars/functions
 - hook into an openai library and auto-send the response & save that somewhere
@@ -12,7 +13,9 @@ syntax/error checking
 - check for optional params before required
 
 collection stuff? (low priority until I actually need them)
-- decide on best syntax
+- decide on best syntax. probably this:
+{collectionVar[] = 1, "two", 3.14, anotherVarName, varNameWithParams("hello"), functionName("test.txt",1)}
+I played with multiline collection var tags and don't like it, better off using json vars if you want to get fancy
 - basic iterating
 - validate the names of collection vars
 - make collection variable name accessible in the loop

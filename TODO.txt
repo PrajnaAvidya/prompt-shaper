@@ -39,6 +39,6 @@ nice to haves
 - operators could just be registered aliases for functions, so they could be extended/customized
 - python style named params
 - better messages for syntax errors
-- param to show filename with load()
+- param to show filename with load() (ie the resuling variable/value contains the file name and surrounding blocks to space it)
 - option to allow absolute/parent paths for template file load (for security)
-- syntax highlighting for clis
+- syntax highlighting for .ps.txt in clis

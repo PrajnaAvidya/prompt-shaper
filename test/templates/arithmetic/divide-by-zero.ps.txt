@@ -1,0 +1,1 @@
+The quotient of {{num}} divided by 0 is {{num/0}}

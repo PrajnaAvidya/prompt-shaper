@@ -12,6 +12,9 @@ export const functions: Record<string, PromptShapeFunction> = {
 		return (a.value as number) * (b.value as number)
 	},
 	divide: (a: ParserParam, b: ParserParam): number => {
+		if (b.value as number == 0) {
+			throw new Error('Division by zero')
+		}
 		return (a.value as number) / (b.value as number)
 	},
 	load: (filePath: ParserParam): string => {

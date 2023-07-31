@@ -31,6 +31,12 @@ describe('functions', () => {
 		expect(result).to.equal('The quotient of 10 and 2 is 5')
 	})
 
+	it('should throw an error when dividing by zero', () => {
+		const template = loadFileContent('./test/templates/functions/divide-by-zero.ps.txt')
+
+		expect(() => parseTemplate(template)).to.throw('Division by zero')
+	})
+
 	it('should correctly evaluate load function', () => {
 		const template = loadFileContent('./test/templates/functions/load.ps.txt')
 		const result = parseTemplate(template)

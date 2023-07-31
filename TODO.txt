@@ -7,6 +7,9 @@ TOP PRIORITY (stuff to do before first npm release)
 - build/infra stuff to make it usable without downloading repo
 - redo/order samples
 
+tests
+- whitespace
+
 syntax/error checking
 - check for unpaired multilines (or just ignore them?)
 - check for incorrect nesting of multilines eg {a} {b} {/a} {/b}

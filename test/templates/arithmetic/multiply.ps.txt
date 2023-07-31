@@ -1,1 +1,1 @@
-The product of {{num1}} and {{num2}} is {{num1*num2}}
+The product of {{num}} and 4 is {{num*4}}

@@ -37,6 +37,6 @@ I'm currently writing tests for everything. Here they are:
 {{@load("test/slots.spec.ts"}}
 {{@load("test/utils.spec.ts"}}
 
-Am I missing based on what I have vs what's in the readme and parsers, am I missing any important tests?
+
 {/currentQuestion}
 {{currentQuestion}}

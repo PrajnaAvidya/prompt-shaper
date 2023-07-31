@@ -148,6 +148,9 @@ export function parseTemplate(template: string, variables?: ParserVariables, opt
 					variableValue *= slot.operation.value
 					break
 				case ParserOperator.Divide:
+					if (slot.operation.value === 0) {
+						throw new Error('Division by zero')
+					}
 					variableValue /= slot.operation.value
 					break
 			}

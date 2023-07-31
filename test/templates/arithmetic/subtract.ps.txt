@@ -1,1 +1,1 @@
-The difference between {{num1}} and {{num2}} is {{num1-num2}}
+The difference between {{num}} and 6 is {{num-6}}

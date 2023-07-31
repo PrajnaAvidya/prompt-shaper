@@ -5,7 +5,7 @@ import * as path from 'path'
 import { program } from 'commander'
 import { loadFileContent, transformJsonToVariables } from './utils'
 import { parseTemplate } from './parser'
-import { ParserVariables } from './types'
+import { CLIOptions, ParserVariables } from './types'
 
 program
 	.description('Run the PromptShape parser CLI')
@@ -15,7 +15,7 @@ program
 	.option('-s, --save <string>', 'Path to save output')
 	.option('-j, --json <string>', 'Input JSON variables as string')
 	.option('-f, --json-file <string>', 'Input JSON variables as file path')
-	.action((input, options) => {
+	.action((input: string, options: CLIOptions) => {
 		// handle input type
 		let template: string
 		if (options.isString) {

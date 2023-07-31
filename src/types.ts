@@ -65,3 +65,11 @@ export interface ParserOptions {
 	returnParserMatches?: boolean // return array of parser matches instead of rendered template
 	showDebugMessages?: boolean // show verbose debug stuff
 }
+
+export interface CLIOptions {
+	isString?: boolean;
+	debug?: boolean;
+	save?: string;
+	json?: string;
+	jsonFile?: string;
+}

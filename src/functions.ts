@@ -1,7 +1,7 @@
-import { ParserParam, PromptShapeFunction } from './types'
+import { ParserParam, PromptShaperFunction } from './types'
 import { loadFileContent } from './utils'
 
-export const functions: Record<string, PromptShapeFunction> = {
+export const functions: Record<string, PromptShaperFunction> = {
 	add: (a: ParserParam, b: ParserParam): number => {
 		return (a.value as number) + (b.value as number)
 	},
@@ -26,7 +26,7 @@ export const functions: Record<string, PromptShapeFunction> = {
 }
 
 // to allow people to add their own functions
-export const registerFunction = (name: string, func: PromptShapeFunction): void => {
+export const registerFunction = (name: string, func: PromptShaperFunction): void => {
 	if (functions[name]) {
 		throw new Error(`Function ${name} is already registered.`)
 	}

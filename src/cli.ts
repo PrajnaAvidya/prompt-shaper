@@ -8,7 +8,7 @@ import { parseTemplate } from './parser'
 import { CLIOptions, ParserVariables } from './types'
 
 program
-	.description('Run the PromptShape parser CLI')
+	.description('Run the PromptShaper parser CLI')
 	.argument('<input>', 'Input template file path')
 	.option('-i, --is-string', 'Indicate that the input is a string, not a file path')
 	.option('-d, --debug', 'Show debug messages')

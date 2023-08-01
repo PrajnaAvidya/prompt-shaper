@@ -1,11 +1,11 @@
 {
-  "name": "prompt-shape",
+  "name": "prompt-shaper",
   "description": "prompt scripting language",
   "author": "Rafiq <r@neat.af>",
   "license": "MIT",
   "main": "dist/cli.js",
   "bin": {
-    "prompt-shape-parser": "./dist/cli.js"
+    "prompt-shaper-parser": "./dist/cli.js"
   },
   "scripts": {
     "lint": "eslint . --ext .ts",

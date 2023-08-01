@@ -110,7 +110,7 @@ param
 variableName
   = first:[a-zA-Z_] rest:$[a-zA-Z_0-9]* { return first + rest }
 
-// matches anything that isn't a PromptShape tag
+// matches anything that isn't a PromptShaper tag
 text
   = escapedChar:escapedChar { return { type: 'text', content: escapedChar } }
   / chars:$[^{}\\]+ { return { type: 'text', content: chars } }

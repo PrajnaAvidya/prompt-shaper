@@ -59,7 +59,7 @@ export interface ParserVariables {
 	}
 }
 
-export type PromptShapeFunction = (...args: ParserParam[]) => string | number
+export type PromptShaperFunction = (...args: ParserParam[]) => string | number
 
 export interface ParserOptions {
 	returnParserMatches?: boolean // return array of parser matches instead of rendered template

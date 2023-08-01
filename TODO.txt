@@ -1,14 +1,16 @@
 TOP PRIORITY (stuff to do before first npm release)
 - build+docs for use through npx+global install
 -- automatic change/release logs
-- docs for contributing/support
+- docs for contributing/code of conduct/support
 - arithmetic between any combo of numbers/vars/functions
 -- merge the code/logic for arithmetic and functions
 - hook into an openai library and auto-send the response & save that somewhere
 - build/infra stuff to make it usable without downloading repo
+- reporting the column/line/offset of syntax errors
 
 tests
 - whitespace
+- recursion limit
 
 syntax/error checking
 - check for unpaired multilines (or just ignore them?)
@@ -49,3 +51,5 @@ nice to haves
 - option to allow absolute/parent paths for template file load (for security)
 - syntax highlighting for .ps.txt in clis
 - params for inline variables e.g. {rectArea(length, width)=multiply(length, width)}
+- parse multiple files or a directory
+- option to trim the leading \n from multiline vars

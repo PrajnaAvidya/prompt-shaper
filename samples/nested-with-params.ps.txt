@@ -1,6 +1,0 @@
-{nested1WithParams(a, bb="defaultBB")}
-a, bb
-{{a}}, {{bb}}
-{/nested1WithParams}
-
-{{nested1WithParams(1)}}

@@ -1,0 +1,2 @@
+{sum=add(2,2)}
+The sum of 2 and 2 is {{sum}}.

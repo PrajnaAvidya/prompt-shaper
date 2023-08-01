@@ -1,1 +1,0 @@
-This file just contains text but counts as a template. If loaded in a larger workflow it will become a variable called simpleTemplate.

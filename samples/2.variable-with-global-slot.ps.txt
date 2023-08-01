@@ -1,0 +1,5 @@
+{name = "John"}
+{greetingWithSlot}
+Hello, {{name}}!
+{/greetingWithSlot}
+{{greetingWithSlot}}

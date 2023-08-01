@@ -1,0 +1,5 @@
+{chapterTitle(chapterIndex)}
+Chapter {{chapterIndex+1}}
+{/chapterTitle}
+{{chapterTitle(chapterIndex=0)}} // outputs "Chapter 1"
+{{chapterTitle(chapterIndex="0")}} // outputs "Chapter 0"

@@ -1,0 +1,4 @@
+{greetingWithParameters(name)}
+Hello, {{name}}!
+{/greetingWithParameters}
+{{greetingWithParameters(name="John")}}

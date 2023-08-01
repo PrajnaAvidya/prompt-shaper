@@ -1,0 +1,5 @@
+{multilineVariable}
+This is a multiline variable.
+It spans multiple lines.
+{/multilineVariable}
+{{multilineVariable}}

@@ -1,9 +1,0 @@
-{license = "LICENSE.txt"}
-{spec = "spec.md"}
-
-Here is the license for PromptShape:
-{{license}}
-
-// the @ operator renders a slot as raw text (does not execute contents)
-Here's the spec for PromptShape:
-{{@spec}}

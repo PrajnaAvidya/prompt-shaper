@@ -57,7 +57,7 @@ This variable contains a slot which is defined in the outer scope: {{stringVaria
 ## Parameters and Functions
 A multiline variable can also be specified with parameters (which are required if no default is provided) which can be referenced using slots. Parameters are strings or numbers
 ```
-{variableWithParameters(requiredParameter, optionaParameter="hello")}
+{variableWithParameters(requiredParameter, optionalParameter="hello")}
 {{requiredParameter}}
 {{optionalParameter}}
 {/variableWithParameters}

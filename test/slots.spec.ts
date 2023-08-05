@@ -4,13 +4,13 @@ import { ParserVariables, ValueType } from '../src/types'
 import { loadFileContent } from '../src/utils'
 
 describe('slots', () => {
-	it('should correctly render a slot with string variable', () => {
+	it.only('should correctly render a slot with string variable', () => {
 		const template = loadFileContent('./test/templates/slots/string.ps.txt')
 		const variables: ParserVariables = {
 			name: { name: 'name', type: ValueType.string, value: 'World', params: [] },
 		}
 
-		const result = parseTemplate(template, variables)
+		const result = parseTemplate(template, variables, {showDebugMessages: true})
 
 		expect(result).to.equal('Hello, World!')
 	})

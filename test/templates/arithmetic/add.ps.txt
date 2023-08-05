@@ -1,1 +1,5 @@
-The sum of {{num}} and 7 is {{num+7}}
+The sum of {{num1}} and 7 is {{num1+7}}
+The sum of 5 and {{num2}} is {{5+num2}}
+The sum of {{num3}} and {{num4}} is {{num3+num4}}
+The sum of 1 and 2 is {{1+2}}
+// TODO functions

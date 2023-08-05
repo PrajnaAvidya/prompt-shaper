@@ -53,7 +53,7 @@ slot
 
 expression
   = head:additive tail:(_ operator:addSubOperator _ additive:additive)*
-    { return tail.reduce((result, element) => { return { operator: element[1], operands: [result, element[3]] } }, head) }
+    { return tail.reduce((result, element) => { return { type:'operation', value: { operator: element[1], operands: [result, element[3]] } } }, head) }
 
 additive
   = head:multiplicative tail:(_ operator:mulDivOperator _ multiplicative:multiplicative)*
@@ -66,8 +66,9 @@ multiplicative
 primary
   = "(" _ expression:expression _ ")" { return expression }
   / functionCall
-  / variableName
+  / variableObject
   / number
+  / string
 
 addSubOperator
   = "+" / "-"
@@ -120,6 +121,8 @@ param
 // variable names must start with a letter and contain letters, numbers, underscores
 variableName
   = first:[a-zA-Z_] rest:$[a-zA-Z_0-9]* { return first + rest }
+variableObject
+  = first:[a-zA-Z_] rest:$[a-zA-Z_0-9]* { return { type: 'variable', value: first + rest } }
 
 // matches anything that isn't a PromptShaper tag
 text

@@ -1,0 +1,5 @@
+{person(name, age)}
+Name: {{name}}
+Age: {{age}}
+{/person}
+{{person(name="John", age=30)}}

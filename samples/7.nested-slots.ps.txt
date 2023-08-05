@@ -1,0 +1,6 @@
+{greeting = "Hello"}
+{name = "John"}
+{nestedGreeting}
+{{greeting}}, {{name}}!
+{/nestedGreeting}
+{{nestedGreeting}}

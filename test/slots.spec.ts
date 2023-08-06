@@ -3,20 +3,36 @@ import { parseTemplate } from '../src/parser'
 import { ParserVariables, ValueType } from '../src/types'
 import { loadFileContent } from '../src/utils'
 
-describe('slots', () => {
-	it.only('should correctly render a slot with string variable', () => {
-		const template = loadFileContent('./test/templates/slots/string.ps.txt')
+describe.only('slots', () => {
+	it('should correctly render a slot with raw string', () => {
+		const template = loadFileContent('./test/templates/slots/raw-string.ps.txt')
+
+		const result = parseTemplate(template)
+
+		expect(result).to.equal('This is a raw string: Hello')
+	})
+
+	it('should correctly render a slot with raw number', () => {
+		const template = loadFileContent('./test/templates/slots/raw-number.ps.txt')
+
+		const result = parseTemplate(template)
+
+		expect(result).to.equal('This is a raw number: 42')
+	})
+
+	it('should correctly render a slot with string variable', () => {
+		const template = loadFileContent('./test/templates/slots/string-variable.ps.txt')
 		const variables: ParserVariables = {
 			name: { name: 'name', type: ValueType.string, value: 'World', params: [] },
 		}
 
-		const result = parseTemplate(template, variables, {showDebugMessages: true})
+		const result = parseTemplate(template, variables)
 
 		expect(result).to.equal('Hello, World!')
 	})
 
 	it('should correctly render a slot with number variable', () => {
-		const template = loadFileContent('./test/templates/slots/number.ps.txt')
+		const template = loadFileContent('./test/templates/slots/number-variable.ps.txt')
 		const variables: ParserVariables = {
 			age: { name: 'age', type: ValueType.number, value: 25, params: [] },
 		}
@@ -57,7 +73,7 @@ describe('slots', () => {
 		const template = loadFileContent('./test/templates/slots/malformed.ps.txt')
 
 		expect(() => parseTemplate(template)).to.throw(
-			`Expected "(", ")", "*", "+", "-", "/", "\\"", "}}", [0-9], [a-zA-Z_0-9], or [a-zA-Z_] but "}" found.`,
+			`Expected "(", "*", "+", "-", "/", "^", "}}", or [a-zA-Z_0-9] but "}" found.`,
 		)
 	})
 

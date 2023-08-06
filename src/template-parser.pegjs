@@ -1,8 +1,16 @@
 {
     // build text from parsed parts
     function buildText(parts) {
+        let offset = 0
         return parts.map(part => {
-            if (part.type === 'text' || part.type === 'slot') {
+            if (part.type === 'text') {
+                offset += part.content.length
+                return part.content
+            } else if (part.type === 'slot') {
+                // adjust the slot location based on the current offset
+                part.location.start.offset = offset
+                part.location.end.offset = part.location.start.offset + part.content.length
+                offset += part.content.length
                 return part.content
             } else {
                 return ''

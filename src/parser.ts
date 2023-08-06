@@ -1,15 +1,7 @@
 import peg from 'pegjs'
 
 import { loadFileContent, replaceStringAtLocation } from './utils'
-import {
-	ExpressionType,
-	ParserOperator,
-	ParserOptions,
-	ParserSection,
-	ParserType,
-	ParserVariables,
-	ValueType,
-} from './types'
+import { ExpressionType, ParserOptions, ParserSection, ParserType, ParserVariables, ValueType } from './types'
 import { functions } from './functions'
 
 const templateParser = peg.generate(loadFileContent('src/template-parser.pegjs'))
@@ -177,16 +169,30 @@ export const parseTemplate = (template: string, variables?: ParserVariables, opt
 }
 
 function renderSlot(slot: ParserSection, variables: ParserVariables): string | undefined {
-	// TODO single function
-	// TODO single number
-	// TODO complex expression
+	// TODO direct function call
+	// TODO operation (recursive/AST)
 
 	switch (slot.expression!.type) {
+		case ExpressionType.string:
+		case ExpressionType.number:
+			return slot.expression!.value as string
 		case ExpressionType.variable:
 			const variable = variables[slot.expression!.value as string]
-			return variable ? variable.value as string : undefined
-			break
-	}
+			if (!variable) {
+				return undefined
+			}
 
-	return ''
+			if (variable.type === ValueType.function) {
+				// process function
+				const func = functions[variable.value]
+				if (!func) {
+					throw new Error(`Unknown function: ${variable.value}`)
+				}
+				return func(...variable.params!) as string
+			} else {
+				return variable.value as string
+			}
+		default:
+			return undefined
+	}
 }

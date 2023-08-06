@@ -1,10 +1,10 @@
-import peg from 'pegjs'
+import peggy from 'peggy'
 
 import { loadFileContent, replaceStringAtLocation } from './utils'
 import { ExpressionType, Operand, Operation, ParserParam, ParserSection, ParserType, ParserVariables, ValueType } from './types'
 import { functions } from './functions'
 
-const templateParser = peg.generate(loadFileContent('src/template-parser.pegjs'))
+const templateParser = peggy.generate(loadFileContent('src/template-parser.pegjs'))
 const maxRecursionDepth = 5
 
 interface ParserOptions {

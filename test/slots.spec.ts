@@ -72,7 +72,7 @@ describe('slots', () => {
 	it('should throw an error with malformed slot', () => {
 		const template = loadFileContent('./test/templates/slots/malformed.ps.txt')
 
-		expect(() => parseTemplate(template)).to.throw(`Expected "(", "*", "+", "-", "/", "^", "}}", or [a-zA-Z_0-9] but "}" found.`)
+		expect(() => parseTemplate(template)).to.throw(`Expected "(", "*", "+", "-", "/", "^", "}}", [a-zA-Z_0-9], or whitespace but "}" found.`)
 	})
 
 	it('should render raw text when the @ symbol is used', () => {

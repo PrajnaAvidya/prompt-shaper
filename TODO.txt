@@ -1,5 +1,4 @@
 TOP PRIORITY (stuff to do before first npm release)
-- migrate from pegjs to peggy https://github.com/peggyjs/peggy
 - build+docs for use through npx+global install
 -- automatic change/release logs
 - docs for contributing/code of conduct/support

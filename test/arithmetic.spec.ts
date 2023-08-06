@@ -3,61 +3,6 @@ import { parseTemplate } from '../src/parser'
 import { ParserVariables, ValueType } from '../src/types'
 import { loadFileContent } from '../src/utils'
 
-describe.skip('arithmetic (old)', () => {
-	it('should correctly add two numbers', () => {
-		const template = loadFileContent('./test/templates/arithmetic/add.ps.txt')
-		const variables: ParserVariables = {
-			num: { name: 'num', type: ValueType.number, value: 5, params: [] },
-		}
-
-		const result = parseTemplate(template, variables)
-
-		expect(result).to.equal('The sum of 5 and 7 is 12')
-	})
-
-	it('should correctly subtract two numbers', () => {
-		const template = loadFileContent('./test/templates/arithmetic/subtract.ps.txt')
-		const variables: ParserVariables = {
-			num: { name: 'num', type: ValueType.number, value: 10, params: [] },
-		}
-
-		const result = parseTemplate(template, variables)
-
-		expect(result).to.equal('The difference between 10 and 6 is 4')
-	})
-
-	it('should correctly multiply two numbers', () => {
-		const template = loadFileContent('./test/templates/arithmetic/multiply.ps.txt')
-		const variables: ParserVariables = {
-			num: { name: 'num', type: ValueType.number, value: 3, params: [] },
-		}
-
-		const result = parseTemplate(template, variables)
-
-		expect(result).to.equal('The product of 3 and 4 is 12')
-	})
-
-	it('should correctly divide two numbers', () => {
-		const template = loadFileContent('./test/templates/arithmetic/divide.ps.txt')
-		const variables: ParserVariables = {
-			num: { name: 'num', type: ValueType.number, value: 20, params: [] },
-		}
-
-		const result = parseTemplate(template, variables)
-
-		expect(result).to.equal('The quotient of 20 divided by 5 is 4')
-	})
-
-	it('should throw an error when dividing by zero', () => {
-		const template = loadFileContent('./test/templates/arithmetic/divide-by-zero.ps.txt')
-		const variables: ParserVariables = {
-			num: { name: 'num', type: ValueType.number, value: 20, params: [] },
-		}
-
-		expect(() => parseTemplate(template, variables)).to.throw('Division by zero')
-	})
-})
-
 describe('arithmetic', () => {
 	const variables: ParserVariables = {
 		num1: { name: 'num1', type: ValueType.number, value: 5, params: [] },
@@ -133,6 +78,19 @@ describe('arithmetic', () => {
 		expect(result).to.equal(`0.5\n1`)
 	})
 
-	// TODO multiple operands eg 1+1+1
-	// TODO complex arithmetic/nested parentheses
+	it('should work with multiple operands', () => {
+		const template = loadFileContent('./test/templates/arithmetic/multiple-operands.ps.txt')
+
+		const result = parseTemplate(template, variables)
+
+		expect(result).to.equal(`3\n4`)
+	})
+
+	it('should handle complex operations', () => {
+		const template = loadFileContent('./test/templates/arithmetic/complex.ps.txt')
+
+		const result = parseTemplate(template, variables)
+
+		expect(result).to.equal(`2`)
+	})
 })

@@ -5,7 +5,15 @@ import * as path from 'path'
 import { program } from 'commander'
 import { loadFileContent, transformJsonToVariables } from './utils'
 import { parseTemplate } from './parser'
-import { CLIOptions, ParserVariables } from './types'
+import { ParserVariables } from './types'
+
+interface CLIOptions {
+	isString?: boolean
+	debug?: boolean
+	save?: string
+	json?: string
+	jsonFile?: string
+}
 
 program
 	.description('Run the PromptShaper parser')

@@ -1,11 +1,16 @@
 import peg from 'pegjs'
 
 import { loadFileContent, replaceStringAtLocation } from './utils'
-import { ExpressionType, Operand, Operation, ParserOptions, ParserParam, ParserSection, ParserType, ParserVariables, ValueType } from './types'
+import { ExpressionType, Operand, Operation, ParserParam, ParserSection, ParserType, ParserVariables, ValueType } from './types'
 import { functions } from './functions'
 
 const templateParser = peg.generate(loadFileContent('src/template-parser.pegjs'))
 const maxRecursionDepth = 5
+
+interface ParserOptions {
+	returnParserMatches?: boolean // return array of parser matches instead of rendered template
+	showDebugMessages?: boolean // show verbose debug stuff
+}
 
 export const parseTemplate = (template: string, variables?: ParserVariables, options?: ParserOptions, recursionDepth?: number): string => {
 	if (typeof template !== 'string' || template.trim() === '' || (recursionDepth && recursionDepth > maxRecursionDepth)) return template

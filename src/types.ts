@@ -33,10 +33,8 @@ export interface ParserSection {
 
 type Operator = '+' | '-' | '*' | '/' | '^'
 
-type OperandType = 'number' | 'function' | 'variable' | 'operation'
-
 export interface Operand {
-	type: OperandType
+	type: ExpressionType
 	value: number | string | Operation
 	params?: ParserParam[]
 }
@@ -49,15 +47,15 @@ export enum ExpressionType {
 	operation = 'operation',
 }
 
-export interface Operation {
-	operator: Operator
-	operands: Operand[]
-}
-
 export interface Expression {
 	type: ExpressionType
 	value: number | string | Operation
 	params?: ParserParam[]
+}
+
+export interface Operation {
+	operator: Operator
+	operands: Operand[]
 }
 
 export interface TextLocation {
@@ -73,19 +71,4 @@ export interface ParserVariables {
 		value: string | number
 		params: ParserParam[]
 	}
-}
-
-export type PromptShaperFunction = (...args: ParserParam[]) => string | number
-
-export interface ParserOptions {
-	returnParserMatches?: boolean // return array of parser matches instead of rendered template
-	showDebugMessages?: boolean // show verbose debug stuff
-}
-
-export interface CLIOptions {
-	isString?: boolean
-	debug?: boolean
-	save?: string
-	json?: string
-	jsonFile?: string
 }

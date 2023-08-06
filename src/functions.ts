@@ -1,5 +1,7 @@
-import { ParserParam, PromptShaperFunction } from './types'
+import { ParserParam } from './types'
 import { loadFileContent } from './utils'
+
+type PromptShaperFunction = (...args: ParserParam[]) => string | number
 
 export const functions: Record<string, PromptShaperFunction> = {
 	add: (a: ParserParam, b: ParserParam): number => {

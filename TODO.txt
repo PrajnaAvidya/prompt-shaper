@@ -6,7 +6,6 @@ TOP PRIORITY (stuff to do before first npm release)
 - hook into an openai library and auto-send the response & save that somewhere
 - build/infra stuff to make it usable without downloading repo
 - reporting the column/line/offset of syntax errors
-- clean up/merge types
 
 tests
 - whitespace

@@ -1,13 +1,13 @@
 import peg from 'pegjs'
 
 import { loadFileContent, replaceStringAtLocation } from './utils'
-import { ParserOperator, ParserOptions, ParserSection, ParserType, ParserVariables, ValueType } from './types'
+import { ExpressionType, Operand, Operation, ParserOptions, ParserParam, ParserSection, ParserType, ParserVariables, ValueType } from './types'
 import { functions } from './functions'
 
 const templateParser = peg.generate(loadFileContent('src/template-parser.pegjs'))
 const maxRecursionDepth = 5
 
-export function parseTemplate(template: string, variables?: ParserVariables, options?: ParserOptions, recursionDepth?: number): string {
+export const parseTemplate = (template: string, variables?: ParserVariables, options?: ParserOptions, recursionDepth?: number): string => {
 	if (typeof template !== 'string' || template.trim() === '' || (recursionDepth && recursionDepth > maxRecursionDepth)) return template
 
 	if (!variables) variables = {}
@@ -64,102 +64,143 @@ export function parseTemplate(template: string, variables?: ParserVariables, opt
 	for (const slot of slots as ParserSection[]) {
 		showDebug && console.log('DEBUG: Rendering slot:', slot)
 
-		// look for inline function call
-		if (slot.variableName! in functions) {
-			variables[slot.variableName!] = {
-				name: slot.variableName!,
-				type: ValueType.function,
-				value: slot.variableName!,
-				params: slot.params || [],
-			}
-		}
-
-		const variable = variables[slot.variableName!]
-		showDebug && console.log('DEBUG: Slot variable:', variable)
-		if (!variable) continue
-
-		// get contents of variable
-		let variableValue: string | number
-		switch (variable.type) {
-			case ValueType.number:
-				variableValue = variable.value
-				break
-			case ValueType.string:
-				if (slot.raw) {
-					// raw strings don't get parsed
-					variableValue = variable.value
-				} else {
-					// recursively render string as template
-					showDebug && console.log(`DEBUG: Recursively rendering ${slot.variableName}`)
-
-					// map slot/variable params
-					const slotVariables: ParserVariables = variable.params.reduce((obj: ParserVariables, item, index) => {
-						// find matching slot param/value
-						const slotParam = slot.params && index in slot.params ? slot.params[index] : null
-						if (!slotParam && item.required) {
-							throw new Error(`Required param for ${slot.variableName} not found: ${item.variableName}`)
-						}
-
-						obj[item.variableName!] = {
-							name: item.variableName!,
-							type: slotParam?.value === 'number' ? ValueType.number : ValueType.string,
-							value: slotParam ? slotParam.value : item.value,
-							params: [], // this will be used in the future when a function can be passed as a param
-						}
-						return obj
-					}, {})
-					showDebug && console.log(`DEBUG: Slot variables for ${slot.variableName}:`, slotVariables)
-					if (!recursionDepth) {
-						recursionDepth = 0
-					}
-					recursionDepth++
-					variableValue = parseTemplate(
-						variable.value as string,
-						{ ...variables, ...slotVariables },
-						{ ...options, returnParserMatches: options?.returnParserMatches || false },
-						recursionDepth,
-					) as string
-				}
-				break
-			case ValueType.function: {
-				const func = functions[variable.value]
-				if (!func) {
-					throw new Error(`Unknown function: ${variable.value}`)
-				}
-				variableValue = func(...variable.params!)
-				break
-			}
-			case ValueType.unknown:
-				throw new Error('Variable should never be unknown type (only params should be unknown)')
-			default:
-				throw new Error(`Unknown variable type: ${variable.type}`)
-		}
-
-		// perform arithmetic if necessary
-		if (slot.operation && typeof variableValue === 'number') {
-			switch (slot.operation.operator) {
-				case ParserOperator.Add:
-					variableValue += slot.operation.value
-					break
-				case ParserOperator.Subtract:
-					variableValue -= slot.operation.value
-					break
-				case ParserOperator.Multiply:
-					variableValue *= slot.operation.value
-					break
-				case ParserOperator.Divide:
-					if (slot.operation.value === 0) {
-						throw new Error('Division by zero')
-					}
-					variableValue /= slot.operation.value
-					break
-			}
-		}
-
 		// replace slot with variable
-		currentTemplate = replaceStringAtLocation(currentTemplate, variableValue, slot.location!.start.offset, slot.location!.end.offset)
+		const slotValue = renderSlot(slot, variables, recursionDepth || 0)
+		if (slotValue) {
+			currentTemplate = replaceStringAtLocation(currentTemplate, slotValue, slot.location!.start.offset, slot.location!.end.offset)
+		}
 	}
 
 	// remove excess whitespace
 	return currentTemplate.replace(/\n{3,}/g, '\n\n').trim()
+}
+
+// traverse an operation recursively as a syntax tree
+function evaluateOperation(operation: Operation | Operand, variables: ParserVariables): number {
+	if ('type' in operation) {
+		switch (operation.type) {
+			case 'number':
+				return operation.value as number
+			case 'variable':
+				return evaluateVariable(operation.value as string, variables, []) as number
+			case 'function':
+				return evaluateFunction(operation.value as string, operation.params || []) as number
+			case 'operation':
+				// this is when the operand is an operation inside parenthesis
+				return evaluateOperation(operation.value as Operation, variables)
+		}
+	}
+
+	if ('operator' in operation) {
+		let result = evaluateOperation(operation.operands[0], variables)
+
+		switch (operation.operator) {
+			case '+':
+				result += evaluateOperation(operation.operands[1], variables)
+				break
+			case '-':
+				result -= evaluateOperation(operation.operands[1], variables)
+				break
+			case '*':
+				result *= evaluateOperation(operation.operands[1], variables)
+				break
+			case '/': {
+				const operand2 = evaluateOperation(operation.operands[1], variables)
+				if (operand2 === 0) {
+					throw new Error('Division by zero')
+				}
+				result /= operand2
+				break
+			}
+			case '^':
+				result = Math.pow(result, evaluateOperation(operation.operands[1], variables))
+				break
+		}
+
+		return result
+	}
+
+	// we should never reach this
+	throw new Error('Invalid operation')
+}
+
+// evaluate the contents of a variable (which may contain a static value or a function evaluation)
+function evaluateVariable(
+	variableName: string,
+	variables: ParserVariables,
+	params: ParserParam[],
+	raw: boolean = false,
+	recursionDepth = 0,
+): string | number | undefined {
+	const variable = variables[variableName]
+	if (!variable) {
+		return undefined
+	}
+
+	if (variable.type === ValueType.function) {
+		return evaluateFunction(variable.value as string, variable.params!)
+	} else if (variable.type === ValueType.number) {
+		return variable.value
+	} else if (variable.type === ValueType.string) {
+		if (raw) {
+			return variable.value
+		}
+
+		// map slot/variable params
+		const slotVariables: ParserVariables = variable.params.reduce((obj: ParserVariables, item, index) => {
+			// find matching slot param/value
+			const slotParam = params && index in params ? params[index] : null
+			if (!slotParam && item.required) {
+				throw new Error(`Required param for ${variableName} not found: ${item.variableName}`)
+			}
+
+			obj[item.variableName!] = {
+				name: item.variableName!,
+				type: slotParam?.value === 'number' ? ValueType.number : ValueType.string,
+				value: slotParam ? slotParam.value : item.value,
+				params: [], // this will be used in the future when a function can be passed as a param
+			}
+			return obj
+		}, {})
+
+		recursionDepth++
+
+		return parseTemplate(variable.value as string, { ...variables, ...slotVariables }, {}, recursionDepth) as string
+	}
+}
+
+function evaluateFunction(functionName: string, params: ParserParam[]): string | number {
+	const func = functions[functionName]
+	if (!func) {
+		throw new Error(`Unknown function: ${functionName}`)
+	}
+	return func(...params)
+}
+
+// render the contents of a slot to a string
+function renderSlot(slot: ParserSection, variables: ParserVariables, recursionDepth: number): string | undefined {
+	switch (slot.expression!.type) {
+		case ExpressionType.number:
+		case ExpressionType.string:
+			return slot.expression!.value as string
+		case ExpressionType.variable:
+		case ExpressionType.function:
+			if ((slot.expression!.value as string) in functions) {
+				return evaluateFunction(slot.expression!.value as string, slot.expression!.params!) as string
+			} else if ((slot.expression!.value as string) in variables) {
+				return evaluateVariable(
+					slot.expression!.value as string,
+					variables,
+					slot.expression!.params || [],
+					slot.raw || false,
+					recursionDepth,
+				) as string
+			} else {
+				return undefined
+			}
+		case ExpressionType.operation:
+			return evaluateOperation(slot.expression!.value as Operation, variables).toString()
+		default:
+			return undefined
+	}
 }

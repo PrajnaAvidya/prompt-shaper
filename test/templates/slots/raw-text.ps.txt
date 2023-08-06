@@ -1,4 +1,1 @@
-{rawText}
-{{hello}}
-{/rawText}
 {{@rawText}}

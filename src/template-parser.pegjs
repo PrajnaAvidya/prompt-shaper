@@ -7,16 +7,11 @@
                 offset += part.content.length
                 return part.content
             } else if (part.type === 'slot') {
-                // re-construct the slot string with its parameters and optional raw marker (@)
-                const params = part.params ? "(" + part.params.map(p => p.type === 'string' ? `"${p.value}"` : p.value).join(', ') + ")" : ""
-                const raw = part.raw ? "@" : ""
-                const operation = part.operation ? `${part.operation.operator}${part.operation.value}` : ""
-                const slot = "{{" + raw + part.variableName + params + operation + "}}"
                 // adjust the slot location based on the current offset
                 part.location.start.offset = offset
-                part.location.end.offset = part.location.start.offset + slot.length
-                offset += slot.length
-                return slot
+                part.location.end.offset = part.location.start.offset + part.content.length
+                offset += part.content.length
+                return part.content
             } else {
                 return ''
             }
@@ -28,14 +23,14 @@ start
   = parts:part+ { return { parsed: parts, text: buildText(parts) } }
 
 part
-  = variableDefinition
+  = variable
   / slot
   / text
 
 // variables are defined with single brackets
 // for multiline variables, we need to extract the raw content using regex so it can be rendered recursively if necessary
-variableDefinition
-  = "{" _ variableName:variableName _ "(" _ variableParams:variableParams _ ")"? _ "}" _ content:(variableDefinition / slot / text)* _ "{/" _ variableName _ "}"
+variable
+  = "{" _ variableName:variableName _ "(" _ variableParams:variableParams _ ")"? _ "}" _ content:(variable / slot / text)* _ "{/" _ variableName _ "}"
     // multiline with parameters (always string)
     {
       const varString = input.slice(location().start.offset, location().end.offset)
@@ -43,7 +38,7 @@ variableDefinition
       const value = Array.from(varString.matchAll(new RegExp(regex, "g")))[0][2]
       return { type: 'variable', variableName, params:variableParams, content:{ type:'string', value } }
     }
-  / "{" _ variableName:variableName _ "}" _ content:(variableDefinition / slot / text)* _ "{/" _ variableName _ "}"
+  / "{" _ variableName:variableName _ "}" _ content:(variable / slot / text)* _ "{/" _ variableName _ "}"
     // multiline without params (always string)
     {
       const varString = input.slice(location().start.offset, location().end.offset)
@@ -59,13 +54,38 @@ variableDefinition
 
 // slots are defined with double brackets
 slot
-  = "{{" _ "@"? _ variableName:variableName _ "("? _ params:params? _ ")"? _ operator:operator? _ value:value? _ "}}"
+  = "{{" _ "@"? _ expression:expression _ "}}"
     {
-      return { type: 'slot', variableName, params, operation: operator ? { operator:operator, value: value.value } : null, raw: text().includes('@'), location: location() }
+      return { type: 'slot', expression, raw: text().includes('@'), location: location(), content: input.slice(location().start.offset, location().end.offset) }
     }
 
-operator
-  = "+" / "-" / "*" / "/"
+expression
+  = head:additive tail:(_ operator:addSubOperator _ additive:additive)*
+    { return tail.reduce((result, element) => { return { type: 'operation', value: { operator: element[1], operands: [result, element[3]] } } }, head) }
+
+additive
+  = head:multiplicative tail:(_ operator:mulDivOperator _ multiplicative:multiplicative)*
+    { return tail.reduce((result, element) => { return { type: 'operation', value: { operator: element[1], operands: [result, element[3]] } } }, head) }
+
+multiplicative
+  = head:primary tail:(_ operator:powOperator _ primary:primary)*
+    { return tail.reduce((result, element) => { return { type: 'operation', value: { operator: element[1], operands: [result, element[3]] } } }, head) }
+
+primary
+  = "(" _ expression:expression _ ")" { return expression }
+  / functionCall
+  / variableObject
+  / number
+  / string
+
+addSubOperator
+  = "+" / "-"
+
+mulDivOperator
+  = "*" / "/"
+
+powOperator
+  = "^"
 
 params
   = head:param tail:(_ "," _ param)*
@@ -109,6 +129,8 @@ param
 // variable names must start with a letter and contain letters, numbers, underscores
 variableName
   = first:[a-zA-Z_] rest:$[a-zA-Z_0-9]* { return first + rest }
+variableObject
+  = first:[a-zA-Z_] rest:$[a-zA-Z_0-9]* { return { type: 'variable', value: first + rest } }
 
 // matches anything that isn't a PromptShaper tag
 text

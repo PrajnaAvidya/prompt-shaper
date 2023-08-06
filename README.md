@@ -75,7 +75,7 @@ A slot or variable can be assigned the contents of a function, which is called u
 There's a few basic functions defined in the `functions.ts` file and you can add your own using `registerFunction`.
 
 ## String vs Number Parameters
-The only difference between string and number params is that numeric params can have basic arithmetic operations done on their output. Supported operations are `+ - * /`.
+The only difference between string and number params is that numeric params can have basic arithmetic operations done on their output. Supported operations are `+ - * / ^`.
 ```
 {chapterTitle(chapterIndex)}
 Chapter {{chapterIndex+1}}

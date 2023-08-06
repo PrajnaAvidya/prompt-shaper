@@ -1,4 +1,4 @@
 {requiredParams(a, b)}
 {{a}} {{b}}
 {/requiredParams}
-{{requiredParams("Hello"}}
+{{requiredParams("Hello")}}

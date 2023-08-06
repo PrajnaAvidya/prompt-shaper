@@ -83,7 +83,9 @@ describe('arithmetic', () => {
 
 		const result = parseTemplate(template, variables)
 
-		expect(result).to.equal(`The difference between 5 and 7 is -2 \nThe difference between 5 and 6 is -1 \nThe difference between 7 and 8 is -1 \nThe difference between 1 and 2 is -1 \nThe difference between -1 and 3 is -4 \nThe difference between 4 and -1 is 5 \nThe difference between -1 and -1 is 0 \nThe difference between -1 and 9 is -10 \nThe difference between 10 and -1 is 11`)
+		expect(result).to.equal(
+			`The difference between 5 and 7 is -2 \nThe difference between 5 and 6 is -1 \nThe difference between 7 and 8 is -1 \nThe difference between 1 and 2 is -1 \nThe difference between -1 and 3 is -4 \nThe difference between 4 and -1 is 5 \nThe difference between -1 and -1 is 0 \nThe difference between -1 and 9 is -10 \nThe difference between 10 and -1 is 11`,
+		)
 	})
 
 	it('should correctly multiply two numbers', () => {
@@ -91,7 +93,9 @@ describe('arithmetic', () => {
 
 		const result = parseTemplate(template, variables)
 
-		expect(result).to.equal(`The product of 5 and 7 is 35 \nThe product of 5 and 6 is 30 \nThe product of 7 and 8 is 56 \nThe product of 1 and 2 is 2 \nThe product of 2 and 3 is 6 \nThe product of 4 and 6 is 24 \nThe product of 2 and 12 is 24 \nThe product of 2 and 9 is 18 \nThe product of 10 and 12 is 120`)
+		expect(result).to.equal(
+			`The product of 5 and 7 is 35 \nThe product of 5 and 6 is 30 \nThe product of 7 and 8 is 56 \nThe product of 1 and 2 is 2 \nThe product of 2 and 3 is 6 \nThe product of 4 and 6 is 24 \nThe product of 2 and 12 is 24 \nThe product of 2 and 9 is 18 \nThe product of 10 and 12 is 120`,
+		)
 	})
 
 	it('should correctly divide two numbers', () => {
@@ -99,7 +103,9 @@ describe('arithmetic', () => {
 
 		const result = parseTemplate(template, variables)
 
-		expect(result).to.equal(`The quotient of 5 and 7 is 0.7142857142857143 \nThe quotient of 5 and 6 is 0.8333333333333334 \nThe quotient of 7 and 8 is 0.875 \nThe quotient of 1 and 2 is 0.5 \nThe quotient of 0.5 and 3 is 0.16666666666666666 \nThe quotient of 4 and 0.6666666666666666 is 6 \nThe quotient of 0.5 and 0.75 is 0.6666666666666666 \nThe quotient of 0.5 and 9 is 0.05555555555555555 \nThe quotient of 10 and 0.75 is 13.333333333333334`)
+		expect(result).to.equal(
+			`The quotient of 5 and 7 is 0.7142857142857143 \nThe quotient of 5 and 6 is 0.8333333333333334 \nThe quotient of 7 and 8 is 0.875 \nThe quotient of 1 and 2 is 0.5 \nThe quotient of 0.5 and 3 is 0.16666666666666666 \nThe quotient of 4 and 0.6666666666666666 is 6 \nThe quotient of 0.5 and 0.75 is 0.6666666666666666 \nThe quotient of 0.5 and 9 is 0.05555555555555555 \nThe quotient of 10 and 0.75 is 13.333333333333334`,
+		)
 	})
 
 	it('should throw an error when dividing by zero', () => {

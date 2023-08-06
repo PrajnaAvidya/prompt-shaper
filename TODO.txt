@@ -1,6 +1,5 @@
 CURRENT TASKS
 - arithmetic between any combo of numbers/vars/functions
--- fix variable with params
 -- finish arithmetic tests
 
 TOP PRIORITY (stuff to do before first npm release)

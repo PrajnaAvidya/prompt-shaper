@@ -166,8 +166,6 @@ function evaluateVariable(
 }
 
 function evaluateFunction(functionName: string, params: ParserParam[]): string | number {
-	// TODO this might also be a variable with params
-
 	const func = functions[functionName]
 	if (!func) {
 		throw new Error(`Unknown function: ${functionName}`)
@@ -182,9 +180,14 @@ function renderSlot(slot: ParserSection, variables: ParserVariables, recursionDe
 		case ExpressionType.string:
 			return slot.expression!.value as string
 		case ExpressionType.variable:
-			return evaluateVariable(slot.expression!.value as string, variables, slot.params || [], slot.raw || false, recursionDepth) as string
 		case ExpressionType.function:
-			return evaluateFunction(slot.expression!.value as string, slot.expression!.params!) as string
+			if (slot.expression!.value as string in functions) {
+				return evaluateFunction(slot.expression!.value as string, slot.expression!.params!) as string
+			} else if (slot.expression!.value as string in variables) {
+				return evaluateVariable(slot.expression!.value as string, variables, slot.expression!.params || [], slot.raw || false, recursionDepth) as string
+			} else {
+				return undefined
+			}
 		case ExpressionType.operation:
 			return evaluateOperation(slot.expression!.value as Operation, variables).toString()
 		default:

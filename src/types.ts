@@ -8,7 +8,6 @@ export enum ValueType {
 	string = 'string',
 	number = 'number',
 	function = 'function',
-	unknown = 'unknown',
 }
 
 export interface ParserParam {
@@ -17,18 +16,6 @@ export interface ParserParam {
 	params?: ParserParam[]
 	variableName?: string
 	required?: boolean
-}
-
-export interface ParserOperation {
-	operator: ParserOperator
-	value: number
-}
-
-export enum ParserOperator {
-	Add = '+',
-	Subtract = '-',
-	Multiply = '*',
-	Divide = '/',
 }
 
 export interface ParserSection {
@@ -44,7 +31,7 @@ export interface ParserSection {
 	}
 }
 
-type Operator = '+' | '-' | '*' | '/'
+type Operator = '+' | '-' | '*' | '/' | '^'
 
 type OperandType = 'number' | 'function' | 'variable'
 

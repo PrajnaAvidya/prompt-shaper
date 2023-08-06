@@ -64,6 +64,9 @@ function evaluateOperation(operation: Operation | Operand, variables: ParserVari
 				}
 				result /= operand2
 				break
+			case '^':
+				result = Math.pow(result, evaluateOperation(operation.operands[1], variables))
+				break
 		}
 
 		return result
@@ -83,6 +86,7 @@ function evaluateVariable(variableName: string, variables: ParserVariables): str
 	if (variable.type === ValueType.function) {
 		return evaluateFunction(variable.value as string, variable.params!)
 	} else {
+		// TODO recursive render
 		return variable.value
 	}
 }
@@ -90,8 +94,8 @@ function evaluateVariable(variableName: string, variables: ParserVariables): str
 // render the contents of a slot to a string
 export const renderSlot = (slot: ParserSection, variables: ParserVariables): string | undefined => {
 	switch (slot.expression!.type) {
-		case ExpressionType.string:
 		case ExpressionType.number:
+		case ExpressionType.string:
 			return slot.expression!.value as string
 		case ExpressionType.variable:
 			return evaluateVariable(slot.expression!.value as string, variables) as string

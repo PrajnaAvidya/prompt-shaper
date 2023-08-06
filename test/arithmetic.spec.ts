@@ -58,7 +58,7 @@ describe.skip('arithmetic (old)', () => {
 	})
 })
 
-describe.only('arithmetic', () => {
+describe('arithmetic', () => {
 	const variables: ParserVariables = {
 		num1: { name: 'num1', type: ValueType.number, value: 5, params: [] },
 		num2: { name: 'num2', type: ValueType.number, value: 6, params: [] },
@@ -111,6 +111,13 @@ describe.only('arithmetic', () => {
 		expect(() => parseTemplate(template, variables)).to.throw('Division by zero')
 	})
 
-	// TODO powers
+	it('should correctly compute powers', () => {
+		const template = loadFileContent('./test/templates/arithmetic/powers.ps.txt')
+
+		const result = parseTemplate(template, variables)
+
+		expect(result).to.equal(`25\n32`)
+	})
+
 	// TODO complex arithmetic/nested parentheses
 })

@@ -1,7 +1,6 @@
 TOP PRIORITY (stuff to do before first npm release)
 - build+docs for use through npx+global install
 -- automatic change/release logs
-- docs for contributing/code of conduct/support
 - hook into an openai library and auto-send the response & save that somewhere
 - build/infra stuff to make it usable without downloading repo
 - reporting the column/line/offset of syntax errors

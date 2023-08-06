@@ -1,12 +1,17 @@
+CURRENT TASKS
+- arithmetic between any combo of numbers/vars/functions
+-- write new tests
+-- re-implement nested render
+
 TOP PRIORITY (stuff to do before first npm release)
+- migrate from pegjs to peggy https://github.com/peggyjs/peggy
 - build+docs for use through npx+global install
 -- automatic change/release logs
 - docs for contributing/code of conduct/support
-- arithmetic between any combo of numbers/vars/functions
--- merge the code/logic for arithmetic and functions
 - hook into an openai library and auto-send the response & save that somewhere
 - build/infra stuff to make it usable without downloading repo
 - reporting the column/line/offset of syntax errors
+- clean up/merge types
 
 tests
 - whitespace

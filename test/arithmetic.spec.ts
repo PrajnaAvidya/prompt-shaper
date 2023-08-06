@@ -66,11 +66,18 @@ describe('arithmetic', () => {
 			num2: { name: 'num2', type: ValueType.number, value: 6, params: [] },
 			num3: { name: 'num3', type: ValueType.number, value: 7, params: [] },
 			num4: { name: 'num4', type: ValueType.number, value: 8, params: [] },
+			num5: { name: 'num5', type: ValueType.number, value: 9, params: [] },
+			num6: { name: 'num6', type: ValueType.number, value: 10, params: [] },
 		}
 
-		const result = parseTemplate(template, variables, { showDebugMessages: true, returnParserMatches: false })
-		console.log(result)
+		const result = parseTemplate(template, variables)
 
-		// expect(result).to.equal('The sum of 5 and 7 is 12')
+		expect(result).to.equal(
+			`The sum of 5 and 7 is 12 \nThe sum of 5 and 6 is 11 \nThe sum of 7 and 8 is 15 \nThe sum of 1 and 2 is 3 \nThe sum of 3 and 3 is 6 \nThe sum of 4 and 5 is 9 \nThe sum of 3 and 7 is 10 \nThe sum of 3 and 9 is 12 \nThe sum of 10 and 7 is 17`,
+		)
 	})
+
+	// TODO sub/mult/divide/powers
+	// TODO nested parentheses
+	// TODO complex arithmetic
 })

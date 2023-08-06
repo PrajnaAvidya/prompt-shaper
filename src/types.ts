@@ -46,12 +46,12 @@ export interface ParserSection {
 
 type Operator = '+' | '-' | '*' | '/'
 
-type OperandType = 'string' | 'number' | 'function' | 'variable'
+type OperandType = 'number' | 'function' | 'variable'
 
-interface Operand {
+export interface Operand {
 	type: OperandType
 	value: number | string
-	params?: Expression[]
+	params?: ParserParam[]
 }
 
 export enum ExpressionType {
@@ -62,19 +62,15 @@ export enum ExpressionType {
 	operation = 'operation',
 }
 
-type ExpressionValue = string | number | Operation
-
-interface Operation {
+export interface Operation {
 	operator: Operator
 	operands: Operand[]
 }
 
-interface Expression {
+export interface Expression {
 	type: ExpressionType
-	value: ExpressionValue
+	value: number | string | Operation
 	params?: ParserParam[]
-	// operator: Operator
-	// operands: (Expression | Operand)[]
 }
 
 export interface TextLocation {

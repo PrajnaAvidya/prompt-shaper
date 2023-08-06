@@ -38,14 +38,14 @@ nice to haves
 - use variable or function as param
 - partial file load (e.g. optional start/end line params for load. except that sucks for when files change, what if there's a symbol start/escape sequence type thing?)
 - tag for making gpt calls e.g. %gpt% (do they need an option to be deferred vs instant)
-- ability to save gpt call response to a var
+- ability to save gpt call response to a variable
 - placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable
 - operators could just be registered aliases for functions, so they could be extended/customized
 - python style named params
 - better messages for syntax errors
-- param to show filename with load() (ie the resuling variable/value contains the file name and surrounding blocks to space it)
+- param to show filename with load() (ie the resulting variable/value contains the file name and surrounding blocks to separate it)
 - option to allow absolute/parent paths for template file load (for security)
-- syntax highlighting for .ps.txt in clis
+- syntax highlighting for .ps.txt in IDEs
 - params for inline variables e.g. {rectArea(length, width)=multiply(length, width)}
 - parse multiple files or a directory
 - option to trim the leading \n from multiline vars

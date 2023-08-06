@@ -61,15 +61,15 @@ slot
 
 expression
   = head:additive tail:(_ operator:addSubOperator _ additive:additive)*
-    { return tail.reduce((result, element) => { return { type:'operation', value: { operator: element[1], operands: [result, element[3]] } } }, head) }
+    { return tail.reduce((result, element) => { return { type: 'operation', value: { operator: element[1], operands: [result, element[3]] } } }, head) }
 
 additive
   = head:multiplicative tail:(_ operator:mulDivOperator _ multiplicative:multiplicative)*
-    { return tail.reduce((result, element) => { return { operator: element[1], operands: [result, element[3]] } }, head) }
+    { return tail.reduce((result, element) => { return { type: 'operation', value: { operator: element[1], operands: [result, element[3]] } } }, head) }
 
 multiplicative
   = head:primary tail:(_ operator:powOperator _ primary:primary)*
-    { return tail.reduce((result, element) => { return { operator: element[1], operands: [result, element[3]] } }, head) }
+    { return tail.reduce((result, element) => { return { type: 'operation', value: { operator: element[1], operands: [result, element[3]] } } }, head) }
 
 primary
   = "(" _ expression:expression _ ")" { return expression }

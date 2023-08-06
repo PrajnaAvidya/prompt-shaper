@@ -1,6 +1,7 @@
 CURRENT TASKS
 - arithmetic between any combo of numbers/vars/functions
 -- write new tests
+-- add pow function/operator
 -- re-implement nested render
 
 TOP PRIORITY (stuff to do before first npm release)

@@ -3,12 +3,10 @@ TOP PRIORITY (stuff to do before first npm release)
 -- automatic change/release logs
 - hook into an openai library and auto-send the response & save that somewhere
 - build/infra stuff to make it usable without downloading repo
-- reporting the column/line/offset of syntax errors
 
 tests
 - whitespace
 - recursion limit
-- syntax errors
 
 syntax/error checking
 - check for unpaired multilines (or just ignore them?)

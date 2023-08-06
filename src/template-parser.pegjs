@@ -26,6 +26,10 @@ part
   = variable
   / slot
   / text
+  / fail
+
+fail
+  = . { throw new SyntaxError(`Syntax error at line ${location().end.line} column ${location().end.column}: '${text()}'`) }
 
 // variables are defined with single brackets
 // for multiline variables, we need to extract the raw content using regex so it can be rendered recursively if necessary
@@ -114,7 +118,7 @@ escapedChars
   / chars:$[^"\\] { return chars }
 
 escapedCharReturnSlash
-  = "\\" char:$["{}\""] { return "\\" + char; }
+  = "\\" char:$["{}\""] { return "\\" + char }
 
 number
   = value:$([0-9]+ ("." [0-9]+)?) { return { type: 'number', value: parseFloat(value) } }
@@ -138,7 +142,7 @@ text
   / chars:$[^{}\\]+ { return { type: 'text', content: chars } }
 
 escapedChar
-  = "\\" char:$["{}\""] { return char; }
+  = "\\" char:$["{}\""] { return char }
 
 _ "whitespace"
   = [ \t\n\r]*

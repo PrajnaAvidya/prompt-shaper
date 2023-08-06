@@ -125,5 +125,14 @@ describe('arithmetic', () => {
 		expect(result).to.equal(`25\n32`)
 	})
 
+	it('should respect parentheses', () => {
+		const template = loadFileContent('./test/templates/arithmetic/parentheses.ps.txt')
+
+		const result = parseTemplate(template, variables)
+
+		expect(result).to.equal(`0.5\n1`)
+	})
+
+	// TODO multiple operands eg 1+1+1
 	// TODO complex arithmetic/nested parentheses
 })

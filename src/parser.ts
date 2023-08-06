@@ -85,6 +85,9 @@ function evaluateOperation(operation: Operation | Operand, variables: ParserVari
 				return evaluateVariable(operation.value as string, variables, []) as number
 			case 'function':
 				return evaluateFunction(operation.value as string, operation.params || []) as number
+			case 'operation':
+				// this is when the operand is an operation inside parenthesis
+				return evaluateOperation(operation.value as Operation, variables)
 		}
 	}
 

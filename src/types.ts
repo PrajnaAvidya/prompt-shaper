@@ -33,11 +33,11 @@ export interface ParserSection {
 
 type Operator = '+' | '-' | '*' | '/' | '^'
 
-type OperandType = 'number' | 'function' | 'variable'
+type OperandType = 'number' | 'function' | 'variable' | 'operation'
 
 export interface Operand {
 	type: OperandType
-	value: number | string
+	value: number | string | Operation
 	params?: ParserParam[]
 }
 

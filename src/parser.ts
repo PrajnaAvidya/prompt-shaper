@@ -101,13 +101,14 @@ function evaluateOperation(operation: Operation | Operand, variables: ParserVari
 			case '*':
 				result *= evaluateOperation(operation.operands[1], variables)
 				break
-			case '/':
+			case '/': {
 				const operand2 = evaluateOperation(operation.operands[1], variables)
 				if (operand2 === 0) {
 					throw new Error('Division by zero')
 				}
 				result /= operand2
 				break
+			}
 			case '^':
 				result = Math.pow(result, evaluateOperation(operation.operands[1], variables))
 				break

@@ -181,10 +181,16 @@ function renderSlot(slot: ParserSection, variables: ParserVariables, recursionDe
 			return slot.expression!.value as string
 		case ExpressionType.variable:
 		case ExpressionType.function:
-			if (slot.expression!.value as string in functions) {
+			if ((slot.expression!.value as string) in functions) {
 				return evaluateFunction(slot.expression!.value as string, slot.expression!.params!) as string
-			} else if (slot.expression!.value as string in variables) {
-				return evaluateVariable(slot.expression!.value as string, variables, slot.expression!.params || [], slot.raw || false, recursionDepth) as string
+			} else if ((slot.expression!.value as string) in variables) {
+				return evaluateVariable(
+					slot.expression!.value as string,
+					variables,
+					slot.expression!.params || [],
+					slot.raw || false,
+					recursionDepth,
+				) as string
 			} else {
 				return undefined
 			}

@@ -166,6 +166,8 @@ function evaluateVariable(
 }
 
 function evaluateFunction(functionName: string, params: ParserParam[]): string | number {
+	// TODO this might also be a variable with params
+
 	const func = functions[functionName]
 	if (!func) {
 		throw new Error(`Unknown function: ${functionName}`)

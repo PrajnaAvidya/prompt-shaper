@@ -1,8 +1,7 @@
 CURRENT TASKS
 - arithmetic between any combo of numbers/vars/functions
--- write new tests
--- add pow function/operator
--- re-implement nested render
+-- fix variable with params
+-- finish arithmetic tests
 
 TOP PRIORITY (stuff to do before first npm release)
 - migrate from pegjs to peggy https://github.com/peggyjs/peggy

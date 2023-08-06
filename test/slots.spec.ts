@@ -3,7 +3,7 @@ import { parseTemplate } from '../src/parser'
 import { ParserVariables, ValueType } from '../src/types'
 import { loadFileContent } from '../src/utils'
 
-describe.only('slots', () => {
+describe('slots', () => {
 	it('should correctly render a slot with raw string', () => {
 		const template = loadFileContent('./test/templates/slots/raw-string.ps.txt')
 
@@ -79,8 +79,16 @@ describe.only('slots', () => {
 
 	it('should render raw text when the @ symbol is used', () => {
 		const template = loadFileContent('./test/templates/slots/raw-text.ps.txt')
+		const variables: ParserVariables = {
+			rawText: {
+				name: 'rawText',
+				type: ValueType.string,
+				value: '{{hello}}',
+				params: [],
+			},
+		}
 
-		const result = parseTemplate(template)
+		const result = parseTemplate(template, variables)
 
 		expect(result).to.equal('{{hello}}')
 	})

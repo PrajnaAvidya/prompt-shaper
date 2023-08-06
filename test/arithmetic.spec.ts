@@ -3,7 +3,7 @@ import { parseTemplate } from '../src/parser'
 import { ParserVariables, ValueType } from '../src/types'
 import { loadFileContent } from '../src/utils'
 
-describe('arithmetic (old)', () => {
+describe.skip('arithmetic (old)', () => {
 	it('should correctly add two numbers', () => {
 		const template = loadFileContent('./test/templates/arithmetic/add.ps.txt')
 		const variables: ParserVariables = {

@@ -68,7 +68,7 @@ describe('arithmetic', () => {
 			num4: { name: 'num4', type: ValueType.number, value: 8, params: [] },
 		}
 
-		const result = parseTemplate(template, variables, {showDebugMessages: true, returnParserMatches: false})
+		const result = parseTemplate(template, variables, { showDebugMessages: true, returnParserMatches: false })
 		console.log(result)
 
 		// expect(result).to.equal('The sum of 5 and 7 is 12')

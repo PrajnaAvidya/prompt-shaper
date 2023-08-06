@@ -25,6 +25,14 @@ export const functions: Record<string, PromptShaperFunction> = {
 	},
 }
 
+export const evaluateFunction = (functionName: string, params: ParserParam[]): string => {
+	const func = functions[functionName]
+	if (!func) {
+		throw new Error(`Unknown function: ${functionName}`)
+	}
+	return func(...params) as string
+}
+
 // to allow people to add their own functions
 export const registerFunction = (name: string, func: PromptShaperFunction): void => {
 	if (functions[name]) {

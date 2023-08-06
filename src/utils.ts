@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs'
-import { ParserVariables, ValueType } from './types'
+import { ExpressionType, ParserSection, ParserVariables, ValueType } from './types'
+import { evaluateFunction } from './functions'
 
 const fileCache: { [key: string]: string } = {}
 export const loadFileContent = (filePath: string): string => {
@@ -25,3 +26,28 @@ export const transformJsonToVariables = (json: { [key: string]: string | number 
 		}
 		return variables
 	}, {} as ParserVariables)
+
+export const renderSlot = (slot: ParserSection, variables: ParserVariables): string | undefined => {
+	// TODO operation (recursive/AST)
+
+	switch (slot.expression!.type) {
+		case ExpressionType.string:
+		case ExpressionType.number:
+			return slot.expression!.value as string
+		case ExpressionType.variable:
+			const variable = variables[slot.expression!.value as string]
+			if (!variable) {
+				return undefined
+			}
+
+			if (variable.type === ValueType.function) {
+				return evaluateFunction(variable.value as string, variable.params!)
+			} else {
+				return variable.value as string
+			}
+		case ExpressionType.function:
+			return evaluateFunction(slot.expression!.value as string, slot.expression!.params!)
+		default:
+			return undefined
+	}
+}

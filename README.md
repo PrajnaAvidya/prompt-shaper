@@ -69,7 +69,7 @@ A slot or variable can be assigned the contents of a function, which is called u
 {sumOfTwoNumbers=add(2,2)}
 
 // this will load file.ps.txt and render it in place
-{{subTemplateToRender=load("file.ps.txt")}}
+{{load("file.ps.txt")}}
 ```
 
 There's a few basic functions defined in the `functions.ts` file and you can add your own using `registerFunction`.

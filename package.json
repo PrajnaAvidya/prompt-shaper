@@ -2,6 +2,7 @@
   "name": "prompt-shaper",
   "description": "prompt scripting language",
   "author": "Rafiq <r@neat.af>",
+  "version": "0.0.0",
   "license": "MIT",
   "main": "dist/cli.js",
   "bin": {

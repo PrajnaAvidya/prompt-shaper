@@ -1,6 +1,7 @@
 {
   "name": "prompt-shaper",
   "description": "prompt scripting language",
+  "repository": "https://github.com/PrajnaAvidya/prompt-shaper",
   "author": "Rafiq <r@neat.af>",
   "version": "0.0.1",
   "license": "MIT",

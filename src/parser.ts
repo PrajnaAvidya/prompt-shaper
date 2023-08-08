@@ -20,7 +20,7 @@ export const parseTemplate = (template: string, variables?: ParserVariables, opt
 	const showDebug = options?.showDebugMessages || false
 
 	// remove comments using regex
-	const withoutComments = template.replace(/\/\/.*$/gm, '')
+	const withoutComments = template.replace(/(\/\/.*$)|(\/\*[\s\S]*?\*\/)/gm, '');
 	showDebug && console.log(`DEBUG: Parsing template:\n${withoutComments}`)
 
 	// match all outer tags

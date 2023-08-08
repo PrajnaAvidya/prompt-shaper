@@ -1,6 +1,5 @@
 TOP PRIORITY
 - hook into an openai library and auto-send the response & save that somewhere
-- multiline comments
 - collections
 
 tests

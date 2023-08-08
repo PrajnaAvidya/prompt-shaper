@@ -10,7 +10,7 @@
     "prompt-shaper": "./dist/src/cli.js"
   },
   "scripts": {
-    "build": "rimraf dist && tsc && chmod +x dist/src/cli.js",
+    "build": "rimraf dist && tsc && chmod +x dist/src/cli.js && cp src/template-parser.pegjs dist/src/template-parser.pegjs",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "parse": "ts-node src/cli.ts",

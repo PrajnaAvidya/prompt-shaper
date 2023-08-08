@@ -4,12 +4,12 @@ Working draft of my prompt construction templating/scripting language
 ## Why
 I'm a programmer and like many I've seen great productivity gains due to the assistance of LLMs. the standard way of interacting with model through a chat interface works great for a lot of things, but I do a lot of what I call "non-linear" workflows and find myself spending a lot of time copying and pasting out of text files to construct the exact prompts I want to run. I wanted to add a UI to do some of these tasks in Prajna Chat (my custom GPT client) but decided that first I needed some kind of text/templating engine to run all this. Inspired by templating engines like Mustache/Handlebars I decided to build my own variant specifically designed for running GPT/LLM prompts. The idea is that you can just work out of a text editor/IDE and save a lot of time vs doing a bunch of copy/pasting of repeatedly used text fragments. Or you could build a UI around it and make it even more powerful.
 
-## Usage
-At this exact moment I'm wrapping up a few more things before I publish version 0.0.1 to npm, so you will need to download the repo and run `yarn parse` for the CLI. Once things are slightly more stable/mature you will be able to run it through npx or downloading the library globally.
+## Requirements
+node/npm
 
-### CLI Options
-CLI command format: `prompt-shaper [options] <input>`
-- `<input>` is treated as a path by default, use `-i` or `--is-string` to treat input as a template string
+### Usage/CLI Options
+Run the CLI using this format: `npx prompt-shaper [options] <input>`
+- `<input>` is treated as a file path by default, use `-i` or `--is-string` to treat input as a template string
 - Save output to a file: `-s or --save <outputPath>`
 - Show verbose debug messages: `-d or --debug`
 - You can provide a variables via a JSON string using `-j or --json <jsonString>` or via a JSON file using `-f or --json-file <jsonPath>`

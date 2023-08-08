@@ -17,7 +17,7 @@ interface CLIOptions {
 }
 
 program
-	.description('Run the PromptShaper parser')
+	.description('Run the PromptShaper parser. Docs: https://github.com/PrajnaAvidya/prompt-shaper')
 	.version(packageJson.version, '-v, --version', 'Show the current version')
 	.argument('<input>', 'Input template file path or string')
 	.option('-i, --is-string', 'Indicate that the input is a string, not a file path')

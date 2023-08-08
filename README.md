@@ -91,7 +91,7 @@ Chapter {{chapterIndex+1}}
 Strings must be double-quoted, and numbers are unquoted and can contain decimals.
 
 ## Misc
-Comments are marked with double slashes `// this is a comment` and are removed before rendering.
+Comments are marked with double slashes `// this is a comment` or `/* mutliline style */` and are removed before rendering.
 
 You can escape braces with backslashes so they won't be parsed as tags: `\{\{escapedSlot\}\}`
 

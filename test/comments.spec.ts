@@ -25,4 +25,15 @@ describe('comments', () => {
 
 		expect(result).to.equal('Hello, World!')
 	})
+
+	it('should remove multiline comments', () => {
+		const template = loadFileContent('./test/templates/comments/multiline.ps.txt')
+		const variables: ParserVariables = {
+			name: { name: 'name', type: ValueType.string, value: 'World', params: [] },
+		}
+
+		const result = parseTemplate(template, variables)
+
+		expect(result).to.equal('Hello, World!')
+	})
 })

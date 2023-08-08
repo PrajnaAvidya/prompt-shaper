@@ -1,3 +1,10 @@
+## [0.0.8](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.7...v0.0.8) (2023-08-08)
+
+
+### Bug Fixes
+
+* log argv for debug ([d84aac3](https://github.com/PrajnaAvidya/prompt-shaper/commit/d84aac3f5bf5844779ff7b33395d9626f4323fad))
+
 ## [0.0.7](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.6...v0.0.7) (2023-08-08)
 
 

@@ -1,3 +1,10 @@
+## [0.0.7](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.6...v0.0.7) (2023-08-08)
+
+
+### Bug Fixes
+
+* use compiled template for build ([436b39c](https://github.com/PrajnaAvidya/prompt-shaper/commit/436b39c2765933949c7c673dbb354a6c7198c367))
+
 ## [0.0.6](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.5...v0.0.6) (2023-08-08)
 
 

@@ -6,7 +6,6 @@ import { program } from 'commander'
 import { loadFileContent, transformJsonToVariables } from './utils'
 import { parseTemplate } from './parser'
 import { ParserVariables } from './types'
-import * as packageJson from '../package.json'
 
 interface CLIOptions {
 	isString?: boolean
@@ -18,7 +17,7 @@ interface CLIOptions {
 
 program
 	.description('Run the PromptShaper parser. Docs: https://github.com/PrajnaAvidya/prompt-shaper')
-	.version(packageJson.version, '-v, --version', 'Show the current version')
+	.version(process.env.npm_package_version as string, '-v, --version', 'Show the current version')
 	.argument('<input>', 'Input template file path or string')
 	.option('-i, --is-string', 'Indicate that the input is a string, not a file path')
 	.option('-d, --debug', 'Show debug messages')

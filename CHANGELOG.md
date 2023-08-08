@@ -1,3 +1,10 @@
+## [0.0.4](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.3...v0.0.4) (2023-08-08)
+
+
+### Bug Fixes
+
+* make cli executable ([94753a2](https://github.com/PrajnaAvidya/prompt-shaper/commit/94753a2c6b0ac4f77133bcb6f3b1c8be888dd1d0))
+
 ## [0.0.3](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.2...v0.0.3) (2023-08-08)
 
 

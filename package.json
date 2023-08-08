@@ -3,7 +3,7 @@
   "description": "prompt scripting language",
   "repository": "https://github.com/PrajnaAvidya/prompt-shaper",
   "author": "Rafiq <r@neat.af>",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "license": "MIT",
   "main": "dist/src/cli.js",
   "bin": {

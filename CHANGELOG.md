@@ -1,3 +1,10 @@
+## [0.0.9](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.8...v0.0.9) (2023-08-08)
+
+
+### Bug Fixes
+
+* account for bin in isPackaged ([c124267](https://github.com/PrajnaAvidya/prompt-shaper/commit/c124267a086b2fbc54d0e2ad745f99a68d407261))
+
 ## [0.0.8](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.7...v0.0.8) (2023-08-08)
 
 

@@ -5,12 +5,12 @@
   "author": "Rafiq <r@neat.af>",
   "version": "0.0.9",
   "license": "MIT",
-  "main": "dist/src/cli.js",
+  "main": "dist/cli.js",
   "bin": {
-    "prompt-shaper": "./dist/src/cli.js"
+    "prompt-shaper": "./dist/cli.js"
   },
   "scripts": {
-    "build": "rimraf dist && tsc && chmod +x dist/src/cli.js && peggy src/template-parser.pegjs -o dist/src/template-parser.js",
+    "build": "rimraf dist && tsc && chmod +x dist/cli.js && peggy src/template-parser.pegjs -o dist/template-parser.js",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "parse": "ts-node src/cli.ts",

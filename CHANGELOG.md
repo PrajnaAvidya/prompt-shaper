@@ -1,3 +1,10 @@
+## [0.0.6](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.5...v0.0.6) (2023-08-08)
+
+
+### Bug Fixes
+
+* copy template parser when building ([0b2b56c](https://github.com/PrajnaAvidya/prompt-shaper/commit/0b2b56ca9c163574bdbbf7e3585769e8f7896f51))
+
 ## [0.0.5](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.4...v0.0.5) (2023-08-08)
 
 

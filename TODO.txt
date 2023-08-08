@@ -1,7 +1,7 @@
-TOP PRIORITY (stuff to do before first npm release)
-- build+infra+docs for use through npx+global install
--- automatic change/release logs
+TOP PRIORITY
 - hook into an openai library and auto-send the response & save that somewhere
+- multiline comments
+- collections
 
 tests
 - whitespace
@@ -23,28 +23,18 @@ I played with multiline collection var tags and don't like it, better off using 
 - appending
 - for loops?
 
-ux stuff
-- what's my ideal workflow? user could either use npx or install it globally and run command line.
-- I want something easily triggered from an IDE, so probably linked to a macro
-- by default it should just output to buffer so it can be redirected or saved or whatever
-- how do I have it get the result into the user's clipboard or whatever way to get it into their gpt client the fastest?
-- make it run a web server able to receive snippets of text from the browser or other sources (what would be the best way to hook into something like github to assign a repo file/snippet to a var?)
-
 nice to haves
-- escaped slashes to preserve comments
-- multi line /* */ comments
-- file/env var based config
 - use variable or function as param
 - partial file load (e.g. optional start/end line params for load. except that sucks for when files change, what if there's a symbol start/escape sequence type thing?)
 - tag for making gpt calls e.g. %gpt% (do they need an option to be deferred vs instant)
-- ability to save gpt call response to a variable
-- placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable
-- operators could just be registered aliases for functions, so they could be extended/customized
+-- ability to save gpt call response to a variable
+-- placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable
 - python style named params
 - better messages for syntax errors
 - param to show filename with load() (ie the resulting variable/value contains the file name and surrounding blocks to separate it)
-- option to allow absolute/parent paths for template file load (for security)
 - syntax highlighting for .ps.txt in IDEs
 - params for inline variables e.g. {rectArea(length, width)=multiply(length, width)}
 - parse multiple files or a directory
-- option to trim the leading \n from multiline vars
+-- load directory into a collection
+- option to trim the leading \n from multiline vars (should this happen by default?)
+- option to put result into user's clipboard

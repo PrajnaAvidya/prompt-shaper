@@ -1,3 +1,10 @@
+## [0.0.5](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.4...v0.0.5) (2023-08-08)
+
+
+### Bug Fixes
+
+* move peggy from devDependencies to dependencies ([3ab1d23](https://github.com/PrajnaAvidya/prompt-shaper/commit/3ab1d231771b8a95ea5d27cfd98ce6da675510bd))
+
 ## [0.0.4](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.3...v0.0.4) (2023-08-08)
 
 

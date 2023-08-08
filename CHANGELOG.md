@@ -1,3 +1,10 @@
+## [0.0.10](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.9...v0.0.10) (2023-08-08)
+
+
+### Bug Fixes
+
+* update paths ([dadbef6](https://github.com/PrajnaAvidya/prompt-shaper/commit/dadbef6676c8326ebde0bd261714b3efd3695e59))
+
 ## [0.0.9](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.8...v0.0.9) (2023-08-08)
 
 

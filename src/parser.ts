@@ -4,7 +4,8 @@ import { loadFileContent, replaceStringAtLocation } from './utils'
 import { ExpressionType, Operand, Operation, ParserParam, ParserSection, ParserType, ParserVariables, ValueType } from './types'
 import { functions } from './functions'
 
-const templateParser = peggy.generate(loadFileContent('src/template-parser.pegjs'))
+const isPackaged = process.argv[1].endsWith('.js')
+const templateParser: peggy.Parser = isPackaged ? require('./template-parser.js') : peggy.generate(loadFileContent('src/template-parser.pegjs'))
 const maxRecursionDepth = 5
 
 interface ParserOptions {

@@ -4,8 +4,7 @@ import { loadFileContent, replaceStringAtLocation } from './utils'
 import { ExpressionType, Operand, Operation, ParserParam, ParserSection, ParserType, ParserVariables, ValueType } from './types'
 import { functions } from './functions'
 
-console.log(process.argv)
-const isPackaged = process.argv[1].endsWith('.js')
+const isPackaged = process.argv[1].endsWith('.js') || process.argv[1].endsWith('prompt-shaper')
 const templateParser: peggy.Parser = isPackaged ? require('./template-parser.js') : peggy.generate(loadFileContent('src/template-parser.pegjs'))
 const maxRecursionDepth = 5
 

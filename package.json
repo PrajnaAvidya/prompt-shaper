@@ -4,9 +4,9 @@
   "author": "Rafiq <r@neat.af>",
   "version": "0.0.1",
   "license": "MIT",
-  "main": "dist/cli.js",
+  "main": "dist/src/cli.js",
   "bin": {
-    "prompt-shaper": "./dist/cli.js"
+    "prompt-shaper": "./dist/src/cli.js"
   },
   "scripts": {
     "build": "rimraf dist && tsc",

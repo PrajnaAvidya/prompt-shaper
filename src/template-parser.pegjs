@@ -31,7 +31,7 @@ part
 fail
   = . { throw new SyntaxError(`Syntax error at line ${location().end.line} column ${location().end.column}: '${text()}'`) }
 
-// variables are defined with single brackets
+// variables are defined with single braces
 // for multiline variables, we need to extract the raw content using regex so it can be rendered recursively if necessary
 variable
   = "{" _ variableName:variableName _ "(" _ variableParams:variableParams _ ")"? _ "}" _ content:(variable / slot / text)* _ "{/" _ variableName _ "}"
@@ -56,7 +56,7 @@ variable
       return { type: 'variable', variableName, content:value }
     }
 
-// slots are defined with double brackets
+// slots are defined with double braces
 slot
   = "{{" _ "@"? _ expression:expression _ "}}"
     {

@@ -19,15 +19,15 @@ See the `samples` directory and try running them with the parser.
 
 ## Terminology
 - Template - A piece of text that is rendered by the parser. I'm using the .ps.txt extension for the samples.
-- Variable - A value loaded from a template file, or defined inline in a template. Variables are defined using single brackets and are either defined as a single tag, or with matching tags wrapped around text. String variables can be rendered as templates.
-- Slot - Renders the contents of a variable or function using double brackets.
+- Variable - A value loaded from a template file, or defined inline in a template. Variables are defined using single braces and are either defined as a single tag, or with matching tags wrapped around text. String variables can be rendered as templates.
+- Slot - Renders the contents of a variable or function using double braces.
 - Parameters - One or more arguments passed to a slot or a function. Parameters can be strings or numbers.
 - Function - Does "something" and the result is rendered on page, or assigned to a variable.
 
 ## Templates, Slots, Variables
 A template is a file or string that gets loaded into a variable by the PromptShaper parser and is then rendered.
 
-Templates can contain one or more inline variable definitions. They are defined using single brackets can be single line or multi line using tags.
+Templates can contain one or more inline variable definitions. They are defined using single braces can be single line or multi line using tags.
 ```
 {stringVariable = "hello world"}
 
@@ -93,9 +93,9 @@ Strings must be double-quoted, and numbers are unquoted and can contain decimals
 ## Misc
 Comments are marked with double slashes `// this is a comment` and are removed before rendering.
 
-You can escape brackets with backslashes so they won't be parsed as tags: `\{\{escapedSlot\}\}`
+You can escape braces with backslashes so they won't be parsed as tags: `\{\{escapedSlot\}\}`
 
-You can escape brackets or double quotes in string parameters: `{{functionCall("param \" with \} special chars")}}`
+You can escape braces or double quotes in string parameters: `{{functionCall("param \" with \} special chars")}}`
 
 ## Template parsing/rendering order
 1) remove comments

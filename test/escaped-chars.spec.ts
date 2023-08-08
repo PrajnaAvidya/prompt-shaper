@@ -4,8 +4,8 @@ import { ParserVariables, ValueType } from '../src/types'
 import { loadFileContent } from '../src/utils'
 
 describe('escaped characters', () => {
-	it('should correctly handle escaped escaped-chars', () => {
-		const template = loadFileContent('./test/templates/escaped-chars/brackets.ps.txt')
+	it('should correctly handle escaped braces', () => {
+		const template = loadFileContent('./test/templates/escaped-chars/braces.ps.txt')
 		const variables: ParserVariables = {
 			name: { name: 'name', type: ValueType.string, value: 'World', params: [] },
 		}

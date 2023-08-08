@@ -8,7 +8,7 @@ I'm a programmer and like many I've seen great productivity gains due to the ass
 At this exact moment I'm wrapping up a few more things before I publish version 0.0.1 to npm, so you will need to download the repo and run `yarn parse` for the CLI. Once things are slightly more stable/mature you will be able to run it through npx or downloading the library globally.
 
 ### CLI Options
-CLI command format: `prompt-shaper-parser [options] <input>`
+CLI command format: `prompt-shaper [options] <input>`
 - `<input>` is treated as a path by default, use `-i` or `--is-string` to treat input as a template string
 - Save output to a file: `-s or --save <outputPath>`
 - Show verbose debug messages: `-d or --debug`

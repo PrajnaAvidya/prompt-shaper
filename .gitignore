@@ -2,3 +2,4 @@ node_modules/*
 .idea/*
 src/template-parser.js
 my_templates/*
+dist/*

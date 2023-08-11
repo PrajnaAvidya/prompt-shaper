@@ -1,3 +1,10 @@
+## [0.0.11](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.10...v0.0.11) (2023-08-11)
+
+
+### Bug Fixes
+
+* release ([d8b7d35](https://github.com/PrajnaAvidya/prompt-shaper/commit/d8b7d3566ab272c1f44d3da761f318d8de2f9b68))
+
 ## [0.0.10](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.9...v0.0.10) (2023-08-08)
 
 

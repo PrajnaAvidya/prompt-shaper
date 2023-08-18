@@ -1,4 +1,7 @@
 .idea/*
+
 node_modules/*
-my_templates/*
 dist/*
+
+my_templates/*
+output.txt

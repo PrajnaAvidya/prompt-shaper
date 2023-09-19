@@ -1,5 +1,4 @@
 TOP PRIORITY
-- hook into an openai library and auto-send the response & save that somewhere
 - collections
 
 tests

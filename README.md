@@ -13,6 +13,8 @@ Run the CLI using this format: `npx prompt-shaper [options] <input>`
 - Save output to a file: `-s or --save <outputPath>`
 - Show verbose debug messages: `-d or --debug`
 - You can provide a variables via a JSON string using `-j or --json <jsonString>` or via a JSON file using `-f or --json-file <jsonPath>`
+- Send the resulting text to GPT4 by specifying the `-g or --generate` option. You must have `OPENAI_API_KEY` set in your environment for this to work.
+    - Example: `OPENAI_API_KEY=abc123 npx prompt-shaper [options] <input>`
 
 ## Examples
 See the `samples` directory and try running them with the parser.

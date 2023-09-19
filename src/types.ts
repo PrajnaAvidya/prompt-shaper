@@ -72,3 +72,7 @@ export interface ParserVariables {
 		params: ParserParam[]
 	}
 }
+
+export interface Generate {
+	(prompt: string): Promise<string>
+}

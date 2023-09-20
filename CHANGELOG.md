@@ -1,3 +1,17 @@
+# [1.1.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v1.0.0...v1.1.0) (2023-09-20)
+
+
+### Bug Fixes
+
+* fix process exit, and save response to convo in non interactive mode ([4e63ef9](https://github.com/PrajnaAvidya/prompt-shaper/commit/4e63ef93fbeaeb05249dfb15a0a2ab058ea718cf))
+
+
+### Features
+
+* add interactive mode ([3ff3863](https://github.com/PrajnaAvidya/prompt-shaper/commit/3ff3863f7a4f4d2903f07c514cc191fba408b505))
+* don't require -g if specifying interactive/prompt/model ([b118669](https://github.com/PrajnaAvidya/prompt-shaper/commit/b118669bbd483754d3ef2b2f927ffb8b93bbd6d1))
+* load conversation from json/text file, and ability to go straight to interactive ([c10c46b](https://github.com/PrajnaAvidya/prompt-shaper/commit/c10c46bfd7e8aea618a3f834ff730e50a9d97ad6))
+
 # [1.0.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.11...v1.0.0) (2023-09-20)
 
 

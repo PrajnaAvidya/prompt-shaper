@@ -21,7 +21,9 @@ Run the CLI using this format: `npx prompt-shaper [options] <input>`
 - You can provide a variables via a JSON file using `-jf or --json-file <jsonPath>`
   - Example: `npx prompt-shaper my_template.ps.txt -jf variables.json`
 - Send the resulting text to GPT4 by specifying the `-g or --generate` option. You must have `OPENAI_API_KEY` set in your environment for this to work.
-  - Example: `OPENAI_API_KEY=abc123 npx prompt-shaper [options] <input>`
+  - Example: `OPENAI_API_KEY=abc123 npx prompt-shaper my_template.ps.txt -g`
+- Change the model type by specifying `-m or --model <modelName>`. The default is `gpt-4`.
+  - Example: `OPENAI_API_KEY=abc123 npx prompt-shaper my_template.ps.txt -g -m gpt-3.5-turbo-16k`
 
 ## Examples
 See the `samples` directory and try running them with the parser.

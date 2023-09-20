@@ -6,7 +6,7 @@ import { program } from 'commander'
 import { loadFileContent, transformJsonToVariables } from './utils'
 import { parseTemplate } from './parser'
 import { ParserVariables } from './types'
-import { gpt4 } from './models/openai'
+import { gpt } from './models/openai'
 
 interface CLIOptions {
 	debug?: boolean
@@ -15,6 +15,7 @@ interface CLIOptions {
 	isString?: boolean
 	json?: string
 	jsonFile?: string
+	model: string
 	save?: string
 }
 
@@ -62,7 +63,7 @@ async function handler(input: string, options: CLIOptions) {
 
 		if (options.generate) {
 			// send to openai
-			const result = await gpt4(parsed)
+			const result = await gpt(parsed, options.model)
 			console.log("") // to prevent the stdout buffer from getting overwritten
 			if (options.save) {
 				response = options.format === 'templateAndResponse' ? `${response}\n\n${result}` : result
@@ -95,7 +96,8 @@ program
 	.option('-j, --json <string>', 'Input JSON variables as string')
 	.option('-jf, --json-file <string>', 'Input JSON variables as file path')
 	.option('-g, --generate', 'Send parsed template result to ChatGPT and return response (instead of the generated template)')
-	.option('-f, --format <type>', 'Set format of output: templateOrResponse (default), templateAndResponse', 'templateOrResponse')
+	.option('-m, --model <string>', 'What OpenAI model to use: gpt-4 (default), gpt-3.5-turbo-16k, etc', 'gpt-4')
+	.option('-f, --format <string>', 'Set format of output: templateOrResponse (default), templateAndResponse', 'templateOrResponse')
 	.action(handler)
 
 program.parse()

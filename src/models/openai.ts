@@ -4,7 +4,7 @@ import { ChatCompletionMessageParam } from 'openai/src/resources/chat/completion
 
 const openai = new OpenAI();
 
-export const gpt4: Generate = async(prompt: string): Promise<string> => {
+export const gpt: Generate = async(prompt: string, model: string): Promise<string> => {
 	const messages: ChatCompletionMessageParam[] = [
 		{
 			role: 'system',
@@ -23,7 +23,7 @@ export const gpt4: Generate = async(prompt: string): Promise<string> => {
 	try {
 		const stream = await openai.chat.completions.create({
 			messages,
-			model: 'gpt-4',
+			model,
 			stream: true,
 		});
 		for await (const part of stream) {

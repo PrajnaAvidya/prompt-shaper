@@ -1,20 +1,13 @@
 TOP PRIORITY
-- hook into an openai library and auto-send the response & save that somewhere
-- collections
-
-tests
-- whitespace
-- recursion limit
-
-syntax/error checking
-- check for unpaired multilines (or just ignore them?)
-- check for incorrect nesting of multilines eg {a} {b} {/a} {/b}
-- check for optional params before required
+- openai stuff
+-- interactive mode - allow further responses to the current thread in the command line. option to save convo to json to pick up later. how to format responses so they are human-readable when saved to text?
+-- how else to quickly be able to tweak/feed responses back in? i.e. how do I continue the same conversation? interactive mode? I could also support saving the convo to json to pick up later
+-- personas - presets (json?) for openai models for system prompt, temperature, etc
+-- something similar to the {{gen}} tag in microsoft guidance so running prompts can be part of processing a template
 
 collection stuff? (low priority until I actually need them)
-- decide on best syntax. probably this:
-{collectionVar[] = 1, "two", 3.14, anotherVarName, varNameWithParams("hello"), functionName("test.txt",1)}
-I played with multiline collection var tags and don't like it, better off using json vars if you want to get fancy
+- decide on best syntax. probably this: {collectionVar[] = 1, "two", 3.14, anotherVarName, varNameWithParams("hello"), functionName("test.txt",1)}
+- I played with multiline collection var tags and don't like it, better off using json vars if you want to get fancy
 - basic iterating
 - validate the names of collection vars
 - make collection variable name accessible in the loop
@@ -23,17 +16,13 @@ I played with multiline collection var tags and don't like it, better off using 
 - for loops?
 
 nice to haves
-- use variable or function as param
 - partial file load (e.g. optional start/end line params for load. except that sucks for when files change, what if there's a symbol start/escape sequence type thing?)
 - tag for making gpt calls e.g. %gpt% (do they need an option to be deferred vs instant)
 -- ability to save gpt call response to a variable
 -- placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable
-- python style named params
-- better messages for syntax errors
 - param to show filename with load() (ie the resulting variable/value contains the file name and surrounding blocks to separate it)
 - syntax highlighting for .ps.txt in IDEs
 - params for inline variables e.g. {rectArea(length, width)=multiply(length, width)}
 - parse multiple files or a directory
 -- load directory into a collection
 - option to trim the leading \n from multiline vars (should this happen by default?)
-- option to put result into user's clipboard

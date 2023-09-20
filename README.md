@@ -2,17 +2,28 @@
 Working draft of my prompt construction templating/scripting language.
 
 ## Why
-I'm a programmer and like many I've seen great productivity gains due to the assistance of LLMs. the standard way of interacting with model through a chat interface works great for a lot of things, but I do a lot of what I call "non-linear" workflows and find myself spending a lot of time copying and pasting out of text files to construct the exact prompts I want to run. I wanted to add a UI to do some of these tasks in Prajna Chat (my custom GPT client) but decided that first I needed some kind of text/templating engine to run all this. Inspired by templating engines like Mustache/Handlebars I decided to build my own variant specifically designed for running GPT/LLM prompts. The idea is that you can just work out of a text editor/IDE and save a lot of time vs doing a bunch of copy/pasting of repeatedly used text fragments. Or you could build a UI around it and make it even more powerful.
+I'm a programmer and like many I've seen great productivity gains due to the assistance of LLMs. the standard way of interacting with model through a chat interface works great for a lot of things, but I do a lot of what I call "non-linear" workflows and find myself spending a lot of time copying and pasting out of text files to construct the exact prompts I want to run. I wanted to add a UI to do some of these tasks in Prajna Chat (my custom GPT client) but decided that first I needed some kind of text/templating engine to run all this. Inspired by templating engines like Handlebars I decided to build my own variant specifically designed for running GPT/LLM prompts. The idea is that you can just work out of a text editor/IDE and save a lot of time vs doing a bunch of copy/pasting of repeatedly used text fragments. Or you could build a UI around it and make it even more powerful.
 
 ## Requirements
 node/npm/npx - https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
 
 ## Usage/CLI Options
 Run the CLI using this format: `npx prompt-shaper [options] <input>`
-- `<input>` is treated as a file path by default, use `-i` or `--is-string` to treat input as a template string
+- `<input>` is treated as a file path by default, use `-i` or `--is-string` to treat input as a template string 
+  - Example (default file behavior): `npx prompt-shaper my_template.ps.txt`
+  - Example (string input): `npx prompt-shaper -i "my PromptShaper template"`
 - Save output to a file: `-s or --save <outputPath>`
+  - Example: `npx prompt-shaper my_template.ps.txt -s output.md`
 - Show verbose debug messages: `-d or --debug`
-- You can provide a variables via a JSON string using `-j or --json <jsonString>` or via a JSON file using `-f or --json-file <jsonPath>`
+  - Example: `npx prompt-shaper my_template.ps.txt -d`
+- You can provide a variables via a JSON string using `-j or --json <jsonString>`
+  - Example: `npx prompt-shaper my_template.ps.txt -j '{ "variableName": "hello world" }'`
+- You can provide a variables via a JSON file using `-jf or --json-file <jsonPath>`
+  - Example: `npx prompt-shaper my_template.ps.txt -jf variables.json`
+- Send the resulting text to GPT4 by specifying the `-g or --generate` option. You must have `OPENAI_API_KEY` set in your environment for this to work.
+  - Example: `OPENAI_API_KEY=abc123 npx prompt-shaper my_template.ps.txt -g`
+- Change the model type by specifying `-m or --model <modelName>`. The default is `gpt-4`.
+  - Example: `OPENAI_API_KEY=abc123 npx prompt-shaper my_template.ps.txt -g -m gpt-3.5-turbo-16k`
 
 ## Examples
 See the `samples` directory and try running them with the parser.

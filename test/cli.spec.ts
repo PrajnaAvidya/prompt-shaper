@@ -69,7 +69,6 @@ describe('CLI', () => {
 	it('should fail when no input or interactive mode', done => {
 		exec('ts-node src/cli.ts -d', error => {
 			if (error) {
-				console.log(error.message)
 				expect(error.message).to.contain('Input value is required')
 			} else {
 				throw new Error('Error not thrown by cli')

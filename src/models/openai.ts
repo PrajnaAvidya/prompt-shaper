@@ -1,6 +1,5 @@
 import OpenAI from 'openai'
 import { ChatMessage, Generate } from '../types'
-import { ChatCompletionMessageParam } from 'openai/src/resources/chat/completions'
 
 const openai = new OpenAI({
 	apiKey: process.env.OPENAI_API_KEY || 'abc123',

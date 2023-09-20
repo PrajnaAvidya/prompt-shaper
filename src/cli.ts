@@ -25,7 +25,6 @@ interface CLIOptions {
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const prompt = (query: string) => new Promise(resolve => rl.question(query, resolve))
 
-let running = true
 async function handler(input: string, options: CLIOptions) {
 	// handle input type
 	let template: string
@@ -78,6 +77,7 @@ async function handler(input: string, options: CLIOptions) {
 			if (options.interactive) {
 				// interactive mode
 
+				const running = true
 				while (running) {
 					const result = await gpt(conversation, options.model)
 					console.log('') // to prevent the stdout buffer from getting overwritten
@@ -103,20 +103,19 @@ async function handler(input: string, options: CLIOptions) {
 				// send single request to openai
 				const result = await gpt(conversation, options.model)
 				console.log('') // to prevent the stdout buffer from getting overwritten
+				conversation.push({ role: 'assistant', content: result })
 				if (options.saveJson) {
 					saveConversationAsJson(conversation, options.saveJson)
 				}
 				if (options.save) {
 					saveConversationAsText(conversation, options.save)
 				}
-				running = false
 			}
 		} else {
 			// just return the generated text
 			if (options.save) {
 				fs.writeFileSync(options.save, parsed)
 			}
-			running = false
 		}
 	} catch (error: Error | unknown) {
 		if (error instanceof Error) {
@@ -127,6 +126,8 @@ async function handler(input: string, options: CLIOptions) {
 			process.exit(1)
 		}
 	}
+
+	process.exit(0)
 }
 
 function saveConversationAsJson(conversation: ChatMessage[], filePath: string) {
@@ -157,5 +158,3 @@ program
 	.action(handler)
 
 program.parse()
-while (running) {}
-process.exit(0)

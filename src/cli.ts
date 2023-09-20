@@ -16,6 +16,8 @@ interface CLIOptions {
 	isString?: boolean
 	json?: string
 	jsonFile?: string
+	loadJson?: string
+	loadText?: string
 	model: string
 	prompt: string
 	save?: string
@@ -26,6 +28,13 @@ const rl = readline.createInterface({ input: process.stdin, output: process.stdo
 const prompt = (query: string) => new Promise(resolve => rl.question(query, resolve))
 
 async function handler(input: string, options: CLIOptions) {
+	if (options.loadJson) {
+		// TODO load json and continue in interactive
+		const conversation: ChatMessage[] = JSON.parse(fs.readFileSync(options.loadJson, 'utf8'))
+	} else if (options.loadText) {
+		// TODO load text and continue in interactive
+	}
+
 	// handle input type
 	let template: string
 	if (options.isString) {
@@ -62,7 +71,7 @@ async function handler(input: string, options: CLIOptions) {
 		const parsed = parseTemplate(template, variables, parserOptions)
 		console.log(parsed)
 
-		if (options.generate || options.interactive || options.model || options.prompt) {
+		if (options.generate || options.interactive || options.model !== 'gpt-4' || options.prompt !== 'You are a helpful assistant.') {
 			const conversation: ChatMessage[] = [
 				{
 					role: 'system',
@@ -76,40 +85,10 @@ async function handler(input: string, options: CLIOptions) {
 
 			if (options.interactive) {
 				// interactive mode
-
-				const running = true
-				while (running) {
-					const result = await gpt(conversation, options.model)
-					console.log('') // to prevent the stdout buffer from getting overwritten
-
-					conversation.push({ role: 'assistant', content: result })
-					if (options.saveJson) {
-						saveConversationAsJson(conversation, options.saveJson)
-					}
-					if (options.save) {
-						saveConversationAsText(conversation, options.save)
-					}
-
-					const response = await prompt("Your response: ") as string
-					conversation.push({ role: 'user', content: response })
-					if (options.saveJson) {
-						saveConversationAsJson(conversation, options.saveJson)
-					}
-					if (options.save) {
-						saveConversationAsText(conversation, options.save)
-					}
-				}
+				await interactiveModeLoop(conversation, options)
 			} else {
 				// send single request to openai
-				const result = await gpt(conversation, options.model)
-				console.log('') // to prevent the stdout buffer from getting overwritten
-				conversation.push({ role: 'assistant', content: result })
-				if (options.saveJson) {
-					saveConversationAsJson(conversation, options.saveJson)
-				}
-				if (options.save) {
-					saveConversationAsText(conversation, options.save)
-				}
+				await makeCompletionRequest(conversation, options)
 			}
 		} else {
 			// just return the generated text
@@ -130,12 +109,41 @@ async function handler(input: string, options: CLIOptions) {
 	process.exit(0)
 }
 
+async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOptions) {
+	const running = true
+	while (running) {
+		await makeCompletionRequest(conversation, options)
+
+		const response = (await prompt('Your response: ')) as string
+		conversation.push({ role: 'user', content: response })
+		if (options.saveJson) {
+			saveConversationAsJson(conversation, options.saveJson)
+		}
+		if (options.save) {
+			saveConversationAsText(conversation, options.save)
+		}
+	}
+}
+
+async function makeCompletionRequest(conversation: ChatMessage[], options: CLIOptions) {
+	const result = await gpt(conversation, options.model)
+	console.log('') // to prevent the stdout buffer from getting overwritten
+
+	conversation.push({ role: 'assistant', content: result })
+	if (options.saveJson) {
+		saveConversationAsJson(conversation, options.saveJson)
+	}
+	if (options.save) {
+		saveConversationAsText(conversation, options.save)
+	}
+}
+
 function saveConversationAsJson(conversation: ChatMessage[], filePath: string) {
 	fs.writeFileSync(filePath, JSON.stringify(conversation))
 }
 
 function saveConversationAsText(conversation: ChatMessage[], filePath: string) {
-	const conversationText = conversation.map(m => `${m.role}\n\n${m.content}`).join("\n\n-----\n\n")
+	const conversationText = conversation.map(m => `${m.role}\n\n${m.content}`).join('\n\n-----\n\n')
 
 	fs.writeFileSync(filePath, conversationText)
 }
@@ -150,11 +158,12 @@ program
 	.option('-i, --interactive', 'Enable interactive mode (continue conversation in command line)')
 	.option('-js, --json <jsonString>', 'Input JSON variables as string')
 	.option('-jf, --json-file <filePath>', 'Input JSON variables as file path')
+	.option('-lj, --load-json <filePath>', 'Load conversation from JSON file and continue in interactive mode')
+	.option('-lt, --load-text <filePath>', 'Load conversation from text/markdown file and continue in interactive mode')
 	.option('-m, --model <modelType>', 'What OpenAI model to use: gpt-4 (default), gpt-3.5-turbo-16k, etc', 'gpt-4')
 	.option('-p, --prompt <promptString>', 'System prompt for LLM conversation', 'You are a helpful assistant.')
 	.option('-s, --save <filePath>', 'Save text/markdown output to file path')
 	.option('-sj, --save-json <filePath>', 'Save conversation as JSON file')
-	// TODO continue conversation from json
 	.action(handler)
 
 program.parse()

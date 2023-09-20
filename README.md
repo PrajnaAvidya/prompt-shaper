@@ -25,11 +25,15 @@ Run the CLI using this format: `npx prompt-shaper [options] <input>`
 - Send the resulting text to GPT4 by specifying the `-g or --generate` option. You must have `OPENAI_API_KEY` set in your environment for this to work. Note that -g isn't required if you are specifying a model or prompt, or using interactive mode.
   - Example: `OPENAI_API_KEY=abc123 npx prompt-shaper my_template.ps.txt -g`
 - Change the model type by specifying `-m or --model <modelName>`. The default is `gpt-4`.
-  - Example: `npx prompt-shaper my_template.ps.txt -g -m gpt-3.5-turbo-16k`
+  - Example: `npx prompt-shaper my_template.ps.txt -m gpt-3.5-turbo-16k`
 - Change the system prompt by specifying `-p or --prompt <prompt>`.
-  - Example: `npx prompt-shaper my_template.ps.txt -g -p "You are a helpful assistant."`
+  - Example: `npx prompt-shaper my_template.ps.txt -p "You are a helpful assistant."`
 - Enable interactive mode by specifying `-i or --interactive` (continue conversation in command line)
-  - Example: `npx prompt-shaper my_template.ps.txt -g -i`
+  - Example: `npx prompt-shaper my_template.ps.txt -i`
+- Load a previous conversation from JSON and continue in interactive mode with `-lj or --load-json`
+  - Example: `npx prompt-shaper my_template.ps.txt -lj <jsonPath>`
+- Load a previous conversation from text and continue in interactive mode with `-lj or --load-text`
+  - Example: `npx prompt-shaper my_template.ps.txt -lt <jsonPath>`
 
 ## Examples
 See the `samples` directory and try running them with the parser.

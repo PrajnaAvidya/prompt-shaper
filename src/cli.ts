@@ -63,7 +63,7 @@ async function handler(input: string, options: CLIOptions) {
 		const parsed = parseTemplate(template, variables, parserOptions)
 		console.log(parsed)
 
-		if (options.generate) {
+		if (options.generate || options.interactive || options.model || options.prompt) {
 			const conversation: ChatMessage[] = [
 				{
 					role: 'system',

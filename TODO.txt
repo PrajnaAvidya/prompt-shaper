@@ -1,6 +1,3 @@
-tests/docs for new cli stuff
-don't require -g if -i is specified? same with -m and -p
-
 nice to haves
 - something similar to the {{gen}} tag in microsoft guidance so running prompts can be part of processing a template
 - partial file load (e.g. optional start/end line params for load. except that sucks for when files change, what if there's a symbol start/escape sequence type thing?)

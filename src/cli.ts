@@ -29,10 +29,40 @@ const prompt = (query: string) => new Promise(resolve => rl.question(query, reso
 
 async function handler(input: string, options: CLIOptions) {
 	if (options.loadJson) {
-		// TODO load json and continue in interactive
+		// load json and continue in interactive
 		const conversation: ChatMessage[] = JSON.parse(fs.readFileSync(options.loadJson, 'utf8'))
-	} else if (options.loadText) {
-		// TODO load text and continue in interactive
+		await startSavedConversation(conversation, options)
+
+		process.exit(0)
+	}
+
+	if (options.loadText) {
+		// load text and continue in interactive
+		const conversation = fs.readFileSync(options.loadText, 'utf8').split('\n\n-----\n\n').map(message => {
+			const [role, ...content] = message.split('\n\n', 2);
+			return { role, content: content.join('\n\n') } as ChatMessage;
+		});
+		await startSavedConversation(conversation, options)
+
+		process.exit(0)
+	}
+
+	if (options.interactive && !input) {
+		// start new conversation in interactive
+		const conversation: ChatMessage[] = [
+			{
+				role: 'system',
+				content: options.prompt,
+			},
+		]
+		await startSavedConversation(conversation, options)
+
+		process.exit(0)
+	}
+
+	if (!input) {
+		console.error('Input value is required')
+		process.exit(1)
 	}
 
 	// handle input type
@@ -69,7 +99,7 @@ async function handler(input: string, options: CLIOptions) {
 		const parserOptions = { returnParserMatches: false, showDebugMessages: options.debug as boolean }
 
 		const parsed = parseTemplate(template, variables, parserOptions)
-		console.log(parsed)
+		console.log(`user\n${[parsed]}\n-----`)
 
 		if (options.generate || options.interactive || options.model !== 'gpt-4' || options.prompt !== 'You are a helpful assistant.') {
 			const conversation: ChatMessage[] = [
@@ -109,12 +139,32 @@ async function handler(input: string, options: CLIOptions) {
 	process.exit(0)
 }
 
+async function startSavedConversation(conversation: ChatMessage[], options: CLIOptions) {
+	// show convo
+	for (const message of conversation) {
+		console.log(`${message.role}\n${message.content}\n-----`)
+	}
+
+	await interactiveModeLoop(conversation, options)
+}
+
 async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOptions) {
+	let userTurn = false
+	if (conversation[conversation.length-1].role !== "user") {
+		userTurn = true
+	}
+
 	const running = true
 	while (running) {
-		await makeCompletionRequest(conversation, options)
+		if (!userTurn) {
+			await makeCompletionRequest(conversation, options)
+			userTurn = true
+		}
 
 		const response = (await prompt('Your response: ')) as string
+		console.log('-----')
+		userTurn = false
+
 		conversation.push({ role: 'user', content: response })
 		if (options.saveJson) {
 			saveConversationAsJson(conversation, options.saveJson)
@@ -126,8 +176,9 @@ async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOpti
 }
 
 async function makeCompletionRequest(conversation: ChatMessage[], options: CLIOptions) {
+	console.log('assistant')
 	const result = await gpt(conversation, options.model)
-	console.log('') // to prevent the stdout buffer from getting overwritten
+	console.log('\n-----')
 
 	conversation.push({ role: 'assistant', content: result })
 	if (options.saveJson) {
@@ -151,7 +202,7 @@ function saveConversationAsText(conversation: ChatMessage[], filePath: string) {
 program
 	.description('Run the PromptShaper parser. Docs: https://github.com/PrajnaAvidya/prompt-shaper')
 	.version((process.env.npm_package_version as string) || '', '-v, --version', 'Show the current version')
-	.argument('<input>', 'Input template file path or string')
+	.argument('[input]', 'Input template file path or string')
 	.option('-d, --debug', 'Show debug messages')
 	.option('-g, --generate', 'Send parsed template result to ChatGPT and return response (instead of the generated template)')
 	.option('-is, --is-string', 'Indicate that the input is a string, not a file path')

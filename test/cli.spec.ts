@@ -9,7 +9,7 @@ describe('CLI', () => {
 			if (error) {
 				throw new Error(error.message)
 			}
-			expect(stdout.trim()).to.equal('Hello, World!')
+			expect(stdout.trim()).to.contain('Hello, World!')
 			done()
 		})
 	})
@@ -19,7 +19,7 @@ describe('CLI', () => {
 			if (error) {
 				throw new Error(error.message)
 			}
-			expect(stdout.trim()).to.equal('hello world')
+			expect(stdout.trim()).to.contain('hello world')
 			done()
 		})
 	})
@@ -50,7 +50,7 @@ describe('CLI', () => {
 			if (error) {
 				throw new Error(error.message)
 			}
-			expect(stdout.trim()).to.equal('hello world')
+			expect(stdout.trim()).to.contain('hello world')
 			done()
 		})
 	})
@@ -61,7 +61,19 @@ describe('CLI', () => {
 			if (error) {
 				throw new Error(error.message)
 			}
-			expect(stdout.trim()).to.equal('hello world')
+			expect(stdout.trim()).to.contain('hello world')
+			done()
+		})
+	})
+
+	it('should fail when no input or interactive mode', done => {
+		exec('ts-node src/cli.ts -d', (error, stdout) => {
+			if (error) {
+				console.log(error.message)
+				expect(error.message).to.contain("Input value is required")
+			} else {
+				throw new Error("Error not thrown by cli")
+			}
 			done()
 		})
 	})

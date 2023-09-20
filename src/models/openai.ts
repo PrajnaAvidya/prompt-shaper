@@ -7,7 +7,6 @@ const openai = new OpenAI();
 export const gpt4: Generate = async(prompt: string): Promise<string> => {
 	const messages: ChatCompletionMessageParam[] = [
 		{
-			// TODO configurable
 			role: 'system',
 			content: 'You are a helpful assistant',
 		},

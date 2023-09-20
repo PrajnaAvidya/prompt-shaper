@@ -9,12 +9,19 @@ node/npm/npx - https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
 
 ## Usage/CLI Options
 Run the CLI using this format: `npx prompt-shaper [options] <input>`
-- `<input>` is treated as a file path by default, use `-i` or `--is-string` to treat input as a template string
+- `<input>` is treated as a file path by default, use `-i` or `--is-string` to treat input as a template string 
+  - Example (default file behavior): `npx prompt-shaper my_template.ps.txt`
+  - Example (string input): `npx prompt-shaper -i "my PromptShaper template"`
 - Save output to a file: `-s or --save <outputPath>`
+  - Example: `npx prompt-shaper my_template.ps.txt -s output.md`
 - Show verbose debug messages: `-d or --debug`
-- You can provide a variables via a JSON string using `-j or --json <jsonString>` or via a JSON file using `-f or --json-file <jsonPath>`
+  - Example: `npx prompt-shaper my_template.ps.txt -d`
+- You can provide a variables via a JSON string using `-j or --json <jsonString>`
+  - Example: `npx prompt-shaper my_template.ps.txt -j '{ "variableName": "hello world" }'`
+- You can provide a variables via a JSON file using `-jf or --json-file <jsonPath>`
+  - Example: `npx prompt-shaper my_template.ps.txt -jf variables.json`
 - Send the resulting text to GPT4 by specifying the `-g or --generate` option. You must have `OPENAI_API_KEY` set in your environment for this to work.
-    - Example: `OPENAI_API_KEY=abc123 npx prompt-shaper [options] <input>`
+  - Example: `OPENAI_API_KEY=abc123 npx prompt-shaper [options] <input>`
 
 ## Examples
 See the `samples` directory and try running them with the parser.

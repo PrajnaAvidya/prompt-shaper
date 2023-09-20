@@ -1,5 +1,8 @@
 TOP PRIORITY
-- collections
+- openai stuff
+-- how else to quickly be able to tweak/feed responses back in? i.e. how do I continue the same conversation? interactive mode? I could also support saving the convo to json to pick up later
+-- cli option for model type
+-- personas
 
 tests
 - whitespace

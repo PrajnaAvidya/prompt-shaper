@@ -10,6 +10,7 @@ import { gpt4 } from './models/openai'
 
 interface CLIOptions {
 	debug?: boolean
+	format: 'templateOrResponse' | 'templateAndResponse'
 	generate?: boolean
 	isString?: boolean
 	json?: string
@@ -53,18 +54,24 @@ async function handler(input: string, options: CLIOptions) {
 
 		const parsed = parseTemplate(template, variables, parserOptions)
 
+		let response: string = ''
+		if (options.format === 'templateAndResponse' || (options.format === 'templateOrResponse' && !options.generate)) {
+			response = parsed
+			console.log(response)
+		}
+
 		if (options.generate) {
 			// send to openai
 			const result = await gpt4(parsed)
+			console.log("") // to prevent the stdout buffer from getting overwritten
 			if (options.save) {
-				fs.writeFileSync(options.save, result)
+				response = options.format === 'templateAndResponse' ? `${response}\n\n${result}` : result
+				fs.writeFileSync(options.save, response)
 			}
 		} else {
 			// just return the generated text
 			if (options.save) {
 				fs.writeFileSync(options.save, parsed)
-			} else {
-				console.log(parsed)
 			}
 		}
 	} catch (error: Error | unknown) {
@@ -86,8 +93,9 @@ program
 	.option('-d, --debug', 'Show debug messages')
 	.option('-s, --save <string>', 'Path to save output')
 	.option('-j, --json <string>', 'Input JSON variables as string')
-	.option('-f, --json-file <string>', 'Input JSON variables as file path')
+	.option('-jf, --json-file <string>', 'Input JSON variables as file path')
 	.option('-g, --generate', 'Send parsed template result to ChatGPT and return response (instead of the generated template)')
+	.option('-f, --format <type>', 'Set format of output: templateOrResponse (default), templateAndResponse', 'templateOrResponse')
 	.action(handler)
 
 program.parse()

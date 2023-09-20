@@ -57,7 +57,7 @@ describe('CLI', () => {
 
 	it('should parse variables from a JSON file', done => {
 		const jsonFilePath = path.resolve(__dirname, './templates/cli/variables.json')
-		exec(`ts-node src/cli.ts "{{test}}" -i -f ${jsonFilePath}`, (error, stdout) => {
+		exec(`ts-node src/cli.ts "{{test}}" -i -jf ${jsonFilePath}`, (error, stdout) => {
 			if (error) {
 				throw new Error(error.message)
 			}

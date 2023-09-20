@@ -1,7 +1,9 @@
 TOP PRIORITY
 - openai stuff
+-- interactive mode - allow further responses to the current thread in the command line. option to save convo to json to pick up later. how to format responses so they are human-readable when saved to text?
 -- how else to quickly be able to tweak/feed responses back in? i.e. how do I continue the same conversation? interactive mode? I could also support saving the convo to json to pick up later
--- personas
+-- personas - presets (json?) for openai models for system prompt, temperature, etc
+-- something similar to the {{gen}} tag in microsoft guidance so running prompts can be part of processing a template
 
 collection stuff? (low priority until I actually need them)
 - decide on best syntax. probably this: {collectionVar[] = 1, "two", 3.14, anotherVarName, varNameWithParams("hello"), functionName("test.txt",1)}

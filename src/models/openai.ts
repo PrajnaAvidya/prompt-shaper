@@ -2,7 +2,9 @@ import OpenAI from 'openai'
 import { Generate } from '../types'
 import { ChatCompletionMessageParam } from 'openai/src/resources/chat/completions'
 
-const openai = new OpenAI()
+const openai = new OpenAI({
+	apiKey: process.env.OPENAI_API_KEY || 'abc123'
+})
 
 export const gpt: Generate = async (prompt: string, model: string): Promise<string> => {
 	const messages: ChatCompletionMessageParam[] = [

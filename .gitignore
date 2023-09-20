@@ -4,5 +4,4 @@ node_modules/*
 dist/*
 
 my_templates/*
-output.txt
-output.md
+output.*

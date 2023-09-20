@@ -15,7 +15,7 @@ describe('CLI', () => {
 	})
 
 	it('should parse a template from a string', done => {
-		exec('ts-node src/cli.ts "{test = \\"hello world\\"}{{test}}" -i', (error, stdout) => {
+		exec('ts-node src/cli.ts -is "{test = \\"hello world\\"}{{test}}"', (error, stdout) => {
 			if (error) {
 				throw new Error(error.message)
 			}
@@ -26,7 +26,7 @@ describe('CLI', () => {
 
 	it('should save output to a file', done => {
 		const outputPath = path.resolve(__dirname, '../output.txt')
-		exec(`ts-node src/cli.ts "{variable = \\"hello world\\"}{{variable}}" -i -s output.txt`, error => {
+		exec(`ts-node src/cli.ts -is "{variable = \\"hello world\\"}{{variable}}" -s output.txt`, error => {
 			if (error) {
 				throw new Error(error.message)
 			}
@@ -36,7 +36,7 @@ describe('CLI', () => {
 	})
 
 	it('should show debug messages', done => {
-		exec('ts-node src/cli.ts "{variable = \\"hello world\\"}{{variable}}" -i -d', (error, stdout) => {
+		exec('ts-node src/cli.ts -is "{variable = \\"hello world\\"}{{variable}}" -d', (error, stdout) => {
 			if (error) {
 				throw new Error(error.message)
 			}
@@ -46,7 +46,7 @@ describe('CLI', () => {
 	})
 
 	it('should parse variables from a JSON string', done => {
-		exec('ts-node src/cli.ts "{{test}}" -i -j \'{ "test": "hello world" }\'', (error, stdout) => {
+		exec('ts-node src/cli.ts -is "{{test}}" -js \'{ "test": "hello world" }\'', (error, stdout) => {
 			if (error) {
 				throw new Error(error.message)
 			}
@@ -57,7 +57,7 @@ describe('CLI', () => {
 
 	it('should parse variables from a JSON file', done => {
 		const jsonFilePath = path.resolve(__dirname, './templates/cli/variables.json')
-		exec(`ts-node src/cli.ts "{{test}}" -i -jf ${jsonFilePath}`, (error, stdout) => {
+		exec(`ts-node src/cli.ts -is "{{test}}" -jf ${jsonFilePath}`, (error, stdout) => {
 			if (error) {
 				throw new Error(error.message)
 			}

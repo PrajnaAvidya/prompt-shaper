@@ -5,20 +5,27 @@ import * as path from 'path'
 import { program } from 'commander'
 import { loadFileContent, transformJsonToVariables } from './utils'
 import { parseTemplate } from './parser'
-import { ParserVariables } from './types'
+import { ChatMessage, ParserVariables } from './types'
 import { gpt } from './models/openai'
+import * as readline from 'readline'
 
 interface CLIOptions {
 	debug?: boolean
-	format: 'templateOrResponse' | 'templateAndResponse'
 	generate?: boolean
+	interactive?: boolean
 	isString?: boolean
 	json?: string
 	jsonFile?: string
 	model: string
+	prompt: string
 	save?: string
+	saveJson?: string
 }
 
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+const prompt = (query: string) => new Promise(resolve => rl.question(query, resolve))
+
+let running = true
 async function handler(input: string, options: CLIOptions) {
 	// handle input type
 	let template: string
@@ -54,26 +61,62 @@ async function handler(input: string, options: CLIOptions) {
 		const parserOptions = { returnParserMatches: false, showDebugMessages: options.debug as boolean }
 
 		const parsed = parseTemplate(template, variables, parserOptions)
-
-		let response: string = ''
-		if (options.format === 'templateAndResponse' || (options.format === 'templateOrResponse' && !options.generate)) {
-			response = parsed
-			console.log(response)
-		}
+		console.log(parsed)
 
 		if (options.generate) {
-			// send to openai
-			const result = await gpt(parsed, options.model)
-			console.log('') // to prevent the stdout buffer from getting overwritten
-			if (options.save) {
-				response = options.format === 'templateAndResponse' ? `${response}\n\n${result}` : result
-				fs.writeFileSync(options.save, response)
+			const conversation: ChatMessage[] = [
+				{
+					role: 'system',
+					content: options.prompt,
+				},
+				{
+					role: 'user',
+					content: parsed,
+				},
+			]
+
+			if (options.interactive) {
+				// interactive mode
+
+				while (running) {
+					const result = await gpt(conversation, options.model)
+					console.log('') // to prevent the stdout buffer from getting overwritten
+
+					conversation.push({ role: 'assistant', content: result })
+					if (options.saveJson) {
+						saveConversationAsJson(conversation, options.saveJson)
+					}
+					if (options.save) {
+						saveConversationAsText(conversation, options.save)
+					}
+
+					const response = await prompt("Your response: ") as string
+					conversation.push({ role: 'user', content: response })
+					if (options.saveJson) {
+						saveConversationAsJson(conversation, options.saveJson)
+					}
+					if (options.save) {
+						saveConversationAsText(conversation, options.save)
+					}
+				}
+			} else {
+				// send single request to openai
+				const result = await gpt(conversation, options.model)
+				console.log('') // to prevent the stdout buffer from getting overwritten
+				if (options.saveJson) {
+					saveConversationAsJson(conversation, options.saveJson)
+				}
+				if (options.save) {
+					saveConversationAsText(conversation, options.save)
+				}
+				running = false
 			}
 		} else {
 			// just return the generated text
 			if (options.save) {
 				fs.writeFileSync(options.save, parsed)
 			}
+			running = false
 		}
 	} catch (error: Error | unknown) {
 		if (error instanceof Error) {
@@ -86,18 +129,33 @@ async function handler(input: string, options: CLIOptions) {
 	}
 }
 
+function saveConversationAsJson(conversation: ChatMessage[], filePath: string) {
+	fs.writeFileSync(filePath, JSON.stringify(conversation))
+}
+
+function saveConversationAsText(conversation: ChatMessage[], filePath: string) {
+	const conversationText = conversation.map(m => `${m.role}\n\n${m.content}`).join("\n\n-----\n\n")
+
+	fs.writeFileSync(filePath, conversationText)
+}
+
 program
 	.description('Run the PromptShaper parser. Docs: https://github.com/PrajnaAvidya/prompt-shaper')
 	.version((process.env.npm_package_version as string) || '', '-v, --version', 'Show the current version')
 	.argument('<input>', 'Input template file path or string')
-	.option('-i, --is-string', 'Indicate that the input is a string, not a file path')
 	.option('-d, --debug', 'Show debug messages')
-	.option('-s, --save <string>', 'Path to save output')
-	.option('-j, --json <string>', 'Input JSON variables as string')
-	.option('-jf, --json-file <string>', 'Input JSON variables as file path')
 	.option('-g, --generate', 'Send parsed template result to ChatGPT and return response (instead of the generated template)')
-	.option('-m, --model <string>', 'What OpenAI model to use: gpt-4 (default), gpt-3.5-turbo-16k, etc', 'gpt-4')
-	.option('-f, --format <string>', 'Set format of output: templateOrResponse (default), templateAndResponse', 'templateOrResponse')
+	.option('-is, --is-string', 'Indicate that the input is a string, not a file path')
+	.option('-i, --interactive', 'Enable interactive mode (continue conversation in command line)')
+	.option('-js, --json <jsonString>', 'Input JSON variables as string')
+	.option('-jf, --json-file <filePath>', 'Input JSON variables as file path')
+	.option('-m, --model <modelType>', 'What OpenAI model to use: gpt-4 (default), gpt-3.5-turbo-16k, etc', 'gpt-4')
+	.option('-p, --prompt <promptString>', 'System prompt for LLM conversation', 'You are a helpful assistant.')
+	.option('-s, --save <filePath>', 'Save text/markdown output to file path')
+	.option('-sj, --save-json <filePath>', 'Save conversation as JSON file')
+	// TODO continue conversation from json
 	.action(handler)
 
 program.parse()
+while (running) {}
+process.exit(0)

@@ -38,10 +38,13 @@ async function handler(input: string, options: CLIOptions) {
 
 	if (options.loadText) {
 		// load text and continue in interactive
-		const conversation = fs.readFileSync(options.loadText, 'utf8').split('\n\n-----\n\n').map(message => {
-			const [role, ...content] = message.split('\n\n', 2);
-			return { role, content: content.join('\n\n') } as ChatMessage;
-		});
+		const conversation = fs
+			.readFileSync(options.loadText, 'utf8')
+			.split('\n\n-----\n\n')
+			.map(message => {
+				const [role, ...content] = message.split('\n\n', 2)
+				return { role, content: content.join('\n\n') } as ChatMessage
+			})
 		await startSavedConversation(conversation, options)
 
 		process.exit(0)
@@ -150,7 +153,7 @@ async function startSavedConversation(conversation: ChatMessage[], options: CLIO
 
 async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOptions) {
 	let userTurn = false
-	if (conversation[conversation.length-1].role !== "user") {
+	if (conversation[conversation.length - 1].role !== 'user') {
 		userTurn = true
 	}
 

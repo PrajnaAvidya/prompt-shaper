@@ -73,6 +73,11 @@ export interface ParserVariables {
 	}
 }
 
+export interface ChatMessage {
+	role: 'system' | 'user' | 'assistant' | 'function'
+	content: string
+}
+
 export interface Generate {
-	(prompt: string, model: string): Promise<string>
+	(messages: ChatMessage[], model: string): Promise<string>
 }

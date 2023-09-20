@@ -9,21 +9,31 @@ node/npm/npx - https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
 
 ## Usage/CLI Options
 Run the CLI using this format: `npx prompt-shaper [options] <input>`
-- `<input>` is treated as a file path by default, use `-i` or `--is-string` to treat input as a template string 
+- `<input>` is treated as a file path by default, use `-is` or `--is-string` to treat input as a template string 
   - Example (default file behavior): `npx prompt-shaper my_template.ps.txt`
-  - Example (string input): `npx prompt-shaper -i "my PromptShaper template"`
-- Save output to a file: `-s or --save <outputPath>`
+  - Example (string input): `npx prompt-shaper -is "my PromptShaper template"`
+- Save output to a text file: `-s or --save <outputPath>`
   - Example: `npx prompt-shaper my_template.ps.txt -s output.md`
+- Save output to a JSON file (generative/interactive modes only): `-sj or --save-json <outputPath>`
+  - Example: `npx prompt-shaper my_template.ps.txt -sj output.json`
 - Show verbose debug messages: `-d or --debug`
   - Example: `npx prompt-shaper my_template.ps.txt -d`
-- You can provide a variables via a JSON string using `-j or --json <jsonString>`
-  - Example: `npx prompt-shaper my_template.ps.txt -j '{ "variableName": "hello world" }'`
+- You can provide a variables via a JSON string using `-js or --json <jsonString>`
+  - Example: `npx prompt-shaper my_template.ps.txt -js '{ "variableName": "hello world" }'`
 - You can provide a variables via a JSON file using `-jf or --json-file <jsonPath>`
   - Example: `npx prompt-shaper my_template.ps.txt -jf variables.json`
-- Send the resulting text to GPT4 by specifying the `-g or --generate` option. You must have `OPENAI_API_KEY` set in your environment for this to work.
+- Send the resulting text to GPT4 by specifying the `-g or --generate` option. You must have `OPENAI_API_KEY` set in your environment for this to work. Note that -g isn't required if you are specifying a model or prompt, or using interactive mode.
   - Example: `OPENAI_API_KEY=abc123 npx prompt-shaper my_template.ps.txt -g`
 - Change the model type by specifying `-m or --model <modelName>`. The default is `gpt-4`.
-  - Example: `OPENAI_API_KEY=abc123 npx prompt-shaper my_template.ps.txt -g -m gpt-3.5-turbo-16k`
+  - Example: `npx prompt-shaper my_template.ps.txt -m gpt-3.5-turbo-16k`
+- Change the system prompt by specifying `-p or --prompt <prompt>`.
+  - Example: `npx prompt-shaper my_template.ps.txt -p "You are a helpful assistant."`
+- Enable interactive mode by specifying `-i or --interactive` (continue conversation in command line)
+  - Example: `npx prompt-shaper my_template.ps.txt -i`
+- Load a previous conversation from JSON and continue in interactive mode with `-lj or --load-json`
+  - Example: `npx prompt-shaper my_template.ps.txt -lj <jsonPath>`
+- Load a previous conversation from text and continue in interactive mode with `-lj or --load-text`
+  - Example: `npx prompt-shaper my_template.ps.txt -lt <jsonPath>`
 
 ## Examples
 See the `samples` directory and try running them with the parser.

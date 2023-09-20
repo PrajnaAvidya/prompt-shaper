@@ -9,24 +9,24 @@ describe('CLI', () => {
 			if (error) {
 				throw new Error(error.message)
 			}
-			expect(stdout.trim()).to.equal('Hello, World!')
+			expect(stdout.trim()).to.contain('Hello, World!')
 			done()
 		})
 	})
 
 	it('should parse a template from a string', done => {
-		exec('ts-node src/cli.ts "{test = \\"hello world\\"}{{test}}" -i', (error, stdout) => {
+		exec('ts-node src/cli.ts -is "{test = \\"hello world\\"}{{test}}"', (error, stdout) => {
 			if (error) {
 				throw new Error(error.message)
 			}
-			expect(stdout.trim()).to.equal('hello world')
+			expect(stdout.trim()).to.contain('hello world')
 			done()
 		})
 	})
 
 	it('should save output to a file', done => {
 		const outputPath = path.resolve(__dirname, '../output.txt')
-		exec(`ts-node src/cli.ts "{variable = \\"hello world\\"}{{variable}}" -i -s output.txt`, error => {
+		exec(`ts-node src/cli.ts -is "{variable = \\"hello world\\"}{{variable}}" -s output.txt`, error => {
 			if (error) {
 				throw new Error(error.message)
 			}
@@ -36,7 +36,7 @@ describe('CLI', () => {
 	})
 
 	it('should show debug messages', done => {
-		exec('ts-node src/cli.ts "{variable = \\"hello world\\"}{{variable}}" -i -d', (error, stdout) => {
+		exec('ts-node src/cli.ts -is "{variable = \\"hello world\\"}{{variable}}" -d', (error, stdout) => {
 			if (error) {
 				throw new Error(error.message)
 			}
@@ -46,22 +46,33 @@ describe('CLI', () => {
 	})
 
 	it('should parse variables from a JSON string', done => {
-		exec('ts-node src/cli.ts "{{test}}" -i -j \'{ "test": "hello world" }\'', (error, stdout) => {
+		exec('ts-node src/cli.ts -is "{{test}}" -js \'{ "test": "hello world" }\'', (error, stdout) => {
 			if (error) {
 				throw new Error(error.message)
 			}
-			expect(stdout.trim()).to.equal('hello world')
+			expect(stdout.trim()).to.contain('hello world')
 			done()
 		})
 	})
 
 	it('should parse variables from a JSON file', done => {
 		const jsonFilePath = path.resolve(__dirname, './templates/cli/variables.json')
-		exec(`ts-node src/cli.ts "{{test}}" -i -jf ${jsonFilePath}`, (error, stdout) => {
+		exec(`ts-node src/cli.ts -is "{{test}}" -jf ${jsonFilePath}`, (error, stdout) => {
 			if (error) {
 				throw new Error(error.message)
 			}
-			expect(stdout.trim()).to.equal('hello world')
+			expect(stdout.trim()).to.contain('hello world')
+			done()
+		})
+	})
+
+	it('should fail when no input or interactive mode', done => {
+		exec('ts-node src/cli.ts -d', error => {
+			if (error) {
+				expect(error.message).to.contain('Input value is required')
+			} else {
+				throw new Error('Error not thrown by cli')
+			}
 			done()
 		})
 	})

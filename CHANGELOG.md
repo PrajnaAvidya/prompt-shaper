@@ -1,3 +1,22 @@
+# [1.0.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.11...v1.0.0) (2023-09-20)
+
+
+### Bug Fixes
+
+* fix tests in CI ([69ff4d3](https://github.com/PrajnaAvidya/prompt-shaper/commit/69ff4d35d3a97c95b50daa82c063ee519067e96c))
+
+
+### Features
+
+* add -m to specify model type for openai calls ([4a1707b](https://github.com/PrajnaAvidya/prompt-shaper/commit/4a1707b4a0eaaa09a4161cb9aa1be8b8ac48269a))
+* add format option -f ([dc8e749](https://github.com/PrajnaAvidya/prompt-shaper/commit/dc8e749d5802f42f4e1ba7a221f9e0ad25819784))
+* add support for -g option to send parsed template to OpenAI ([9316d09](https://github.com/PrajnaAvidya/prompt-shaper/commit/9316d09e626d52677fac9378684766149084cc03))
+
+
+### BREAKING CHANGES
+
+* JSON var file option was changed
+
 ## [0.0.11](https://github.com/PrajnaAvidya/prompt-shaper/compare/v0.0.10...v0.0.11) (2023-08-11)
 
 

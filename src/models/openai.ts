@@ -2,9 +2,9 @@ import OpenAI from 'openai'
 import { Generate } from '../types'
 import { ChatCompletionMessageParam } from 'openai/src/resources/chat/completions'
 
-const openai = new OpenAI();
+const openai = new OpenAI()
 
-export const gpt: Generate = async(prompt: string, model: string): Promise<string> => {
+export const gpt: Generate = async (prompt: string, model: string): Promise<string> => {
 	const messages: ChatCompletionMessageParam[] = [
 		{
 			role: 'system',
@@ -16,7 +16,7 @@ export const gpt: Generate = async(prompt: string, model: string): Promise<strin
 		},
 	]
 
-	console.log("Sending request to OpenAI...")
+	console.log('Sending request to OpenAI...')
 
 	let response = ''
 
@@ -25,16 +25,16 @@ export const gpt: Generate = async(prompt: string, model: string): Promise<strin
 			messages,
 			model,
 			stream: true,
-		});
+		})
 		for await (const part of stream) {
 			const content = part.choices[0]?.delta?.content || ''
 			response += content
-			process.stdout.write(content);
+			process.stdout.write(content)
 		}
 
 		return response
 	} catch (e) {
 		console.log(e)
-		return ""
+		return ''
 	}
 }

@@ -64,7 +64,7 @@ async function handler(input: string, options: CLIOptions) {
 		if (options.generate) {
 			// send to openai
 			const result = await gpt(parsed, options.model)
-			console.log("") // to prevent the stdout buffer from getting overwritten
+			console.log('') // to prevent the stdout buffer from getting overwritten
 			if (options.save) {
 				response = options.format === 'templateAndResponse' ? `${response}\n\n${result}` : result
 				fs.writeFileSync(options.save, response)

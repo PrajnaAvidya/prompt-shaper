@@ -4,6 +4,11 @@ Working draft of my prompt construction templating/scripting language.
 ## Why
 I'm a programmer and like many I've seen great productivity gains due to the assistance of LLMs. the standard way of interacting with model through a chat interface works great for a lot of things, but I do a lot of what I call "non-linear" workflows and find myself spending a lot of time copying and pasting out of text files to construct the exact prompts I want to run. I wanted to add a UI to do some of these tasks in Prajna Chat (my custom GPT client) but decided that first I needed some kind of text/templating engine to run all this. Inspired by templating engines like Handlebars I decided to build my own variant specifically designed for running GPT/LLM prompts. The idea is that you can just work out of a text editor/IDE and save a lot of time vs doing a bunch of copy/pasting of repeatedly used text fragments. Or you could build a UI around it and make it even more powerful.
 
+## Features
+- Templating Engine: Work out of a text editor/IDE and save a lot of time by avoiding repetitive copy/pasting of text fragments. Through the use of slots, variables, and functions you can dynamically load and render text into LLM prompts.
+- CLI: A variety of command-line options to customize usage. You can treat the input as a file path or a template string, save the output to text or JSON file, provide variables via JSON, send the resulting text to OpenAI/ChatGPT, change the model type, and many more.
+- Interactive Mode: Continue your conversation in the command line, or load a previous conversation from JSON or text and continue in interactive mode.
+
 ## Requirements
 node/npm/npx - https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
 

@@ -37,7 +37,7 @@ Run the CLI using this format: `npx prompt-shaper [options] <input>`
   - Example: `npx prompt-shaper my_template.ps.txt -i`
 - Load a previous conversation from JSON and continue in interactive mode with `-lj or --load-json`
   - Example: `npx prompt-shaper my_template.ps.txt -lj <jsonPath>`
-- Load a previous conversation from text and continue in interactive mode with `-lj or --load-text`
+- Load a previous conversation from text and continue in interactive mode with `-lt or --load-text`
   - Example: `npx prompt-shaper my_template.ps.txt -lt <jsonPath>`
 
 ## Examples

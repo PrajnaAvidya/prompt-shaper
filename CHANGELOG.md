@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v1.1.0...v1.2.0) (2023-09-26)
+
+
+### Features
+
+* add more context to contents of loaded files ([5300e68](https://github.com/PrajnaAvidya/prompt-shaper/commit/5300e6877bc000e1e65396a798b7c93944378717))
+
 # [1.1.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v1.0.0...v1.1.0) (2023-09-20)
 
 

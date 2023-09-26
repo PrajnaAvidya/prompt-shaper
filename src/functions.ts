@@ -23,11 +23,11 @@ export const functions: Record<string, PromptShaperFunction> = {
 		if (!filePath.value || typeof filePath.value !== 'string') {
 			throw new Error('Invalid file path')
 		}
-		return loadFileContent(filePath.value as string)
+		return `\n===\nFile: ${filePath.value}\n\n${loadFileContent(filePath.value) as string}\n===\n`
 	},
 }
 
-// to allow people to add their own functions
+// allow people to add their own functions
 export const registerFunction = (name: string, func: PromptShaperFunction): void => {
 	if (functions[name]) {
 		throw new Error(`Function ${name} is already registered.`)

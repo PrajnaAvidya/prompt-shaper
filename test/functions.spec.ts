@@ -41,7 +41,7 @@ describe('functions', () => {
 		const template = loadFileContent('./test/templates/functions/load.ps.txt')
 		const result = parseTemplate(template)
 
-		const expectedOutput = loadFileContent('./test/templates/functions/load-content.ps.txt')
+		const expectedOutput = `===\nFile: test/templates/functions/load-content.ps.txt\n\n${loadFileContent('./test/templates/functions/load-content.ps.txt')}\n===`;
 		expect(result).to.equal(expectedOutput)
 	})
 

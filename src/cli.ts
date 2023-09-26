@@ -64,6 +64,7 @@ async function handler(input: string, options: CLIOptions) {
 		process.exit(0)
 	}
 
+	// all other options require an input
 	if (!input) {
 		console.error('Input value is required')
 		process.exit(1)
@@ -77,9 +78,11 @@ async function handler(input: string, options: CLIOptions) {
 		template = loadFileContent(path.resolve(input))
 	}
 
+	// resolve save paths
 	if (options.save) options.save = path.resolve(options.save)
+	if (options.saveJson) options.saveJson = path.resolve(options.saveJson)
 
-	// handle json vars
+	// handle user provided vars
 	let variables: ParserVariables = {}
 	if (options.json) {
 		try {
@@ -99,12 +102,14 @@ async function handler(input: string, options: CLIOptions) {
 		}
 	}
 
+	// run the parser
 	try {
 		const parserOptions = { returnParserMatches: false, showDebugMessages: options.debug as boolean }
 
 		const parsed = parseTemplate(template, variables, parserOptions)
 		console.log(`user\n${[parsed]}\n-----`)
 
+		// check if user wants to send results to LLM
 		if (options.generate || options.interactive || options.raw || options.model !== 'gpt-4' || options.prompt !== 'You are a helpful assistant.') {
 			const conversation: ChatMessage[] = [
 				{
@@ -144,7 +149,7 @@ async function handler(input: string, options: CLIOptions) {
 }
 
 async function startSavedConversation(conversation: ChatMessage[], options: CLIOptions) {
-	// show convo
+	// show convo history to user
 	for (const message of conversation) {
 		console.log(`${message.role}\n${message.content}\n-----`)
 	}
@@ -158,6 +163,7 @@ async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOpti
 		userTurn = true
 	}
 
+	// runs forever until user hits control+c
 	const running = true
 	while (running) {
 		if (!userTurn) {
@@ -165,6 +171,7 @@ async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOpti
 			userTurn = true
 		}
 
+		// collect user response and then parse response if not in raw mode
 		const response = (await prompt('Your response: ')) as string
 		const parsedResponse = options.raw ? response : parseTemplate(response, variables || {}, { showDebugMessages: options.debug }, 0)
 		if (parsedResponse !== response) {
@@ -174,6 +181,7 @@ async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOpti
 		}
 		userTurn = false
 
+		// update/save chat history
 		conversation.push({ role: 'user', content: parsedResponse })
 		if (options.saveJson) {
 			saveConversationAsJson(conversation, options.saveJson)
@@ -189,6 +197,7 @@ async function makeCompletionRequest(conversation: ChatMessage[], options: CLIOp
 	const result = await gpt(conversation, options.model)
 	console.log('\n-----')
 
+	// update/save chat history
 	conversation.push({ role: 'assistant', content: result })
 	if (options.saveJson) {
 		saveConversationAsJson(conversation, options.saveJson)

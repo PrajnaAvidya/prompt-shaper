@@ -43,7 +43,7 @@ async function handler(input: string, options: CLIOptions) {
 			.readFileSync(options.loadText, 'utf8')
 			.split('\n\n-----\n\n')
 			.map(message => {
-				const [role, ...content] = message.split('\n\n', 2)
+				const [role, ...content] = message.split('\n\n')
 				return { role, content: content.join('\n\n') } as ChatMessage
 			})
 		await startSavedConversation(conversation, options)

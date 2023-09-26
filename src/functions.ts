@@ -23,7 +23,7 @@ export const functions: Record<string, PromptShaperFunction> = {
 		if (!filePath.value || typeof filePath.value !== 'string') {
 			throw new Error('Invalid file path')
 		}
-		return `\n===\nFile: ${filePath.value}\n\n${loadFileContent(filePath.value) as string}\n===\n`
+		return `\n===\n\nFile: ${filePath.value}\n\n${loadFileContent(filePath.value) as string}\n\n===\n`
 	},
 }
 

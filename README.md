@@ -7,7 +7,7 @@ I'm a programmer and like many I've seen great productivity gains due to the ass
 ## Features
 - Templating Engine: Work out of a text editor/IDE and save a lot of time by avoiding repetitive copy/pasting of text fragments. Through the use of slots, variables, and functions you can dynamically load and render text into LLM prompts.
 - CLI: A variety of command-line options to customize usage. You can treat the input as a file path or a template string, save the output to text or JSON file, provide variables via JSON, send the resulting text to OpenAI/ChatGPT, change the model type, and many more.
-- Interactive Mode: Continue your conversation in the command line, or load a previous conversation from JSON or text and continue in interactive mode.
+- Interactive Mode: Continue your conversation in the command line, or load a previous conversation from JSON or text and continue in interactive mode. You can even use PromptShaper tags in interactive mode!
 
 ## Requirements
 node/npm/npx - https://docs.npmjs.com/downloading-and-installing-node-js-and-npm

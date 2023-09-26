@@ -20,6 +20,7 @@ interface CLIOptions {
 	loadText?: string
 	model: string
 	prompt: string
+	raw?: boolean
 	save?: string
 	saveJson?: string
 }
@@ -50,7 +51,7 @@ async function handler(input: string, options: CLIOptions) {
 		process.exit(0)
 	}
 
-	if (options.interactive && !input) {
+	if ((options.interactive || options.raw) && !input) {
 		// start new conversation in interactive
 		const conversation: ChatMessage[] = [
 			{
@@ -104,7 +105,7 @@ async function handler(input: string, options: CLIOptions) {
 		const parsed = parseTemplate(template, variables, parserOptions)
 		console.log(`user\n${[parsed]}\n-----`)
 
-		if (options.generate || options.interactive || options.model !== 'gpt-4' || options.prompt !== 'You are a helpful assistant.') {
+		if (options.generate || options.interactive || options.raw || options.model !== 'gpt-4' || options.prompt !== 'You are a helpful assistant.') {
 			const conversation: ChatMessage[] = [
 				{
 					role: 'system',
@@ -116,9 +117,9 @@ async function handler(input: string, options: CLIOptions) {
 				},
 			]
 
-			if (options.interactive) {
+			if (options.interactive || options.raw) {
 				// interactive mode
-				await interactiveModeLoop(conversation, options)
+				await interactiveModeLoop(conversation, options, variables)
 			} else {
 				// send single request to openai
 				await makeCompletionRequest(conversation, options)
@@ -151,7 +152,7 @@ async function startSavedConversation(conversation: ChatMessage[], options: CLIO
 	await interactiveModeLoop(conversation, options)
 }
 
-async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOptions) {
+async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOptions, variables?: ParserVariables) {
 	let userTurn = false
 	if (conversation[conversation.length - 1].role !== 'user') {
 		userTurn = true
@@ -165,10 +166,15 @@ async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOpti
 		}
 
 		const response = (await prompt('Your response: ')) as string
-		console.log('-----')
+		const parsedResponse = options.raw ? response : parseTemplate(response, variables || {}, { showDebugMessages: options.debug }, 0)
+		if (parsedResponse !== response) {
+			console.log(parsedResponse, '\n-----')
+		} else {
+			console.log('-----')
+		}
 		userTurn = false
 
-		conversation.push({ role: 'user', content: response })
+		conversation.push({ role: 'user', content: parsedResponse })
 		if (options.saveJson) {
 			saveConversationAsJson(conversation, options.saveJson)
 		}
@@ -216,6 +222,7 @@ program
 	.option('-lt, --load-text <filePath>', 'Load conversation from text/markdown file and continue in interactive mode')
 	.option('-m, --model <modelType>', 'What OpenAI model to use: gpt-4 (default), gpt-3.5-turbo-16k, etc', 'gpt-4')
 	.option('-p, --prompt <promptString>', 'System prompt for LLM conversation', 'You are a helpful assistant.')
+	.option('-r, --raw', "Raw interactive mode. Don't parse any user responses for PromptShaper tags.")
 	.option('-s, --save <filePath>', 'Save text/markdown output to file path')
 	.option('-sj, --save-json <filePath>', 'Save conversation as JSON file')
 	.action(handler)

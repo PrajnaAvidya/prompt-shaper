@@ -1,3 +1,17 @@
+# [1.3.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v1.2.0...v1.3.0) (2023-09-26)
+
+
+### Bug Fixes
+
+* 🐛 add more whitespace to loaded files ([c5479b2](https://github.com/PrajnaAvidya/prompt-shaper/commit/c5479b276eb4c5676f2c784b97e2a7334453f088))
+* 🐛 fix text loading issue ([7efbd48](https://github.com/PrajnaAvidya/prompt-shaper/commit/7efbd48d1ae4d0382c1b7c2019ede4937f633653))
+* 🐛 validate path for saveJson and add some more comments ([bb39909](https://github.com/PrajnaAvidya/prompt-shaper/commit/bb39909b7410fe5e154e7033b08528e9f959f38f))
+
+
+### Features
+
+* parse PromptShaper tags in interactive mode ([e51a4ab](https://github.com/PrajnaAvidya/prompt-shaper/commit/e51a4abfc969da81a1967411dd7039931dacd6ed)), closes [#16](https://github.com/PrajnaAvidya/prompt-shaper/issues/16)
+
 # [1.2.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v1.1.0...v1.2.0) (2023-09-26)
 
 

@@ -24,8 +24,8 @@ export const functions: Record<string, PromptShaperFunction> = {
 			throw new Error('Invalid file path')
 		}
 		// get file extension for markdown
-		const parts = filePath.value.split(".")
-		const extension = parts.length > 1 ? `${parts.slice(-1)}` : ""
+		const parts = filePath.value.split('.')
+		const extension = parts.length > 1 ? `${parts.slice(-1)}` : ''
 
 		return `\n\nFile: ${filePath.value}\n\`\`\`${extension}\n${loadFileContent(filePath.value) as string}\n\`\`\`\n\n`
 	},

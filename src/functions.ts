@@ -23,7 +23,11 @@ export const functions: Record<string, PromptShaperFunction> = {
 		if (!filePath.value || typeof filePath.value !== 'string') {
 			throw new Error('Invalid file path')
 		}
-		return `\n===\n\nFile: ${filePath.value}\n\n${loadFileContent(filePath.value) as string}\n\n===\n`
+		// get file extension for markdown
+		const parts = filePath.value.split('.')
+		const extension = parts.length > 1 ? `${parts.slice(-1)}` : ''
+
+		return `\n\nFile: ${filePath.value}\n\`\`\`${extension}\n${loadFileContent(filePath.value) as string}\n\`\`\`\n\n`
 	},
 }
 

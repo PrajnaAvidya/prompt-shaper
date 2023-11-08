@@ -1,11 +1,13 @@
+how to save default/stored prefs for multiple requests? so you could do something like --profile blah instead of 6 different options. also defaults for certain options? being able to change default model would be nice
+
+officially switch to .md for files (.md or .ps.md?)
+
 nice to haves
 - something similar to the {{gen}} tag in microsoft guidance so running prompts can be part of processing a template
-- partial file load (e.g. optional start/end line params for load. except that sucks for when files change, what if there's a symbol start/escape sequence type thing?)
 - tag for making gpt calls e.g. %gpt% (do they need an option to be deferred vs instant)
 -- ability to save gpt call response to a variable
 -- placeholders for responses -- i.e. as it scans down the file you can define a thing where it executes up until there and then captures the response and either adds it as another chatgpt message, or captures it into a variable
-- param to show filename with load() (ie the resulting variable/value contains the file name and surrounding blocks to separate it)
-- syntax highlighting for .ps.txt in IDEs
+- partial file load (e.g. optional start/end line params for load. except that sucks for when files change, what if there's a symbol start/escape sequence type thing?)
 - params for inline variables e.g. {rectArea(length, width)=multiply(length, width)}
 - parse multiple files or a directory
 -- load directory into a collection

@@ -1,7 +1,5 @@
 how to save default/stored prefs for multiple requests? so you could do something like --profile blah instead of 6 different options. also defaults for certain options? being able to change default model would be nice
 
-officially switch to .md for files (.md or .ps.md?)
-
 nice to haves
 - something similar to the {{gen}} tag in microsoft guidance so running prompts can be part of processing a template
 - tag for making gpt calls e.g. %gpt% (do they need an option to be deferred vs instant)

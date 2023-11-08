@@ -5,7 +5,7 @@ import { loadFileContent } from '../src/utils'
 
 describe('slots', () => {
 	it('should correctly render a slot with raw string', () => {
-		const template = loadFileContent('./test/templates/slots/raw-string.ps.txt')
+		const template = loadFileContent('./test/templates/slots/raw-string.ps.md')
 
 		const result = parseTemplate(template)
 
@@ -13,7 +13,7 @@ describe('slots', () => {
 	})
 
 	it('should correctly render a slot with raw number', () => {
-		const template = loadFileContent('./test/templates/slots/raw-number.ps.txt')
+		const template = loadFileContent('./test/templates/slots/raw-number.ps.md')
 
 		const result = parseTemplate(template)
 
@@ -21,7 +21,7 @@ describe('slots', () => {
 	})
 
 	it('should correctly render a slot with string variable', () => {
-		const template = loadFileContent('./test/templates/slots/string-variable.ps.txt')
+		const template = loadFileContent('./test/templates/slots/string-variable.ps.md')
 		const variables: ParserVariables = {
 			name: { name: 'name', type: ValueType.string, value: 'World', params: [] },
 		}
@@ -32,7 +32,7 @@ describe('slots', () => {
 	})
 
 	it('should correctly render a slot with number variable', () => {
-		const template = loadFileContent('./test/templates/slots/number-variable.ps.txt')
+		const template = loadFileContent('./test/templates/slots/number-variable.ps.md')
 		const variables: ParserVariables = {
 			age: { name: 'age', type: ValueType.number, value: 25, params: [] },
 		}
@@ -43,7 +43,7 @@ describe('slots', () => {
 	})
 
 	it('should correctly render a slot with function variable', () => {
-		const template = loadFileContent('./test/templates/slots/function.ps.txt')
+		const template = loadFileContent('./test/templates/slots/function.ps.md')
 		const variables: ParserVariables = {
 			sum: {
 				name: 'sum',
@@ -62,7 +62,7 @@ describe('slots', () => {
 	})
 
 	it('should not render slots that have no variable', () => {
-		const template = loadFileContent('./test/templates/slots/undefined.ps.txt')
+		const template = loadFileContent('./test/templates/slots/undefined.ps.md')
 
 		const result = parseTemplate(template)
 
@@ -70,13 +70,13 @@ describe('slots', () => {
 	})
 
 	it('should throw an error with malformed slot', () => {
-		const template = loadFileContent('./test/templates/slots/malformed.ps.txt')
+		const template = loadFileContent('./test/templates/slots/malformed.ps.md')
 
 		expect(() => parseTemplate(template)).to.throw(`Syntax error at line 1 column 2: '{'`)
 	})
 
 	it('should render raw text when the @ symbol is used', () => {
-		const template = loadFileContent('./test/templates/slots/raw-text.ps.txt')
+		const template = loadFileContent('./test/templates/slots/raw-text.ps.md')
 		const variables: ParserVariables = {
 			rawText: {
 				name: 'rawText',

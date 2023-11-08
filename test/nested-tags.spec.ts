@@ -4,7 +4,7 @@ import { loadFileContent } from '../src/utils'
 
 describe('nested tags', () => {
 	it('should correctly parse nested variables and slots', () => {
-		const template = loadFileContent('./test/templates/nested-tags/nested-variables.ps.txt')
+		const template = loadFileContent('./test/templates/nested-tags/nested-variables.ps.md')
 
 		const result = parseTemplate(template)
 

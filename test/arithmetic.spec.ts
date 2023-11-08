@@ -14,7 +14,7 @@ describe('arithmetic', () => {
 	}
 
 	it('should correctly add two numbers', () => {
-		const template = loadFileContent('./test/templates/arithmetic/add.ps.txt')
+		const template = loadFileContent('./test/templates/arithmetic/add.ps.md')
 
 		const result = parseTemplate(template, variables)
 
@@ -24,7 +24,7 @@ describe('arithmetic', () => {
 	})
 
 	it('should correctly subtract two numbers', () => {
-		const template = loadFileContent('./test/templates/arithmetic/subtract.ps.txt')
+		const template = loadFileContent('./test/templates/arithmetic/subtract.ps.md')
 
 		const result = parseTemplate(template, variables)
 
@@ -34,7 +34,7 @@ describe('arithmetic', () => {
 	})
 
 	it('should correctly multiply two numbers', () => {
-		const template = loadFileContent('./test/templates/arithmetic/multiply.ps.txt')
+		const template = loadFileContent('./test/templates/arithmetic/multiply.ps.md')
 
 		const result = parseTemplate(template, variables)
 
@@ -44,7 +44,7 @@ describe('arithmetic', () => {
 	})
 
 	it('should correctly divide two numbers', () => {
-		const template = loadFileContent('./test/templates/arithmetic/divide.ps.txt')
+		const template = loadFileContent('./test/templates/arithmetic/divide.ps.md')
 
 		const result = parseTemplate(template, variables)
 
@@ -54,7 +54,7 @@ describe('arithmetic', () => {
 	})
 
 	it('should throw an error when dividing by zero', () => {
-		const template = loadFileContent('./test/templates/arithmetic/divide-by-zero.ps.txt')
+		const template = loadFileContent('./test/templates/arithmetic/divide-by-zero.ps.md')
 		const variables: ParserVariables = {
 			num: { name: 'num', type: ValueType.number, value: 20, params: [] },
 		}
@@ -63,7 +63,7 @@ describe('arithmetic', () => {
 	})
 
 	it('should correctly compute powers', () => {
-		const template = loadFileContent('./test/templates/arithmetic/powers.ps.txt')
+		const template = loadFileContent('./test/templates/arithmetic/powers.ps.md')
 
 		const result = parseTemplate(template, variables)
 
@@ -71,7 +71,7 @@ describe('arithmetic', () => {
 	})
 
 	it('should respect parentheses', () => {
-		const template = loadFileContent('./test/templates/arithmetic/parentheses.ps.txt')
+		const template = loadFileContent('./test/templates/arithmetic/parentheses.ps.md')
 
 		const result = parseTemplate(template, variables)
 
@@ -79,7 +79,7 @@ describe('arithmetic', () => {
 	})
 
 	it('should work with multiple operands', () => {
-		const template = loadFileContent('./test/templates/arithmetic/multiple-operands.ps.txt')
+		const template = loadFileContent('./test/templates/arithmetic/multiple-operands.ps.md')
 
 		const result = parseTemplate(template, variables)
 
@@ -87,7 +87,7 @@ describe('arithmetic', () => {
 	})
 
 	it('should handle complex operations', () => {
-		const template = loadFileContent('./test/templates/arithmetic/complex.ps.txt')
+		const template = loadFileContent('./test/templates/arithmetic/complex.ps.md')
 
 		const result = parseTemplate(template, variables)
 

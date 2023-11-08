@@ -5,7 +5,7 @@ import { loadFileContent } from '../src/utils'
 
 describe('escaped characters', () => {
 	it('should correctly handle escaped braces', () => {
-		const template = loadFileContent('./test/templates/escaped-chars/braces.ps.txt')
+		const template = loadFileContent('./test/templates/escaped-chars/braces.ps.md')
 		const variables: ParserVariables = {
 			name: { name: 'name', type: ValueType.string, value: 'World', params: [] },
 		}
@@ -16,7 +16,7 @@ describe('escaped characters', () => {
 	})
 
 	it('should correctly handle escaped double quotes', () => {
-		const template = loadFileContent('./test/templates/escaped-chars/double-quotes.ps.txt')
+		const template = loadFileContent('./test/templates/escaped-chars/double-quotes.ps.md')
 		const variables: ParserVariables = {
 			quote: { name: 'quote', type: ValueType.string, value: "It's a beautiful day", params: [] },
 		}

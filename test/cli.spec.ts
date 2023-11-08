@@ -5,7 +5,7 @@ import * as fs from 'fs'
 
 describe('CLI', () => {
 	it('should parse a template from a file', done => {
-		exec('ts-node src/cli.ts test/templates/cli/sample.ps.txt', (error, stdout) => {
+		exec('ts-node src/cli.ts test/templates/cli/sample.ps.md', (error, stdout) => {
 			if (error) {
 				throw new Error(error.message)
 			}

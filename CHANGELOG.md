@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v1.3.0...v1.4.0) (2023-11-08)
+
+
+### Features
+
+* render loaded files in markdown tags, and attempt to use file extension ([207181d](https://github.com/PrajnaAvidya/prompt-shaper/commit/207181dee81dbbf6845464a2c771ccf3ee4a2f42)), closes [#18](https://github.com/PrajnaAvidya/prompt-shaper/issues/18)
+
 # [1.3.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v1.2.0...v1.3.0) (2023-09-26)
 
 

@@ -106,11 +106,12 @@ async function handler(input: string, options: CLIOptions) {
 	try {
 		const parserOptions = { returnParserMatches: false, showDebugMessages: options.debug as boolean }
 
-		const parsed = parseTemplate(template, variables, parserOptions)
+		// parse template if not in raw mode
+		const parsed = options.raw ? template : parseTemplate(template, variables, parserOptions)
 		console.log(`user\n${[parsed]}\n-----`)
 
 		// check if user wants to send results to LLM
-		if (options.generate || options.interactive || options.raw || options.model !== 'gpt-4' || options.prompt !== 'You are a helpful assistant.') {
+		if (options.generate || options.interactive || options.model !== 'gpt-4' || options.prompt !== 'You are a helpful assistant.') {
 			const conversation: ChatMessage[] = [
 				{
 					role: 'system',

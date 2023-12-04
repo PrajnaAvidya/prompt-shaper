@@ -76,4 +76,14 @@ describe('CLI', () => {
 			done()
 		})
 	})
+
+	it('should not parse input template when in raw mode', done => {
+		exec('ts-node src/cli.ts -r test/templates/cli/raw.ps.md', (error, stdout) => {
+			if (error) {
+				throw new Error(error.message)
+			}
+			expect(stdout.trim()).to.contain('none of this {{ }}} should be parsed! // !{}}}{{')
+			done()
+		})
+	})
 })

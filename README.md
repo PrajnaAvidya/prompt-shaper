@@ -36,6 +36,8 @@ Run the CLI using this format: `npx prompt-shaper [options] <input>`
 - Enable interactive mode by specifying `-i or --interactive` (continue conversation in command line)
   - Example (send template to interactive mode): `npx prompt-shaper my_template.ps.md -i`
   - Example (start empty new chat in interactive mode): `npx prompt-shaper -i`
+- Use raw mode to not run the parser on any inputs
+  - Example: `npx prompt-shaper -r raw.ps.md`
 - Load a previous conversation from JSON and continue in interactive mode with `-lj or --load-json`
   - Example: `npx prompt-shaper my_template.ps.md -lj <jsonPath>`
 - Load a previous conversation from text and continue in interactive mode with `-lt or --load-text`

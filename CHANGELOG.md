@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v1.4.0...v2.0.0) (2023-12-04)
+
+
+### Bug Fixes
+
+* 🐛 don't parse any inputs for raw mode ([01fb77a](https://github.com/PrajnaAvidya/prompt-shaper/commit/01fb77a5200eb065322cf08305b83e6715a063e6)), closes [#21](https://github.com/PrajnaAvidya/prompt-shaper/issues/21)
+
+
+### BREAKING CHANGES
+
+* 🧨 raw mode flag will no longer automatically trigger interactive mode
+
 # [1.4.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v1.3.0...v1.4.0) (2023-11-08)
 
 

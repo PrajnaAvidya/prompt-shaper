@@ -40,7 +40,7 @@ const defaultOptions: CLIOptions = {
 	raw: process.env.PROMPT_SHAPER_RAW === 'true',
 	save: process.env.PROMPT_SHAPER_SAVE,
 	saveJson: process.env.PROMPT_SHAPER_SAVE_JSON,
-};
+}
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const prompt = (query: string) => new Promise(resolve => rl.question(query, resolve))
@@ -230,13 +230,13 @@ function saveConversationAsText(conversation: ChatMessage[], filePath: string) {
 function startConversation(systemPrompt: string, model: string): ChatMessage[] {
 	const conversation: ChatMessage[] = []
 	if (!model.startsWith('o1-')) {
-		conversation.push(		{
+		conversation.push({
 			role: 'system',
 			content: systemPrompt,
 		})
 	}
 
-	return conversation;
+	return conversation
 }
 
 program

@@ -230,7 +230,7 @@ program
 	.option('-jf, --json-file <filePath>', 'Input JSON variables as file path')
 	.option('-lj, --load-json <filePath>', 'Load conversation from JSON file and continue in interactive mode')
 	.option('-lt, --load-text <filePath>', 'Load conversation from text/markdown file and continue in interactive mode')
-	.option('-m, --model <modelType>', 'What OpenAI model to use: gpt-4 (default), gpt-3.5-turbo-16k, etc', 'gpt-4')
+	.option('-m, --model <modelType>', 'What OpenAI model to use: gpt-4o (default), o1-mini, etc', 'gpt-4o')
 	.option('-p, --prompt <promptString>', 'System prompt for LLM conversation', 'You are a helpful assistant.')
 	.option('-r, --raw', "Raw interactive mode. Don't parse any user responses for PromptShaper tags.")
 	.option('-s, --save <filePath>', 'Save text/markdown output to file path')

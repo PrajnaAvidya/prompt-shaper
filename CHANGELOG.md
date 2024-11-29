@@ -1,3 +1,16 @@
+# [2.1.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v2.0.0...v2.1.0) (2024-11-29)
+
+
+### Bug Fixes
+
+* fix cli tests/parsing ([947e9a7](https://github.com/PrajnaAvidya/prompt-shaper/commit/947e9a75c8c40435f60fb02716ed110aa789087a))
+
+
+### Features
+
+* add support for env vars ([fcda4c4](https://github.com/PrajnaAvidya/prompt-shaper/commit/fcda4c4e964d9515c60bd38b948c683be604f49e)), closes [#27](https://github.com/PrajnaAvidya/prompt-shaper/issues/27)
+* change default model to gpt-4o ([af0783f](https://github.com/PrajnaAvidya/prompt-shaper/commit/af0783f3d79f4296bdfb03307046f4b9b5849e54))
+
 # [2.0.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v1.4.0...v2.0.0) (2023-12-04)
 
 

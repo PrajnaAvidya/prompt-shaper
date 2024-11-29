@@ -123,7 +123,7 @@ async function handler(input: string, options: CLIOptions) {
 		console.log(`user\n${[parsed]}\n-----`)
 
 		// check if user wants to send results to LLM
-		if (options.generate || options.interactive || options.model !== 'gpt-4' || options.prompt !== 'You are a helpful assistant.') {
+		if (options.generate || options.interactive || options.model !== 'gpt-4o' || options.prompt !== 'You are a helpful assistant.') {
 			const conversation: ChatMessage[] = [
 				...startConversation(options.prompt, options.model),
 				{

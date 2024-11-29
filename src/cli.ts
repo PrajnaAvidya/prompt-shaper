@@ -25,6 +25,23 @@ interface CLIOptions {
 	saveJson?: string
 }
 
+// parse env vars/defaults
+const defaultOptions: CLIOptions = {
+	debug: process.env.PROMPT_SHAPER_DEBUG === 'true',
+	generate: process.env.PROMPT_SHAPER_GENERATE === 'true',
+	isString: process.env.PROMPT_SHAPER_IS_STRING === 'true',
+	interactive: process.env.PROMPT_SHAPER_INTERACTIVE === 'true',
+	json: process.env.PROMPT_SHAPER_JSON,
+	jsonFile: process.env.PROMPT_SHAPER_JSON_FILE,
+	loadJson: process.env.PROMPT_SHAPER_LOAD_JSON,
+	loadText: process.env.PROMPT_SHAPER_LOAD_TEXT,
+	model: process.env.PROMPT_SHAPER_MODEL || 'gpt-4o',
+	prompt: process.env.PROMPT_SHAPER_PROMPT || 'You are a helpful assistant.',
+	raw: process.env.PROMPT_SHAPER_RAW === 'true',
+	save: process.env.PROMPT_SHAPER_SAVE,
+	saveJson: process.env.PROMPT_SHAPER_SAVE_JSON,
+};
+
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const prompt = (query: string) => new Promise(resolve => rl.question(query, resolve))
 
@@ -53,12 +70,7 @@ async function handler(input: string, options: CLIOptions) {
 
 	if ((options.interactive || options.raw) && !input) {
 		// start new conversation in interactive
-		const conversation: ChatMessage[] = [
-			{
-				role: 'system',
-				content: options.prompt,
-			},
-		]
+		const conversation: ChatMessage[] = startConversation(options.prompt, options.model)
 		await startSavedConversation(conversation, options)
 
 		process.exit(0)
@@ -113,10 +125,7 @@ async function handler(input: string, options: CLIOptions) {
 		// check if user wants to send results to LLM
 		if (options.generate || options.interactive || options.model !== 'gpt-4' || options.prompt !== 'You are a helpful assistant.') {
 			const conversation: ChatMessage[] = [
-				{
-					role: 'system',
-					content: options.prompt,
-				},
+				...startConversation(options.prompt, options.model),
 				{
 					role: 'user',
 					content: parsed,
@@ -218,23 +227,35 @@ function saveConversationAsText(conversation: ChatMessage[], filePath: string) {
 	fs.writeFileSync(filePath, conversationText)
 }
 
+function startConversation(systemPrompt: string, model: string): ChatMessage[] {
+	const conversation: ChatMessage[] = []
+	if (!model.startsWith('o1-')) {
+		conversation.push(		{
+			role: 'system',
+			content: systemPrompt,
+		})
+	}
+
+	return conversation;
+}
+
 program
 	.description('Run the PromptShaper parser. Docs: https://github.com/PrajnaAvidya/prompt-shaper')
 	.version((process.env.npm_package_version as string) || '', '-v, --version', 'Show the current version')
 	.argument('[input]', 'Input template file path or string')
-	.option('-d, --debug', 'Show debug messages')
-	.option('-g, --generate', 'Send parsed template result to ChatGPT and return response (instead of the generated template)')
-	.option('-is, --is-string', 'Indicate that the input is a string, not a file path')
-	.option('-i, --interactive', 'Enable interactive mode (continue conversation in command line)')
-	.option('-js, --json <jsonString>', 'Input JSON variables as string')
-	.option('-jf, --json-file <filePath>', 'Input JSON variables as file path')
-	.option('-lj, --load-json <filePath>', 'Load conversation from JSON file and continue in interactive mode')
-	.option('-lt, --load-text <filePath>', 'Load conversation from text/markdown file and continue in interactive mode')
-	.option('-m, --model <modelType>', 'What OpenAI model to use: gpt-4o (default), o1-mini, etc', 'gpt-4o')
-	.option('-p, --prompt <promptString>', 'System prompt for LLM conversation', 'You are a helpful assistant.')
-	.option('-r, --raw', "Raw interactive mode. Don't parse any user responses for PromptShaper tags.")
-	.option('-s, --save <filePath>', 'Save text/markdown output to file path')
-	.option('-sj, --save-json <filePath>', 'Save conversation as JSON file')
+	.option('-d, --debug', 'Show debug messages', defaultOptions.debug)
+	.option('-g, --generate', 'Send parsed template result to ChatGPT and return response', defaultOptions.generate)
+	.option('-is, --is-string', 'Indicate that the input is a string, not a file path', defaultOptions.isString)
+	.option('-i, --interactive', 'Enable interactive mode', defaultOptions.interactive)
+	.option('-js, --json <jsonString>', 'Input JSON variables as string', defaultOptions.json)
+	.option('-jf, --json-file <filePath>', 'Input JSON variables as file path', defaultOptions.jsonFile)
+	.option('-lj, --load-json <filePath>', 'Load conversation from JSON file and continue in interactive mode', defaultOptions.loadJson)
+	.option('-lt, --load-text <filePath>', 'Load conversation from text/markdown file and continue in interactive mode', defaultOptions.loadText)
+	.option('-m, --model <modelType>', 'OpenAI model to use', defaultOptions.model)
+	.option('-p, --prompt <promptString>', 'System prompt for LLM conversation', defaultOptions.prompt)
+	.option('-r, --raw', 'Raw interactive mode', defaultOptions.raw)
+	.option('-s, --save <filePath>', 'Save output to file path', defaultOptions.save)
+	.option('-sj, --save-json <filePath>', 'Save conversation as JSON file', defaultOptions.saveJson)
 	.action(handler)
 
 program.parse()

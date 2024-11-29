@@ -43,6 +43,9 @@ Run the CLI using this format: `npx prompt-shaper [options] <input>`
 - Load a previous conversation from text and continue in interactive mode with `-lt or --load-text`
   - Example: `npx prompt-shaper my_template.ps.md -lt <jsonPath>`
 
+## Environment Variables
+In addition to command-line options, PromptShaper supports environment variables to configure default behavior. Command-line options take precedence over environment variables if both are specified. For example `PROMPT_SHAPER_MODEL` to change the default OpenAI model and `PROMPT_SHAPER_PROMPT` to change the system prompt. See `cli.ts` for the complete list.
+
 ## Examples
 See the `samples` directory and try running them with the parser.
 

@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v2.1.0...v2.2.0) (2024-12-13)
+
+
+### Features
+
+* added loadDir template function ([1080245](https://github.com/PrajnaAvidya/prompt-shaper/commit/1080245f01a2e710e7f910099453027ab5bd072a)), closes [#29](https://github.com/PrajnaAvidya/prompt-shaper/issues/29) [#24](https://github.com/PrajnaAvidya/prompt-shaper/issues/24)
+
 # [2.1.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v2.0.0...v2.1.0) (2024-11-29)
 
 

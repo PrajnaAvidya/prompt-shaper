@@ -293,7 +293,6 @@ function startConversation(systemPrompt: string, model: string): ChatMessage[] {
 
 program
 	.description('Run the PromptShaper parser. Docs: https://github.com/PrajnaAvidya/prompt-shaper')
-	.version((process.env.npm_package_version as string) || '', '-v, --version', 'Show the current version')
 	.argument('[input]', 'Input template file path or string')
 	.option('-d, --debug', 'Show debug messages', envVars.debug)
 	.option(

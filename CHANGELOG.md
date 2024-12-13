@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v2.2.0...v2.3.0) (2024-12-13)
+
+
+### Features
+
+* add output-assistant option ([09d58f0](https://github.com/PrajnaAvidya/prompt-shaper/commit/09d58f0598570e2b847ec537a8b85f94fc5165c3)), closes [#25](https://github.com/PrajnaAvidya/prompt-shaper/issues/25)
+
 # [2.2.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v2.1.0...v2.2.0) (2024-12-13)
 
 

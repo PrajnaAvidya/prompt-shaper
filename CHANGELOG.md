@@ -1,3 +1,10 @@
+## [2.3.1](https://github.com/PrajnaAvidya/prompt-shaper/compare/v2.3.0...v2.3.1) (2024-12-13)
+
+
+### Bug Fixes
+
+* remove version cli arg ([d16ce88](https://github.com/PrajnaAvidya/prompt-shaper/commit/d16ce881b11406175df821b9a80bb6dd86867b01))
+
 # [2.3.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v2.2.0...v2.3.0) (2024-12-13)
 
 

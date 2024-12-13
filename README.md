@@ -14,34 +14,19 @@ node/npm/npx - https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
 
 ## Usage/CLI Options
 Run the CLI using this format: `npx prompt-shaper [options] <input>`
+Run `npx prompt-shaper -h` to see a complete list of CLI options. Here are some important ones:
 - `<input>` is treated as a file path by default, use `-is` or `--is-string` to treat input as a template string 
   - Example (default file behavior): `npx prompt-shaper my_template.ps.md`
   - Example (string input): `npx prompt-shaper -is "my PromptShaper template"`
-- Save output to a text file: `-s or --save <outputPath>`
+- Enter interactive mode by specifying `-i` (send the rendered prompt to the OpenAI API and continue the conversation)
+  - Example: `npx prompt-shaper my_template.ps.md -i`
+  - You can start a new conversation in interactive mode with: `npx prompt-shaper -i`
+- Save output to a text file: `-s <outputPath>`
   - Example: `npx prompt-shaper my_template.ps.md -s output.md`
-- Save output to a JSON file (generative/interactive modes only): `-sj or --save-json <outputPath>`
-  - Example: `npx prompt-shaper my_template.ps.md -sj output.json`
-- Show verbose debug messages: `-d or --debug`
-  - Example: `npx prompt-shaper my_template.ps.md -d`
-- You can provide a variables via a JSON string using `-js or --json <jsonString>`
-  - Example: `npx prompt-shaper my_template.ps.md -js '{ "variableName": "hello world" }'`
-- You can provide a variables via a JSON file using `-jf or --json-file <jsonPath>`
-  - Example: `npx prompt-shaper my_template.ps.md -jf variables.json`
-- Send the resulting text to GPT4 by specifying the `-g or --generate` option. You must have `OPENAI_API_KEY` set in your environment for this to work. Note that -g isn't required if you are specifying a model or prompt, or using interactive mode.
-  - Example: `OPENAI_API_KEY=abc123 npx prompt-shaper my_template.ps.md -g`
-- Change the model type by specifying `-m or --model <modelName>`. The default is `gpt-4`.
-  - Example: `npx prompt-shaper my_template.ps.md -m gpt-3.5-turbo-16k`
-- Change the system prompt by specifying `-p or --prompt <prompt>`.
-  - Example: `npx prompt-shaper my_template.ps.md -p "You are a helpful assistant."`
-- Enable interactive mode by specifying `-i or --interactive` (continue conversation in command line)
-  - Example (send template to interactive mode): `npx prompt-shaper my_template.ps.md -i`
-  - Example (start empty new chat in interactive mode): `npx prompt-shaper -i`
-- Use raw mode to not run the parser on any inputs
-  - Example: `npx prompt-shaper -r raw.ps.md`
-- Load a previous conversation from JSON and continue in interactive mode with `-lj or --load-json`
-  - Example: `npx prompt-shaper my_template.ps.md -lj <jsonPath>`
-- Load a previous conversation from text and continue in interactive mode with `-lt or --load-text`
-  - Example: `npx prompt-shaper my_template.ps.md -lt <jsonPath>`
+- Load a previous conversation from text and continue in interactive mode with `-lt`
+  - Example: `npx prompt-shaper -lt output.md`
+
+**Note: you must set the OPENAI_API_KEY env var for any calls to OpenAI to work.**
 
 ## Environment Variables
 In addition to command-line options, PromptShaper supports environment variables to configure default behavior. Command-line options take precedence over environment variables if both are specified. For example `PROMPT_SHAPER_MODEL` to change the default OpenAI model and `PROMPT_SHAPER_PROMPT` to change the system prompt. See `cli.ts` for the complete list.
@@ -50,11 +35,11 @@ In addition to command-line options, PromptShaper supports environment variables
 See the `samples` directory and try running them with the parser.
 
 ## Terminology
-- Template - A piece of text that is rendered by the parser. I'm using the .ps.md extension for the samples.
-- Variable - A value loaded from a template file, or defined inline in a template. Variables are defined using single braces and are either defined as a single tag, or with matching tags wrapped around text. String variables can be rendered as templates.
-- Slot - Renders the contents of a variable or function using double braces.
-- Parameters - One or more arguments passed to a slot or a function. Parameters can be strings or numbers.
-- Function - Does "something" and the result is rendered on page, or assigned to a variable.
+- **Template** - A piece of text that is rendered by the parser. I'm using the .ps.md extension for the samples.
+- **Variable** - A value loaded from a template file, or defined inline in a template. Variables are defined using single braces and are either defined as a single tag, or with matching tags wrapped around text. String variables can be rendered as templates.
+- **Slot** - Renders the contents of a variable or function using double braces.
+- **Parameters** - One or more arguments passed to a slot or a function. Parameters can be strings or numbers.
+- **Function** - Does "something" and the result is rendered on page, or assigned to a variable.
 
 ## Templates, Slots, Variables
 A template is a file or string that gets loaded into a variable by the PromptShaper parser and is then rendered.
@@ -107,6 +92,8 @@ A slot or variable can be assigned the contents of a function, which is called u
 There's a few basic functions defined in the `functions.ts` file and you can add your own using `registerFunction`.
 
 #### Built-in Functions
+
+By default, the `parser.ts` uses the contents of `functions.ts` as built-in functions. You can add your own custom functions with `registerFunction`.
 
 - **add(a, b)**: Returns the sum of `a` and `b`.
 ```

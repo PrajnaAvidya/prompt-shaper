@@ -20,6 +20,7 @@ interface CLIOptions {
 	loadJson?: string
 	loadText?: string
 	model: string
+	outputAssistant: boolean
 	prompt: string
 	raw?: boolean
 	save?: string
@@ -80,6 +81,7 @@ const envVars =
 				loadJson: process.env.PROMPT_SHAPER_LOAD_JSON,
 				loadText: process.env.PROMPT_SHAPER_LOAD_TEXT,
 				model: process.env.PROMPT_SHAPER_MODEL,
+				outputAssistant: process.env.PROMPT_SHAPER_OUTPUT_ASSISTANT === 'true',
 				prompt: process.env.PROMPT_SHAPER_PROMPT,
 				raw: process.env.PROMPT_SHAPER_RAW === 'true',
 				save: process.env.PROMPT_SHAPER_SAVE,
@@ -241,10 +243,10 @@ async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOpti
 		// update/save chat history
 		conversation.push({ role: 'user', content: parsedResponse })
 		if (options.saveJson) {
-			saveConversationAsJson(conversation, options.saveJson)
+			saveConversationAsJson(conversation, options)
 		}
 		if (options.save) {
-			saveConversationAsText(conversation, options.save)
+			saveConversationAsText(conversation, options)
 		}
 	}
 }
@@ -257,21 +259,24 @@ async function makeCompletionRequest(conversation: ChatMessage[], options: CLIOp
 	// update/save chat history
 	conversation.push({ role: 'assistant', content: result })
 	if (options.saveJson) {
-		saveConversationAsJson(conversation, options.saveJson)
+		saveConversationAsJson(conversation, options)
 	}
 	if (options.save) {
-		saveConversationAsText(conversation, options.save)
+		saveConversationAsText(conversation, options)
 	}
 }
 
-function saveConversationAsJson(conversation: ChatMessage[], filePath: string) {
-	fs.writeFileSync(filePath, JSON.stringify(conversation))
+function saveConversationAsJson(conversation: ChatMessage[], options: CLIOptions) {
+	const filteredConvo = options.outputAssistant ? conversation.filter(m => m.role === 'assistant') : conversation
+
+	fs.writeFileSync(options.saveJson!, JSON.stringify(filteredConvo))
 }
 
-function saveConversationAsText(conversation: ChatMessage[], filePath: string) {
-	const conversationText = conversation.map(m => `${m.role}\n\n${m.content}`).join('\n\n-----\n\n')
+function saveConversationAsText(conversation: ChatMessage[], options: CLIOptions) {
+	const filteredConvo = options.outputAssistant ? conversation.filter(m => m.role === 'assistant') : conversation
+	const conversationText = filteredConvo.map(m => `${m.role}\n\n${m.content}`).join('\n\n-----\n\n')
 
-	fs.writeFileSync(filePath, conversationText)
+	fs.writeFileSync(options.save!, conversationText)
 }
 
 function startConversation(systemPrompt: string, model: string): ChatMessage[] {
@@ -304,6 +309,7 @@ program
 	.option('-lj, --load-json <filePath>', 'Load conversation from JSON file and continue in interactive mode', envVars.loadJson)
 	.option('-lt, --load-text <filePath>', 'Load conversation from text/markdown file and continue in interactive mode', envVars.loadText)
 	.option('-m, --model <modelType>', 'OpenAI model to use', envVars.model || 'gpt-4o')
+	.option('-oa --output-assistant', 'Save gpt output only to text/JSON (filters out user responses)', envVars.outputAssistant)
 	.option('-p, --prompt <promptString>', 'System prompt for LLM conversation', envVars.prompt || 'You are a helpful assistant.')
 	.option('-r, --raw', 'Raw interactive mode', envVars.raw)
 	.option('-s, --save <filePath>', 'Save output to file path', envVars.save)

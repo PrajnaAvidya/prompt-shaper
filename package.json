@@ -2,7 +2,7 @@
   "name": "prompt-shaper",
   "description": "prompt scripting language",
   "repository": "https://github.com/PrajnaAvidya/prompt-shaper",
-  "author": "Rafiq <rafiq@prajnaconcepts.com>",
+  "author": "Prajna Avidya",
   "version": "2.2.0",
   "license": "MIT",
   "main": "dist/cli.js",

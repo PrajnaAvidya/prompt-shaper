@@ -31,7 +31,8 @@ const defaultFileExtensions = [
 	'.txt',
 	'.md',
 	'.rst',
-	'.html', '.htm',
+	'.html',
+	'.htm',
 
 	// common programming languages
 	'.js',
@@ -39,8 +40,11 @@ const defaultFileExtensions = [
 	'.py',
 	'.rb',
 	'.java',
-	'.c', '.h',
-	'.cpp', '.hpp', '.cc',
+	'.c',
+	'.h',
+	'.cpp',
+	'.hpp',
+	'.cc',
 	'.cs',
 	'.swift',
 	'.kt',
@@ -55,12 +59,13 @@ const defaultFileExtensions = [
 
 	// config/data
 	'.json',
-	'.yaml', '.yml',
+	'.yaml',
+	'.yml',
 	'.xml',
 	'.ini',
 	'.toml',
-	'.env'
-];
+	'.env',
+]
 
 const envVars =
 	process.env.PROMPT_SHAPER_TESTS !== 'true'
@@ -223,7 +228,9 @@ async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOpti
 
 		// collect user response and then parse response if not in raw mode
 		const response = (await prompt('Your response: ')) as string
-		const parsedResponse = options.raw ? response : parseTemplate(response, variables || {}, { showDebugMessages: options.debug, fileExtensions: options.extensions }, 0)
+		const parsedResponse = options.raw
+			? response
+			: parseTemplate(response, variables || {}, { showDebugMessages: options.debug, fileExtensions: options.extensions }, 0)
 		if (parsedResponse !== response) {
 			console.log(parsedResponse, '\n-----')
 		} else {
@@ -284,7 +291,11 @@ program
 	.version((process.env.npm_package_version as string) || '', '-v, --version', 'Show the current version')
 	.argument('[input]', 'Input template file path or string')
 	.option('-d, --debug', 'Show debug messages', envVars.debug)
-	.option('-e, --extensions', 'What file extensions to include when loading a directory, list separated by commas (see cli.ts for default file extensions)', envVars.extensions)
+	.option(
+		'-e, --extensions',
+		'What file extensions to include when loading a directory, list separated by commas (see cli.ts for default file extensions)',
+		envVars.extensions,
+	)
 	.option('-g, --generate', 'Send parsed template result to ChatGPT and return response', envVars.generate)
 	.option('-is, --is-string', 'Indicate that the input is a string, not a file path', envVars.isString)
 	.option('-i, --interactive', 'Enable interactive mode', envVars.interactive)

@@ -29,60 +29,60 @@ describe('loadFileContent', () => {
 
 describe('loadDirectoryContents', () => {
 	it('should load all matching files from a directory and ignore non-matching files', () => {
-		const readdirSyncStub = sinon.stub(fs, 'readdirSync');
-		const readFileSyncStub = sinon.stub(fs, 'readFileSync');
-		const statSyncStub = sinon.stub(fs, 'statSync');
+		const readdirSyncStub = sinon.stub(fs, 'readdirSync')
+		const readFileSyncStub = sinon.stub(fs, 'readFileSync')
+		const statSyncStub = sinon.stub(fs, 'statSync')
 
 		// mock directory contents
-		readdirSyncStub.withArgs('/test-dir').returns(['file1.txt', 'file2.md', 'file3.js', 'file6.exe', 'subdir']);
-		readdirSyncStub.withArgs('/test-dir/subdir').returns(['file4.txt', 'file5.js']);
+		readdirSyncStub.withArgs('/test-dir').returns(['file1.txt', 'file2.md', 'file3.js', 'file6.exe', 'subdir'])
+		readdirSyncStub.withArgs('/test-dir/subdir').returns(['file4.txt', 'file5.js'])
 
 		// mock file stats
-		statSyncStub.callsFake((filePath) => {
+		statSyncStub.callsFake(filePath => {
 			if (filePath === '/test-dir/subdir') {
-				return { isDirectory: () => true };
+				return { isDirectory: () => true }
 			} else {
-				return { isDirectory: () => false };
+				return { isDirectory: () => false }
 			}
-		});
+		})
 
 		// mock file contents
-		readFileSyncStub.callsFake((filePath) => {
+		readFileSyncStub.callsFake(filePath => {
 			if (filePath === '/test-dir/file1.txt') {
-				return 'Content of file1.txt';
+				return 'Content of file1.txt'
 			} else if (filePath === '/test-dir/file2.md') {
-				return 'Content of file2.md';
+				return 'Content of file2.md'
 			} else if (filePath === '/test-dir/file3.js') {
-				return 'Content of file3.js';
+				return 'Content of file3.js'
 			} else if (filePath === '/test-dir/file6.exe') {
-				return 'Content of file6.exe';
+				return 'Content of file6.exe'
 			} else if (filePath === '/test-dir/subdir/file4.txt') {
-				return 'Content of file4.txt';
+				return 'Content of file4.txt'
 			} else if (filePath === '/test-dir/subdir/file5.js') {
-				return 'Content of file5.js';
+				return 'Content of file5.js'
 			} else {
-				return '';
+				return ''
 			}
-		});
+		})
 
-		const extensions = ['.txt', '.md'];
+		const extensions = ['.txt', '.md']
 
-		const result = loadDirectoryContents('/test-dir', extensions);
+		const result = loadDirectoryContents('/test-dir', extensions)
 
 		expect(result).to.deep.equal({
 			'/test-dir/file1.txt': 'Content of file1.txt',
 			'/test-dir/file2.md': 'Content of file2.md',
 			'/test-dir/subdir/file4.txt': 'Content of file4.txt',
-		});
+		})
 
 		// ensure red herring was not loaded
-		expect(result).to.not.have.property('/test-dir/file6.exe');
+		expect(result).to.not.have.property('/test-dir/file6.exe')
 
-		readdirSyncStub.restore();
-		readFileSyncStub.restore();
-		statSyncStub.restore();
-	});
-});
+		readdirSyncStub.restore()
+		readFileSyncStub.restore()
+		statSyncStub.restore()
+	})
+})
 
 describe('replaceStringAtLocation', () => {
 	it('replaces string at location', () => {

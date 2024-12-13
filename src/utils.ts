@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync, statSync } from 'fs'
 import { ParserVariables, ValueType } from './types'
-import { join, extname } from 'path';
+import { join, extname } from 'path'
 
 const fileCache: { [key: string]: string } = {}
 
@@ -16,29 +16,29 @@ export const loadFileContent = (filePath: string): string => {
 
 // load a directory of files by extension, recursively if specified
 export const loadDirectoryContents = (directoryPath: string, extensions: string[], recursive: boolean = true): { [filePath: string]: string } => {
-	let results: { [filePath: string]: string } = {};
+	const results: { [filePath: string]: string } = {}
 
 	function readDir(dir: string, recursive: boolean) {
-		const list = readdirSync(dir);
-		list.forEach((file) => {
-			const filePath = join(dir, file);
-			const stat = statSync(filePath);
+		const list = readdirSync(dir)
+		list.forEach(file => {
+			const filePath = join(dir, file)
+			const stat = statSync(filePath)
 			if (stat) {
 				if (recursive && stat.isDirectory()) {
-					readDir(filePath, recursive);
+					readDir(filePath, recursive)
 				} else {
-					const fileExt = extname(file);
+					const fileExt = extname(file)
 					if (extensions.includes(fileExt)) {
-						results[filePath] = loadFileContent(filePath);
+						results[filePath] = loadFileContent(filePath)
 					}
 				}
 			}
-		});
+		})
 	}
 
-	readDir(directoryPath, recursive);
+	readDir(directoryPath, recursive)
 
-	return results;
+	return results
 }
 
 // used to replace a slot with its rendered contents

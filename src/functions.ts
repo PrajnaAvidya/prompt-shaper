@@ -33,23 +33,26 @@ export const functions: Record<string, PromptShaperFunction> = {
 	loadDir: (options: ParserOptions, dirPathParam: ParserParam): string => {
 		// validate params
 		if (!dirPathParam || !dirPathParam.value || typeof dirPathParam.value !== 'string') {
-			throw new Error('Invalid directory path');
+			throw new Error('Invalid directory path')
 		}
-		const dirPath = dirPathParam.value as string;
+		const dirPath = dirPathParam.value as string
 
 		// get the extensions list from cli params
-		const extensions = (options.fileExtensions || "").split(',').map(ext => ext.trim()).map(ext => (ext.startsWith('.') ? ext : `.${ext}`));
+		const extensions = (options.fileExtensions || '')
+			.split(',')
+			.map(ext => ext.trim())
+			.map(ext => (ext.startsWith('.') ? ext : `.${ext}`))
 
-		const contents = loadDirectoryContents(dirPath, extensions);
+		const contents = loadDirectoryContents(dirPath, extensions)
 
 		// format
-		let result = '';
+		let result = ''
 		for (const [filePath, content] of Object.entries(contents)) {
-			const fileExt = extname(filePath).slice(1); // Remove leading dot for formatting
-			result += `\n\nFile: ${filePath}\n\`\`\`${fileExt}\n${content}\n\`\`\`\n\n`;
+			const fileExt = extname(filePath).slice(1) // Remove leading dot for formatting
+			result += `\n\nFile: ${filePath}\n\`\`\`${fileExt}\n${content}\n\`\`\`\n\n`
 		}
 
-		return result;
+		return result
 	},
 }
 
@@ -62,6 +65,6 @@ export const registerFunction = (name: string, func: PromptShaperFunction): void
 }
 export const unregisterFunction = (name: string): void => {
 	if (functions[name]) {
-		delete functions[name];
+		delete functions[name]
 	}
 }

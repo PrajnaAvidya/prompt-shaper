@@ -1,3 +1,9 @@
+export interface ParserOptions {
+	fileExtensions?: string // what file extensions to include when reading files from directories with loadDir
+	returnParserMatches?: boolean // return array of parser matches instead of rendered template
+	showDebugMessages?: boolean // show verbose debug stuff
+}
+
 export enum ParserType {
 	text = 'text',
 	variable = 'variable',

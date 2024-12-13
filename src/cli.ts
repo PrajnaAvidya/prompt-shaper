@@ -11,6 +11,7 @@ import * as readline from 'readline'
 
 interface CLIOptions {
 	debug?: boolean
+	extensions?: string
 	generate?: boolean
 	interactive?: boolean
 	isString?: boolean
@@ -25,22 +26,66 @@ interface CLIOptions {
 	saveJson?: string
 }
 
-// parse env vars/defaults
-const defaultOptions: CLIOptions = {
-	debug: process.env.PROMPT_SHAPER_DEBUG === 'true',
-	generate: process.env.PROMPT_SHAPER_GENERATE === 'true',
-	isString: process.env.PROMPT_SHAPER_IS_STRING === 'true',
-	interactive: process.env.PROMPT_SHAPER_INTERACTIVE === 'true',
-	json: process.env.PROMPT_SHAPER_JSON,
-	jsonFile: process.env.PROMPT_SHAPER_JSON_FILE,
-	loadJson: process.env.PROMPT_SHAPER_LOAD_JSON,
-	loadText: process.env.PROMPT_SHAPER_LOAD_TEXT,
-	model: process.env.PROMPT_SHAPER_MODEL || 'gpt-4o',
-	prompt: process.env.PROMPT_SHAPER_PROMPT || 'You are a helpful assistant.',
-	raw: process.env.PROMPT_SHAPER_RAW === 'true',
-	save: process.env.PROMPT_SHAPER_SAVE,
-	saveJson: process.env.PROMPT_SHAPER_SAVE_JSON,
-}
+const defaultFileExtensions = [
+	// text
+	'.txt',
+	'.md',
+	'.rst',
+	'.html',
+	'.htm',
+
+	// common programming languages
+	'.js',
+	'.ts',
+	'.py',
+	'.rb',
+	'.java',
+	'.c',
+	'.h',
+	'.cpp',
+	'.hpp',
+	'.cc',
+	'.cs',
+	'.swift',
+	'.kt',
+	'.go',
+	'.rs',
+	'.php',
+	'.pl',
+	'.sh',
+	'.bat',
+	'.r',
+	'.jl',
+
+	// config/data
+	'.json',
+	'.yaml',
+	'.yml',
+	'.xml',
+	'.ini',
+	'.toml',
+	'.env',
+]
+
+const envVars =
+	process.env.PROMPT_SHAPER_TESTS !== 'true'
+		? {
+				debug: process.env.PROMPT_SHAPER_DEBUG === 'true',
+				extensions: process.env.PROMPT_SHAPER_FILE_EXTENSIONS || defaultFileExtensions.join(','),
+				generate: process.env.PROMPT_SHAPER_GENERATE === 'true',
+				isString: process.env.PROMPT_SHAPER_IS_STRING === 'true',
+				interactive: process.env.PROMPT_SHAPER_INTERACTIVE === 'true',
+				json: process.env.PROMPT_SHAPER_JSON,
+				jsonFile: process.env.PROMPT_SHAPER_JSON_FILE,
+				loadJson: process.env.PROMPT_SHAPER_LOAD_JSON,
+				loadText: process.env.PROMPT_SHAPER_LOAD_TEXT,
+				model: process.env.PROMPT_SHAPER_MODEL,
+				prompt: process.env.PROMPT_SHAPER_PROMPT,
+				raw: process.env.PROMPT_SHAPER_RAW === 'true',
+				save: process.env.PROMPT_SHAPER_SAVE,
+				saveJson: process.env.PROMPT_SHAPER_SAVE_JSON,
+		  }
+		: {}
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const prompt = (query: string) => new Promise(resolve => rl.question(query, resolve))
@@ -116,7 +161,7 @@ async function handler(input: string, options: CLIOptions) {
 
 	// run the parser
 	try {
-		const parserOptions = { returnParserMatches: false, showDebugMessages: options.debug as boolean }
+		const parserOptions = { returnParserMatches: false, showDebugMessages: options.debug as boolean, fileExtensions: options.extensions }
 
 		// parse template if not in raw mode
 		const parsed = options.raw ? template : parseTemplate(template, variables, parserOptions)
@@ -183,7 +228,9 @@ async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOpti
 
 		// collect user response and then parse response if not in raw mode
 		const response = (await prompt('Your response: ')) as string
-		const parsedResponse = options.raw ? response : parseTemplate(response, variables || {}, { showDebugMessages: options.debug }, 0)
+		const parsedResponse = options.raw
+			? response
+			: parseTemplate(response, variables || {}, { showDebugMessages: options.debug, fileExtensions: options.extensions }, 0)
 		if (parsedResponse !== response) {
 			console.log(parsedResponse, '\n-----')
 		} else {
@@ -243,19 +290,24 @@ program
 	.description('Run the PromptShaper parser. Docs: https://github.com/PrajnaAvidya/prompt-shaper')
 	.version((process.env.npm_package_version as string) || '', '-v, --version', 'Show the current version')
 	.argument('[input]', 'Input template file path or string')
-	.option('-d, --debug', 'Show debug messages', defaultOptions.debug)
-	.option('-g, --generate', 'Send parsed template result to ChatGPT and return response', defaultOptions.generate)
-	.option('-is, --is-string', 'Indicate that the input is a string, not a file path', defaultOptions.isString)
-	.option('-i, --interactive', 'Enable interactive mode', defaultOptions.interactive)
-	.option('-js, --json <jsonString>', 'Input JSON variables as string', defaultOptions.json)
-	.option('-jf, --json-file <filePath>', 'Input JSON variables as file path', defaultOptions.jsonFile)
-	.option('-lj, --load-json <filePath>', 'Load conversation from JSON file and continue in interactive mode', defaultOptions.loadJson)
-	.option('-lt, --load-text <filePath>', 'Load conversation from text/markdown file and continue in interactive mode', defaultOptions.loadText)
-	.option('-m, --model <modelType>', 'OpenAI model to use', defaultOptions.model)
-	.option('-p, --prompt <promptString>', 'System prompt for LLM conversation', defaultOptions.prompt)
-	.option('-r, --raw', 'Raw interactive mode', defaultOptions.raw)
-	.option('-s, --save <filePath>', 'Save output to file path', defaultOptions.save)
-	.option('-sj, --save-json <filePath>', 'Save conversation as JSON file', defaultOptions.saveJson)
+	.option('-d, --debug', 'Show debug messages', envVars.debug)
+	.option(
+		'-e, --extensions',
+		'What file extensions to include when loading a directory, list separated by commas (see cli.ts for default file extensions)',
+		envVars.extensions,
+	)
+	.option('-g, --generate', 'Send parsed template result to ChatGPT and return response', envVars.generate)
+	.option('-is, --is-string', 'Indicate that the input is a string, not a file path', envVars.isString)
+	.option('-i, --interactive', 'Enable interactive mode', envVars.interactive)
+	.option('-js, --json <jsonString>', 'Input JSON variables as string', envVars.json)
+	.option('-jf, --json-file <filePath>', 'Input JSON variables as file path', envVars.jsonFile)
+	.option('-lj, --load-json <filePath>', 'Load conversation from JSON file and continue in interactive mode', envVars.loadJson)
+	.option('-lt, --load-text <filePath>', 'Load conversation from text/markdown file and continue in interactive mode', envVars.loadText)
+	.option('-m, --model <modelType>', 'OpenAI model to use', envVars.model || 'gpt-4o')
+	.option('-p, --prompt <promptString>', 'System prompt for LLM conversation', envVars.prompt || 'You are a helpful assistant.')
+	.option('-r, --raw', 'Raw interactive mode', envVars.raw)
+	.option('-s, --save <filePath>', 'Save output to file path', envVars.save)
+	.option('-sj, --save-json <filePath>', 'Save conversation as JSON file', envVars.saveJson)
 	.action(handler)
 
 program.parse()

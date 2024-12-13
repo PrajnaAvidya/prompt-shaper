@@ -22,7 +22,7 @@ export const gpt: Generate = async (messages: ChatMessage[], model: string): Pro
 
 		return response
 	} catch (e) {
-		console.log(e)
+		console.error(e)
 		return response
 	}
 }

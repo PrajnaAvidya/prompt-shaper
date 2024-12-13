@@ -106,6 +106,47 @@ A slot or variable can be assigned the contents of a function, which is called u
 
 There's a few basic functions defined in the `functions.ts` file and you can add your own using `registerFunction`.
 
+#### Built-in Functions
+
+- **add(a, b)**: Returns the sum of `a` and `b`.
+```
+// outputs 5
+{{add(2, 3)}}
+```
+
+- **subtract(a, b)**: Returns the difference between `a` and `b`.
+```
+// outputs -1
+{{subtract(2, 3)}}
+```
+- **multiply(a, b)**: Returns the product of `a` and `b`.
+
+```
+// outputs 6
+{{multiply(2, 3)}}
+```
+
+- **divide(a, b)**: Returns the quotient of `a` divided by `b`. Throws an error when dividing by zero.
+```
+// outputs 2
+{{divide(6, 3)}}
+```
+
+- **load(filePath)**: Loads a file from the specified path and renders its content.
+```
+// loads and renders the content of file.ps.md
+{{load("file.ps.md")}}
+```
+
+- **loadDir(dirPath)**: Loads all files from the specified directory (and its subdirectories) that match certain extensions, and renders their contents.
+```
+// loads and renders all files in the 'src' directory
+{{loadDir("src")}}
+```
+
+  **Note**: The `loadDir` function uses the file extensions specified in the `--extensions` CLI option or the `PROMPT_SHAPER_FILE_EXTENSIONS` environment variable to determine which files to include. By default, it includes common text and code file extensions.
+
+
 ## String vs Number Parameters
 The only difference between string and number params is that numeric params can have basic arithmetic operations done on their output. Supported operations are `+ - * / ^`.
 ```

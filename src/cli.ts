@@ -11,6 +11,7 @@ import * as readline from 'readline'
 
 interface CLIOptions {
 	debug?: boolean
+	extensions?: string
 	generate?: boolean
 	interactive?: boolean
 	isString?: boolean
@@ -25,10 +26,47 @@ interface CLIOptions {
 	saveJson?: string
 }
 
+const defaultFileExtensions = [
+	// text
+	'.txt',
+	'.md',
+	'.rst',
+	'.html', '.htm',
+
+	// common programming languages
+	'.js',
+	'.ts',
+	'.py',
+	'.rb',
+	'.java',
+	'.c', '.h',
+	'.cpp', '.hpp', '.cc',
+	'.cs',
+	'.swift',
+	'.kt',
+	'.go',
+	'.rs',
+	'.php',
+	'.pl',
+	'.sh',
+	'.bat',
+	'.r',
+	'.jl',
+
+	// config/data
+	'.json',
+	'.yaml', '.yml',
+	'.xml',
+	'.ini',
+	'.toml',
+	'.env'
+];
+
 const envVars =
 	process.env.PROMPT_SHAPER_TESTS !== 'true'
 		? {
 				debug: process.env.PROMPT_SHAPER_DEBUG === 'true',
+				extensions: process.env.PROMPT_SHAPER_FILE_EXTENSIONS || defaultFileExtensions.join(','),
 				generate: process.env.PROMPT_SHAPER_GENERATE === 'true',
 				isString: process.env.PROMPT_SHAPER_IS_STRING === 'true',
 				interactive: process.env.PROMPT_SHAPER_INTERACTIVE === 'true',
@@ -118,7 +156,7 @@ async function handler(input: string, options: CLIOptions) {
 
 	// run the parser
 	try {
-		const parserOptions = { returnParserMatches: false, showDebugMessages: options.debug as boolean }
+		const parserOptions = { returnParserMatches: false, showDebugMessages: options.debug as boolean, fileExtensions: options.extensions }
 
 		// parse template if not in raw mode
 		const parsed = options.raw ? template : parseTemplate(template, variables, parserOptions)
@@ -185,7 +223,7 @@ async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOpti
 
 		// collect user response and then parse response if not in raw mode
 		const response = (await prompt('Your response: ')) as string
-		const parsedResponse = options.raw ? response : parseTemplate(response, variables || {}, { showDebugMessages: options.debug }, 0)
+		const parsedResponse = options.raw ? response : parseTemplate(response, variables || {}, { showDebugMessages: options.debug, fileExtensions: options.extensions }, 0)
 		if (parsedResponse !== response) {
 			console.log(parsedResponse, '\n-----')
 		} else {
@@ -246,6 +284,7 @@ program
 	.version((process.env.npm_package_version as string) || '', '-v, --version', 'Show the current version')
 	.argument('[input]', 'Input template file path or string')
 	.option('-d, --debug', 'Show debug messages', envVars.debug)
+	.option('-e, --extensions', 'What file extensions to include when loading a directory, list separated by commas (see cli.ts for default file extensions)', envVars.extensions)
 	.option('-g, --generate', 'Send parsed template result to ChatGPT and return response', envVars.generate)
 	.option('-is, --is-string', 'Indicate that the input is a string, not a file path', envVars.isString)
 	.option('-i, --interactive', 'Enable interactive mode', envVars.interactive)

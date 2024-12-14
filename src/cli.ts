@@ -37,6 +37,7 @@ const defaultFileExtensions = [
 
 	// common programming languages
 	'.js',
+	'.pegjs',
 	'.ts',
 	'.py',
 	'.rb',

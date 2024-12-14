@@ -2,7 +2,7 @@ import { ParserOptions, ParserParam } from './types'
 import { loadDirectoryContents, loadFileContent } from './utils'
 import { extname } from 'path'
 
-type PromptShaperFunction = (options: ParserOptions, ...args: ParserParam[]) => string | number
+type PromptShaperFunction = (options: ParserOptions, ...args: ParserParam[]) => Promise<string | number> | string | number
 
 export const functions: Record<string, PromptShaperFunction> = {
 	add: (_options: ParserOptions, a: ParserParam, b: ParserParam): number => {

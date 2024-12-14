@@ -3,18 +3,18 @@ import { parseTemplate } from '../src/parser'
 import { loadFileContent } from '../src/utils'
 
 describe('single-line-variables', () => {
-	it('should correctly parse single-line string variables', () => {
+	it('should correctly parse single-line string variables', async () => {
 		const template = loadFileContent('./test/templates/single-line-variables/string.ps.md')
 
-		const result = parseTemplate(template)
+		const result = await parseTemplate(template)
 
 		expect(result).to.equal('Hello World')
 	})
 
-	it('should correctly parse single-line number variables', () => {
+	it('should correctly parse single-line number variables', async () => {
 		const template = loadFileContent('./test/templates/single-line-variables/number.ps.md')
 
-		const result = parseTemplate(template)
+		const result = await parseTemplate(template)
 
 		expect(result).to.equal('42')
 	})

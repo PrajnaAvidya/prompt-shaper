@@ -1,45 +1,51 @@
-import { expect } from 'chai'
+import { assert, expect } from 'chai'
 import { parseTemplate } from '../src/parser'
 import { loadFileContent } from '../src/utils'
 
 describe('functions', () => {
-	it('should correctly evaluate add function', () => {
+	it('should correctly evaluate add function', async () => {
 		const template = loadFileContent('./test/templates/functions/add.ps.md')
-		const result = parseTemplate(template)
+		const result = await parseTemplate(template)
 
 		expect(result).to.equal('The sum of 2 and 3 is 5')
 	})
 
-	it('should correctly evaluate subtract function', () => {
+	it('should correctly evaluate subtract function', async () => {
 		const template = loadFileContent('./test/templates/functions/subtract.ps.md')
-		const result = parseTemplate(template)
+		const result = await parseTemplate(template)
 
 		expect(result).to.equal('The difference between 5 and 2 is 3')
 	})
 
-	it('should correctly evaluate multiply function', () => {
+	it('should correctly evaluate multiply function', async () => {
 		const template = loadFileContent('./test/templates/functions/multiply.ps.md')
-		const result = parseTemplate(template)
+		const result = await parseTemplate(template)
 
 		expect(result).to.equal('The product of 3 and 4 is 12')
 	})
 
-	it('should correctly evaluate divide function', () => {
+	it('should correctly evaluate divide function', async () => {
 		const template = loadFileContent('./test/templates/functions/divide.ps.md')
-		const result = parseTemplate(template)
+		const result = await parseTemplate(template)
 
 		expect(result).to.equal('The quotient of 10 and 2 is 5')
 	})
 
-	it('should throw an error when dividing by zero', () => {
+	it('should throw an error when dividing by zero', async () => {
 		const template = loadFileContent('./test/templates/functions/divide-by-zero.ps.md')
 
-		expect(() => parseTemplate(template)).to.throw('Division by zero')
+		try {
+			await parseTemplate(template)
+			throw new Error('Expected function to throw, but it did not')
+		} catch (err: Error | unknown) {
+			assert(err instanceof Error)
+			expect(err.message).to.equal('Division by zero')
+		}
 	})
 
-	it('should correctly evaluate load function', () => {
+	it('should correctly evaluate load function', async () => {
 		const template = loadFileContent('./test/templates/functions/load.ps.md')
-		const result = parseTemplate(template)
+		const result = await parseTemplate(template)
 
 		const expectedOutput = `File: test/templates/functions/load-content.ps.md\n\`\`\`md\n${loadFileContent(
 			'./test/templates/functions/load-content.ps.md',
@@ -47,9 +53,15 @@ describe('functions', () => {
 		expect(result).to.equal(expectedOutput)
 	})
 
-	it('should throw error with invalid load param', () => {
+	it('should throw error with invalid load param', async () => {
 		const template = loadFileContent('./test/templates/functions/load-broken.ps.md')
 
-		expect(() => parseTemplate(template)).to.throw('Invalid file path')
+		try {
+			await parseTemplate(template)
+			throw new Error('Expected function to throw, but it did not')
+		} catch (err: Error | unknown) {
+			assert(err instanceof Error)
+			expect(err.message).to.equal('Invalid file path')
+		}
 	})
 })

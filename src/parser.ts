@@ -93,7 +93,7 @@ async function evaluateOperation(operation: Operation | Operand, variables: Pars
 				return (await evaluateFunction(operation.value as string, operation.params || [], options)) as number
 			case 'operation':
 				// this is when the operand is an operation inside parenthesis
-				return evaluateOperation(operation.value as Operation, variables, options)
+				return (await evaluateOperation(operation.value as Operation, variables, options)) as number
 		}
 	}
 
@@ -145,7 +145,7 @@ async function evaluateVariable(
 	}
 
 	if (variable.type === ValueType.function) {
-		return evaluateFunction(variable.value as string, variable.params!, options)
+		return await evaluateFunction(variable.value as string, variable.params!, options)
 	} else if (variable.type === ValueType.number) {
 		return variable.value
 	} else if (variable.type === ValueType.string) {
@@ -212,7 +212,7 @@ async function renderSlot(
 				return undefined
 			}
 		case ExpressionType.operation:
-			return evaluateOperation(slot.expression!.value as Operation, variables, options).toString()
+			return (await evaluateOperation(slot.expression!.value as Operation, variables, options)).toString()
 		default:
 			return undefined
 	}

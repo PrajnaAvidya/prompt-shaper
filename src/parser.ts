@@ -19,13 +19,11 @@ export const parseTemplate = async (
 	if (!variables) variables = {}
 	const showDebug = options?.showDebugMessages || false
 
-	// remove comments using regex
-	const withoutComments = template.replace(/(\/\/.*$)|(\/\*[\s\S]*?\*\/)/gm, '')
-	showDebug && console.log(`DEBUG: Parsing template:\n${withoutComments}`)
+	showDebug && console.log(`DEBUG: Parsing template:\n${template}`)
 
 	// match all outer tags
 	showDebug && console.log('DEBUG: Matching all outer tags')
-	const parsedVariables = templateParser.parse(withoutComments)
+	const parsedVariables = templateParser.parse(template)
 	if (options?.returnParserMatches === true) {
 		return parsedVariables.parsed
 	}
@@ -77,8 +75,10 @@ export const parseTemplate = async (
 		}
 	}
 
-	// remove excess whitespace
-	return currentTemplate.replace(/\n{3,}/g, '\n\n').trim()
+	return currentTemplate
+		.replace(/(\/\/.*$)|(\/\*[\s\S]*?\*\/)/gm, '') // remove comments
+		.replace(/\n{3,}/g, '\n\n') // remove excess whitespace
+		.trim()
 }
 
 // traverse an operation recursively as a syntax tree

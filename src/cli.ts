@@ -216,7 +216,7 @@ async function startSavedConversation(conversation: ChatMessage[], options: CLIO
 
 async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOptions, variables?: ParserVariables) {
 	let userTurn = false
-	if (conversation[conversation.length - 1].role !== 'user') {
+	if (conversation.length === 0 || conversation[conversation.length - 1].role !== 'user') {
 		userTurn = true
 	}
 

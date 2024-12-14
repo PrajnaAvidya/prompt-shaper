@@ -1,8 +1,8 @@
 import { readdirSync, readFileSync, statSync } from 'fs'
 import { ParserVariables, ValueType } from './types'
 import { join, extname } from 'path'
-import { JSDOM } from "jsdom";
-import { Readability } from "@mozilla/readability";
+import { JSDOM } from 'jsdom'
+import { Readability } from '@mozilla/readability'
 
 const fileCache: { [key: string]: string } = {}
 

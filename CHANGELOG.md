@@ -1,3 +1,17 @@
+# [2.4.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v2.3.1...v2.4.0) (2024-12-14)
+
+
+### Bug Fixes
+
+* fix starting new interactive mode chat with o1 models ([5bb13dd](https://github.com/PrajnaAvidya/prompt-shaper/commit/5bb13dd7806efbb0c2a9e3ed11f1bce81b95b2fd))
+
+
+### Features
+
+* add loadUrl ([df44abf](https://github.com/PrajnaAvidya/prompt-shaper/commit/df44abfb94723179b24e69558262b65e87441c74)), closes [#26](https://github.com/PrajnaAvidya/prompt-shaper/issues/26)
+* add pegjs to default file extensions ([7efd210](https://github.com/PrajnaAvidya/prompt-shaper/commit/7efd210476351d22d20a3f120369ffc73391d8ea))
+* add support for async functions ([9ce6ec4](https://github.com/PrajnaAvidya/prompt-shaper/commit/9ce6ec4fbc1623559fa2ddfbb6e4de42f76a862f))
+
 ## [2.3.1](https://github.com/PrajnaAvidya/prompt-shaper/compare/v2.3.0...v2.3.1) (2024-12-13)
 
 

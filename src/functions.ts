@@ -1,5 +1,5 @@
 import { ParserOptions, ParserParam } from './types'
-import { loadDirectoryContents, loadFileContent } from './utils'
+import { loadDirectoryContents, loadFileContent, loadUrlReadableContents } from './utils'
 import { extname } from 'path'
 
 type PromptShaperFunction = (options: ParserOptions, ...args: ParserParam[]) => Promise<string | number> | string | number
@@ -53,6 +53,17 @@ export const functions: Record<string, PromptShaperFunction> = {
 		}
 
 		return result
+	},
+	loadUrl: async (_options: ParserOptions, urlParam: ParserParam): Promise<string> => {
+		if (!urlParam.value || typeof urlParam.value !== 'string') {
+			throw new Error('Invalid URL')
+		}
+		const url = urlParam.value as string
+
+		const contents = await loadUrlReadableContents(url)
+		const formattedUrl = url.replace('http://', '').replace('https://', '')
+
+		return `\n\nURL: ${formattedUrl}\n\`\`\`${contents}\n\`\`\`\n\n`
 	},
 }
 

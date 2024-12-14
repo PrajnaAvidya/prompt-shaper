@@ -37,6 +37,7 @@ const defaultFileExtensions = [
 
 	// common programming languages
 	'.js',
+	'.pegjs',
 	'.ts',
 	'.py',
 	'.rb',
@@ -166,7 +167,7 @@ async function handler(input: string, options: CLIOptions) {
 		const parserOptions = { returnParserMatches: false, showDebugMessages: options.debug as boolean, fileExtensions: options.extensions }
 
 		// parse template if not in raw mode
-		const parsed = options.raw ? template : parseTemplate(template, variables, parserOptions)
+		const parsed = options.raw ? template : await parseTemplate(template, variables, parserOptions)
 		console.log(`user\n${[parsed]}\n-----`)
 
 		// check if user wants to send results to LLM
@@ -216,7 +217,7 @@ async function startSavedConversation(conversation: ChatMessage[], options: CLIO
 
 async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOptions, variables?: ParserVariables) {
 	let userTurn = false
-	if (conversation[conversation.length - 1].role !== 'user') {
+	if (conversation.length === 0 || conversation[conversation.length - 1].role !== 'user') {
 		userTurn = true
 	}
 
@@ -232,7 +233,7 @@ async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOpti
 		const response = (await prompt('Your response: ')) as string
 		const parsedResponse = options.raw
 			? response
-			: parseTemplate(response, variables || {}, { showDebugMessages: options.debug, fileExtensions: options.extensions }, 0)
+			: await parseTemplate(response, variables || {}, { showDebugMessages: options.debug, fileExtensions: options.extensions }, 0)
 		if (parsedResponse !== response) {
 			console.log(parsedResponse, '\n-----')
 		} else {

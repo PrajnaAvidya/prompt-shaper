@@ -125,13 +125,17 @@ By default, the `parser.ts` uses the contents of `functions.ts` as built-in func
 {{load("file.ps.md")}}
 ```
 
-- **loadDir(dirPath)**: Loads all files from the specified directory (and its subdirectories) that match certain extensions, and renders their contents.
+- **loadDir(dirPath)**: Loads all files from the specified directory (and its subdirectories) that match certain extensions, and renders their contents. **Note**: The `loadDir` function uses the file extensions specified in the `--extensions` CLI option or the `PROMPT_SHAPER_FILE_EXTENSIONS` environment variable to determine which files to include. By default, it includes common text and code file extensions.
 ```
 // loads and renders all files in the 'src' directory
 {{loadDir("src")}}
 ```
 
-  **Note**: The `loadDir` function uses the file extensions specified in the `--extensions` CLI option or the `PROMPT_SHAPER_FILE_EXTENSIONS` environment variable to determine which files to include. By default, it includes common text and code file extensions.
+- **loadUrl(url)**: Loads content from the specified URL and uses the [@mozilla/readability](https://github.com/mozilla/readability) library to convert it into readable text.
+```
+// loads and renders the Prompt Shaper GitHub page
+{{loadUrl("https://github.com/PrajnaAvidya/prompt-shaper")}}
+```
 
 
 ## String vs Number Parameters

@@ -8,19 +8,22 @@ const isPackaged = process.argv[1].endsWith('.js') || process.argv[1].endsWith('
 const templateParser: peggy.Parser = isPackaged ? require('./template-parser.js') : peggy.generate(loadFileContent('src/template-parser.pegjs'))
 const maxRecursionDepth = 5
 
-export const parseTemplate = (template: string, variables?: ParserVariables, options?: ParserOptions, recursionDepth?: number): string => {
+export const parseTemplate = async (
+	template: string,
+	variables?: ParserVariables,
+	options?: ParserOptions,
+	recursionDepth?: number,
+): Promise<string> => {
 	if (typeof template !== 'string' || template.trim() === '' || (recursionDepth && recursionDepth > maxRecursionDepth)) return template
 
 	if (!variables) variables = {}
 	const showDebug = options?.showDebugMessages || false
 
-	// remove comments using regex
-	const withoutComments = template.replace(/(\/\/.*$)|(\/\*[\s\S]*?\*\/)/gm, '')
-	showDebug && console.log(`DEBUG: Parsing template:\n${withoutComments}`)
+	showDebug && console.log(`DEBUG: Parsing template:\n${template}`)
 
 	// match all outer tags
 	showDebug && console.log('DEBUG: Matching all outer tags')
-	const parsedVariables = templateParser.parse(withoutComments)
+	const parsedVariables = templateParser.parse(template)
 	if (options?.returnParserMatches === true) {
 		return parsedVariables.parsed
 	}
@@ -66,47 +69,49 @@ export const parseTemplate = (template: string, variables?: ParserVariables, opt
 		showDebug && console.log('DEBUG: Rendering slot:', slot)
 
 		// replace slot with variable
-		const slotValue = renderSlot(slot, variables, options || {}, recursionDepth || 0)
+		const slotValue = await renderSlot(slot, variables, options || {}, recursionDepth || 0)
 		if (slotValue) {
 			currentTemplate = replaceStringAtLocation(currentTemplate, slotValue, slot.location!.start.offset, slot.location!.end.offset)
 		}
 	}
 
-	// remove excess whitespace
-	return currentTemplate.replace(/\n{3,}/g, '\n\n').trim()
+	return currentTemplate
+		.replace(/(\/\/.*$)|(\/\*[\s\S]*?\*\/)/gm, '') // remove comments
+		.replace(/\n{3,}/g, '\n\n') // remove excess whitespace
+		.trim()
 }
 
 // traverse an operation recursively as a syntax tree
-function evaluateOperation(operation: Operation | Operand, variables: ParserVariables, options: ParserOptions): number {
+async function evaluateOperation(operation: Operation | Operand, variables: ParserVariables, options: ParserOptions): Promise<number> {
 	if ('type' in operation) {
 		switch (operation.type) {
 			case 'number':
 				return operation.value as number
 			case 'variable':
-				return evaluateVariable(operation.value as string, variables, [], options) as number
+				return (await evaluateVariable(operation.value as string, variables, [], options)) as number
 			case 'function':
-				return evaluateFunction(operation.value as string, operation.params || [], options) as number
+				return (await evaluateFunction(operation.value as string, operation.params || [], options)) as number
 			case 'operation':
 				// this is when the operand is an operation inside parenthesis
-				return evaluateOperation(operation.value as Operation, variables, options)
+				return (await evaluateOperation(operation.value as Operation, variables, options)) as number
 		}
 	}
 
 	if ('operator' in operation) {
-		let result = evaluateOperation(operation.operands[0], variables, options)
+		let result = await evaluateOperation(operation.operands[0], variables, options)
 
 		switch (operation.operator) {
 			case '+':
-				result += evaluateOperation(operation.operands[1], variables, options)
+				result += await evaluateOperation(operation.operands[1], variables, options)
 				break
 			case '-':
-				result -= evaluateOperation(operation.operands[1], variables, options)
+				result -= await evaluateOperation(operation.operands[1], variables, options)
 				break
 			case '*':
-				result *= evaluateOperation(operation.operands[1], variables, options)
+				result *= await evaluateOperation(operation.operands[1], variables, options)
 				break
 			case '/': {
-				const operand2 = evaluateOperation(operation.operands[1], variables, options)
+				const operand2 = await evaluateOperation(operation.operands[1], variables, options)
 				if (operand2 === 0) {
 					throw new Error('Division by zero')
 				}
@@ -114,7 +119,7 @@ function evaluateOperation(operation: Operation | Operand, variables: ParserVari
 				break
 			}
 			case '^':
-				result = Math.pow(result, evaluateOperation(operation.operands[1], variables, options))
+				result = Math.pow(result, await evaluateOperation(operation.operands[1], variables, options))
 				break
 		}
 
@@ -126,21 +131,21 @@ function evaluateOperation(operation: Operation | Operand, variables: ParserVari
 }
 
 // evaluate the contents of a variable (which may contain a static value or a function evaluation)
-function evaluateVariable(
+async function evaluateVariable(
 	variableName: string,
 	variables: ParserVariables,
 	params: ParserParam[],
 	options: ParserOptions,
 	raw: boolean = false,
 	recursionDepth = 0,
-): string | number | undefined {
+): Promise<string | number | undefined> {
 	const variable = variables[variableName]
 	if (!variable) {
 		return undefined
 	}
 
 	if (variable.type === ValueType.function) {
-		return evaluateFunction(variable.value as string, variable.params!, options)
+		return await evaluateFunction(variable.value as string, variable.params!, options)
 	} else if (variable.type === ValueType.number) {
 		return variable.value
 	} else if (variable.type === ValueType.string) {
@@ -167,11 +172,11 @@ function evaluateVariable(
 
 		recursionDepth++
 
-		return parseTemplate(variable.value as string, { ...variables, ...slotVariables }, options, recursionDepth) as string
+		return (await parseTemplate(variable.value as string, { ...variables, ...slotVariables }, options, recursionDepth)) as string
 	}
 }
 
-function evaluateFunction(functionName: string, params: ParserParam[], options: ParserOptions): string | number {
+async function evaluateFunction(functionName: string, params: ParserParam[], options: ParserOptions): Promise<string | number> {
 	const func = functions[functionName]
 	if (!func) {
 		throw new Error(`Unknown function: ${functionName}`)
@@ -180,7 +185,12 @@ function evaluateFunction(functionName: string, params: ParserParam[], options: 
 }
 
 // render the contents of a slot to a string
-function renderSlot(slot: ParserSection, variables: ParserVariables, options: ParserOptions, recursionDepth: number): string | undefined {
+async function renderSlot(
+	slot: ParserSection,
+	variables: ParserVariables,
+	options: ParserOptions,
+	recursionDepth: number,
+): Promise<string | undefined> {
 	switch (slot.expression!.type) {
 		case ExpressionType.number:
 		case ExpressionType.string:
@@ -188,21 +198,21 @@ function renderSlot(slot: ParserSection, variables: ParserVariables, options: Pa
 		case ExpressionType.variable:
 		case ExpressionType.function:
 			if ((slot.expression!.value as string) in functions) {
-				return evaluateFunction(slot.expression!.value as string, slot.expression!.params!, options) as string
+				return (await evaluateFunction(slot.expression!.value as string, slot.expression!.params!, options)) as string
 			} else if ((slot.expression!.value as string) in variables) {
-				return evaluateVariable(
+				return (await evaluateVariable(
 					slot.expression!.value as string,
 					variables,
 					slot.expression!.params || [],
 					options,
 					slot.raw || false,
 					recursionDepth,
-				) as string
+				)) as string
 			} else {
 				return undefined
 			}
 		case ExpressionType.operation:
-			return evaluateOperation(slot.expression!.value as Operation, variables, options).toString()
+			return (await evaluateOperation(slot.expression!.value as Operation, variables, options)).toString()
 		default:
 			return undefined
 	}

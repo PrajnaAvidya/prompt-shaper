@@ -1,6 +1,8 @@
 import { readdirSync, readFileSync, statSync } from 'fs'
 import { ParserVariables, ValueType } from './types'
 import { join, extname } from 'path'
+import { JSDOM } from 'jsdom'
+import { Readability } from '@mozilla/readability'
 
 const fileCache: { [key: string]: string } = {}
 
@@ -39,6 +41,39 @@ export const loadDirectoryContents = (directoryPath: string, extensions: string[
 	readDir(directoryPath, recursive)
 
 	return results
+}
+
+export const loadUrlReadableContents = async (url: string): Promise<string> => {
+	try {
+		if (!/^https?:\/\/.+$/.test(url)) {
+			throw new Error('Invalid URL format')
+		}
+
+		const response = await fetch(url)
+		if (!response.ok) {
+			throw new Error(`Failed to fetch content: ${response.statusText}`)
+		}
+		const htmlContent = await response.text()
+
+		// parse html into readable text
+		const dom = new JSDOM(htmlContent, { url })
+		const reader = new Readability(dom.window.document)
+		const article = reader.parse()
+		if (!article || !article.textContent) {
+			console.error(`Failed to parse content: ${url}`)
+			process.exit(1)
+		}
+
+		return article.textContent
+	} catch (error: Error | unknown) {
+		if (error instanceof Error) {
+			console.error(`Error: ${error.message}`)
+			process.exit(1)
+		} else {
+			console.error(`An unknown error occurred: ${error}`)
+			process.exit(1)
+		}
+	}
 }
 
 // used to replace a slot with its rendered contents

@@ -145,4 +145,4 @@ escapedChar
   = "\\" char:$["{}\""] { return char }
 
 _ "whitespace"
-  = [ \t\n\r]*
+  = [ \t]*

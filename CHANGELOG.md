@@ -1,3 +1,16 @@
+# [3.0.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v2.4.0...v3.0.0) (2024-12-28)
+
+
+### Bug Fixes
+
+* remove newlines as valid whitespace inside tags ([c5a442a](https://github.com/PrajnaAvidya/prompt-shaper/commit/c5a442a7c26bade8a9bf1d2a167feb729b6c4718))
+
+
+### BREAKING CHANGES
+
+* if you were using newlines as whitespace inside promptshaper tags that doesn't work
+anymore, but you really shouldn't have been doing that!
+
 # [2.4.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v2.3.1...v2.4.0) (2024-12-14)
 
 

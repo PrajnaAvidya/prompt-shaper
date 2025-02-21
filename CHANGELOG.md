@@ -1,3 +1,16 @@
+# [4.0.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v3.0.0...v4.0.0) (2025-02-21)
+
+
+### Features
+
+* add additional support for new openai models ([e8ea8d3](https://github.com/PrajnaAvidya/prompt-shaper/commit/e8ea8d3e1abbf02e820fdc2adee9d8ce13060371)), closes [#40](https://github.com/PrajnaAvidya/prompt-shaper/issues/40)
+* add support for reasoning_effort and response_format ([859b9c0](https://github.com/PrajnaAvidya/prompt-shaper/commit/859b9c05149af56400685720589c8df441f6e743)), closes [#41](https://github.com/PrajnaAvidya/prompt-shaper/issues/41)
+
+
+### BREAKING CHANGES
+
+* prompt cli option/env var have been split into system vs developer prompt
+
 # [3.0.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v2.4.0...v3.0.0) (2024-12-28)
 
 

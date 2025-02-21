@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
 import * as fs from 'fs'
+import { ChatCompletionMessageParam, ChatCompletionReasoningEffort } from 'openai/resources/chat/completions/completions'
 import * as path from 'path'
 import { program } from 'commander'
-import { loadFileContent, transformJsonToVariables } from './utils'
+import { loadFileContent, startConversation, transformJsonToVariables } from './utils'
 import { parseTemplate } from './parser'
-import { ChatMessage, ParserVariables } from './types'
+import { ParserVariables, ResponseFormat } from './types'
 import { gpt } from './models/openai'
 import * as readline from 'readline'
 
@@ -21,10 +22,13 @@ interface CLIOptions {
 	loadText?: string
 	model: string
 	outputAssistant: boolean
-	prompt: string
+	systemPrompt: string
+	developerPrompt: string
 	raw?: boolean
 	save?: string
 	saveJson?: string
+	responseFormat: ResponseFormat
+	reasoningEffort: ChatCompletionReasoningEffort
 }
 
 const defaultFileExtensions = [
@@ -83,10 +87,13 @@ const envVars =
 				loadText: process.env.PROMPT_SHAPER_LOAD_TEXT,
 				model: process.env.PROMPT_SHAPER_MODEL,
 				outputAssistant: process.env.PROMPT_SHAPER_OUTPUT_ASSISTANT === 'true',
-				prompt: process.env.PROMPT_SHAPER_PROMPT,
+				systemPrompt: process.env.PROMPT_SHAPER_SYSTEM_PROMPT,
+				developerPrompt: process.env.PROMPT_SHAPER_DEVELOPER_PROMPT,
 				raw: process.env.PROMPT_SHAPER_RAW === 'true',
 				save: process.env.PROMPT_SHAPER_SAVE,
 				saveJson: process.env.PROMPT_SHAPER_SAVE_JSON,
+				responseFormat: process.env.PROMPT_SHAPER_RESPONSE_FORMAT,
+				reasoningEffort: process.env.PROMPT_SHAPER_REASONING_EFFORT,
 		  }
 		: {}
 
@@ -96,7 +103,7 @@ const prompt = (query: string) => new Promise(resolve => rl.question(query, reso
 async function handler(input: string, options: CLIOptions) {
 	if (options.loadJson) {
 		// load json and continue in interactive
-		const conversation: ChatMessage[] = JSON.parse(fs.readFileSync(options.loadJson, 'utf8'))
+		const conversation: ChatCompletionMessageParam[] = JSON.parse(fs.readFileSync(options.loadJson, 'utf8'))
 		await startSavedConversation(conversation, options)
 
 		process.exit(0)
@@ -109,16 +116,16 @@ async function handler(input: string, options: CLIOptions) {
 			.split('\n\n-----\n\n')
 			.map(message => {
 				const [role, ...content] = message.split('\n\n')
-				return { role, content: content.join('\n\n') } as ChatMessage
+				return { role, content: content.join('\n\n') } as ChatCompletionMessageParam
 			})
 		await startSavedConversation(conversation, options)
 
 		process.exit(0)
 	}
 
-	if ((options.interactive || options.raw) && !input) {
+	if (options.interactive && !input) {
 		// start new conversation in interactive
-		const conversation: ChatMessage[] = startConversation(options.prompt, options.model)
+		const conversation: ChatCompletionMessageParam[] = startConversation(options.systemPrompt, options.developerPrompt, options.model)
 		await startSavedConversation(conversation, options)
 
 		process.exit(0)
@@ -171,21 +178,21 @@ async function handler(input: string, options: CLIOptions) {
 		console.log(`user\n${[parsed]}\n-----`)
 
 		// check if user wants to send results to LLM
-		if (options.generate || options.interactive || options.model !== 'gpt-4o' || options.prompt !== 'You are a helpful assistant.') {
-			const conversation: ChatMessage[] = [
-				...startConversation(options.prompt, options.model),
+		if (options.generate || options.interactive) {
+			const conversation: ChatCompletionMessageParam[] = [
+				...startConversation(options.systemPrompt, options.developerPrompt, options.model),
 				{
 					role: 'user',
 					content: parsed,
 				},
 			]
 
-			if (options.interactive || options.raw) {
-				// interactive mode
-				await interactiveModeLoop(conversation, options, variables)
-			} else {
+			if (options.generate) {
 				// send single request to openai
 				await makeCompletionRequest(conversation, options)
+			} else {
+				// interactive mode
+				await interactiveModeLoop(conversation, options, variables)
 			}
 		} else {
 			// just return the generated text
@@ -206,16 +213,16 @@ async function handler(input: string, options: CLIOptions) {
 	process.exit(0)
 }
 
-async function startSavedConversation(conversation: ChatMessage[], options: CLIOptions) {
+async function startSavedConversation(conversation: ChatCompletionMessageParam[], options: CLIOptions) {
 	// show convo history to user
 	for (const message of conversation) {
-		console.log(`${message.role}\n${message.content}\n-----`)
+		console.log(`${message.role}\n${JSON.stringify(message.content)}\n-----`)
 	}
 
 	await interactiveModeLoop(conversation, options)
 }
 
-async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOptions, variables?: ParserVariables) {
+async function interactiveModeLoop(conversation: ChatCompletionMessageParam[], options: CLIOptions, variables?: ParserVariables) {
 	let userTurn = false
 	if (conversation.length === 0 || conversation[conversation.length - 1].role !== 'user') {
 		userTurn = true
@@ -252,9 +259,9 @@ async function interactiveModeLoop(conversation: ChatMessage[], options: CLIOpti
 	}
 }
 
-async function makeCompletionRequest(conversation: ChatMessage[], options: CLIOptions) {
+async function makeCompletionRequest(conversation: ChatCompletionMessageParam[], options: CLIOptions) {
 	console.log('assistant')
-	const result = await gpt(conversation, options.model)
+	const result = await gpt(conversation, options.model, options.responseFormat, options.reasoningEffort)
 	console.log('\n-----')
 
 	// update/save chat history
@@ -267,29 +274,17 @@ async function makeCompletionRequest(conversation: ChatMessage[], options: CLIOp
 	}
 }
 
-function saveConversationAsJson(conversation: ChatMessage[], options: CLIOptions) {
+function saveConversationAsJson(conversation: ChatCompletionMessageParam[], options: CLIOptions) {
 	const filteredConvo = options.outputAssistant ? conversation.filter(m => m.role === 'assistant') : conversation
 
 	fs.writeFileSync(options.saveJson!, JSON.stringify(filteredConvo))
 }
 
-function saveConversationAsText(conversation: ChatMessage[], options: CLIOptions) {
+function saveConversationAsText(conversation: ChatCompletionMessageParam[], options: CLIOptions) {
 	const filteredConvo = options.outputAssistant ? conversation.filter(m => m.role === 'assistant') : conversation
 	const conversationText = filteredConvo.map(m => `${m.role}\n\n${m.content}`).join('\n\n-----\n\n')
 
 	fs.writeFileSync(options.save!, conversationText)
-}
-
-function startConversation(systemPrompt: string, model: string): ChatMessage[] {
-	const conversation: ChatMessage[] = []
-	if (!model.startsWith('o1-')) {
-		conversation.push({
-			role: 'system',
-			content: systemPrompt,
-		})
-	}
-
-	return conversation
 }
 
 program
@@ -310,8 +305,11 @@ program
 	.option('-lt, --load-text <filePath>', 'Load conversation from text/markdown file and continue in interactive mode', envVars.loadText)
 	.option('-m, --model <modelType>', 'OpenAI model to use', envVars.model || 'gpt-4o')
 	.option('-oa --output-assistant', 'Save gpt output only to text/JSON (filters out user responses)', envVars.outputAssistant)
-	.option('-p, --prompt <promptString>', 'System prompt for LLM conversation', envVars.prompt || 'You are a helpful assistant.')
-	.option('-r, --raw', 'Raw interactive mode', envVars.raw)
+	.option('-sp, --system-prompt <promptString>', 'System prompt for LLM conversation', envVars.systemPrompt || 'You are a helpful assistant.')
+	.option('-dp, --developer-prompt <promptString>', 'Developer prompt for LLM conversation', envVars.developerPrompt || 'Formatting re-enabled')
+	.option('-re, --reasoning-effort', 'Reasoning effort (low/medium/high) for o1/o3 models', envVars.reasoningEffort || 'high')
+	.option('-rf, --response-format', 'Response format (text/json_object)', envVars.responseFormat || 'text')
+	.option('-r, --raw', "Raw mode (don't parse any Prompt Shaper tags)", envVars.raw)
 	.option('-s, --save <filePath>', 'Save output to file path', envVars.save)
 	.option('-sj, --save-json <filePath>', 'Save conversation as JSON file', envVars.saveJson)
 	.action(handler)

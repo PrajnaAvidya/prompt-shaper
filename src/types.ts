@@ -1,3 +1,5 @@
+import { ChatCompletionMessageParam, ChatCompletionReasoningEffort } from 'openai/resources/chat/completions/completions'
+
 export interface ParserOptions {
 	fileExtensions?: string // what file extensions to include when reading files from directories with loadDir
 	returnParserMatches?: boolean // return array of parser matches instead of rendered template
@@ -79,11 +81,13 @@ export interface ParserVariables {
 	}
 }
 
-export interface ChatMessage {
-	role: 'system' | 'user' | 'assistant' | 'function'
-	content: string
-}
+export type ResponseFormat = 'text' | 'json_object'
 
 export interface Generate {
-	(messages: ChatMessage[], model: string): Promise<string>
+	(
+		messages: ChatCompletionMessageParam[],
+		model: string,
+		responseFormat: ResponseFormat,
+		reasoningEffort: ChatCompletionReasoningEffort,
+	): Promise<string>
 }

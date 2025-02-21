@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 import * as fs from 'fs'
-import { ChatCompletionMessageParam } from 'openai/resources/chat/completions/completions'
+import { ChatCompletionMessageParam, ChatCompletionReasoningEffort } from 'openai/resources/chat/completions/completions'
 import * as path from 'path'
 import { program } from 'commander'
 import { loadFileContent, startConversation, transformJsonToVariables } from './utils'
 import { parseTemplate } from './parser'
-import { ParserVariables } from './types'
+import { ParserVariables, ResponseFormat } from './types'
 import { gpt } from './models/openai'
 import * as readline from 'readline'
 
@@ -27,6 +27,8 @@ interface CLIOptions {
 	raw?: boolean
 	save?: string
 	saveJson?: string
+	responseFormat: ResponseFormat
+	reasoningEffort: ChatCompletionReasoningEffort
 }
 
 const defaultFileExtensions = [
@@ -90,6 +92,8 @@ const envVars =
 				raw: process.env.PROMPT_SHAPER_RAW === 'true',
 				save: process.env.PROMPT_SHAPER_SAVE,
 				saveJson: process.env.PROMPT_SHAPER_SAVE_JSON,
+				responseFormat: process.env.PROMPT_SHAPER_RESPONSE_FORMAT,
+				reasoningEffort: process.env.PROMPT_SHAPER_REASONING_EFFORT,
 		  }
 		: {}
 
@@ -257,7 +261,7 @@ async function interactiveModeLoop(conversation: ChatCompletionMessageParam[], o
 
 async function makeCompletionRequest(conversation: ChatCompletionMessageParam[], options: CLIOptions) {
 	console.log('assistant')
-	const result = await gpt(conversation, options.model)
+	const result = await gpt(conversation, options.model, options.responseFormat, options.reasoningEffort)
 	console.log('\n-----')
 
 	// update/save chat history
@@ -303,6 +307,8 @@ program
 	.option('-oa --output-assistant', 'Save gpt output only to text/JSON (filters out user responses)', envVars.outputAssistant)
 	.option('-sp, --system-prompt <promptString>', 'System prompt for LLM conversation', envVars.systemPrompt || 'You are a helpful assistant.')
 	.option('-dp, --developer-prompt <promptString>', 'Developer prompt for LLM conversation', envVars.developerPrompt || 'Formatting re-enabled')
+	.option('-re, --reasoning-effort', 'Reasoning effort (low/medium/high) for o1/o3 models', envVars.reasoningEffort || 'high')
+	.option('-rf, --response-format', 'Response format (text/json_object)', envVars.responseFormat || 'text')
 	.option('-r, --raw', "Raw mode (don't parse any Prompt Shaper tags)", envVars.raw)
 	.option('-s, --save <filePath>', 'Save output to file path', envVars.save)
 	.option('-sj, --save-json <filePath>', 'Save conversation as JSON file', envVars.saveJson)

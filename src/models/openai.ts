@@ -1,11 +1,12 @@
 import OpenAI from 'openai'
-import { ChatMessage, Generate } from '../types'
+import { ChatCompletionMessageParam } from 'openai/resources/chat/completions/completions'
+import { Generate } from '../types'
 
 const openai = new OpenAI({
 	apiKey: process.env.OPENAI_API_KEY || 'abc123',
 })
 
-export const gpt: Generate = async (messages: ChatMessage[], model: string): Promise<string> => {
+export const gpt: Generate = async (messages: ChatCompletionMessageParam[], model: string): Promise<string> => {
 	let response: string = ''
 
 	try {

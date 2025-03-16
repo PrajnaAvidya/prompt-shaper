@@ -304,7 +304,7 @@ program
 	.option('-lj, --load-json <filePath>', 'Load conversation from JSON file and continue in interactive mode', envVars.loadJson)
 	.option('-lt, --load-text <filePath>', 'Load conversation from text/markdown file and continue in interactive mode', envVars.loadText)
 	.option('-m, --model <modelType>', 'OpenAI model to use', envVars.model || 'gpt-4o')
-	.option('-oa --output-assistant', 'Save gpt output only to text/JSON (filters out user responses)', envVars.outputAssistant)
+	.option('-oa --output-assistant', 'Save gpt output only to text/JSON (filters out prompt & user responses)', envVars.outputAssistant)
 	.option('-sp, --system-prompt <promptString>', 'System prompt for LLM conversation', envVars.systemPrompt || 'You are a helpful assistant.')
 	.option('-dp, --developer-prompt <promptString>', 'Developer prompt for LLM conversation', envVars.developerPrompt || 'Formatting re-enabled')
 	.option('-re, --reasoning-effort', 'Reasoning effort (low/medium/high) for o1/o3 models', envVars.reasoningEffort || 'high')

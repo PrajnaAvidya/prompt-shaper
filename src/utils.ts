@@ -1,9 +1,11 @@
 import { readdirSync, readFileSync, statSync } from 'fs'
+import { existsSync } from 'node:fs'
 import { ChatCompletionMessageParam } from 'openai/resources/chat/completions/completions'
 import { ParserVariables, ValueType } from './types'
 import { join, extname } from 'path'
 import { JSDOM } from 'jsdom'
 import { Readability } from '@mozilla/readability'
+import sharp from 'sharp'
 
 const fileCache: { [key: string]: string } = {}
 
@@ -94,7 +96,7 @@ export const transformJsonToVariables = (json: { [key: string]: string | number 
 		return variables
 	}, {} as ParserVariables)
 
-export function startConversation(systemPrompt: string, developerPrompt: string, model: string): ChatCompletionMessageParam[] {
+export const startConversation = (systemPrompt: string, developerPrompt: string, model: string): ChatCompletionMessageParam[] => {
 	const conversation: ChatCompletionMessageParam[] = []
 	if (model.startsWith('o1') || model.startsWith('o3')) {
 		conversation.push({
@@ -114,4 +116,31 @@ export function startConversation(systemPrompt: string, developerPrompt: string,
 	}
 
 	return conversation
+}
+
+// export const encodeLocalImageAsBase64 = (path: string): string => {
+// 	if (!existsSync(path)) throw new Error(`Image not found at path: ${path}`)
+// 	const content = readFileSync(path)
+// 	return content.toString('base64')
+// }
+
+export const encodeLocalImageAsBase64 = async (path: string): Promise<{ data: string; format: string }> => {
+	if (!existsSync(path)) throw new Error(`Image not found at path: ${path}`)
+
+	// attempt to convert format if it's not accepted by openai
+	const allowedFormats = ['jpeg', 'png', 'webp', 'gif']
+	let image = sharp(path)
+	const metadata = await image.metadata()
+	let outputFormat = metadata.format
+	if (!outputFormat || !allowedFormats.includes(outputFormat)) {
+		outputFormat = 'jpeg' // default conversion format
+		image = image.jpeg()
+	}
+
+	const buffer = await image.toBuffer()
+
+	return {
+		data: buffer.toString('base64'),
+		format: outputFormat,
+	}
 }

@@ -7,6 +7,7 @@ I'm a programmer, and like many I've seen productivity gains due to the assistan
 ## Features
 - Templating Engine: Work out of a text editor/IDE and save a lot of time by avoiding repetitive copy/pasting of text fragments. Through the use of slots, variables, and functions you can dynamically load and render text into LLM prompts.
 - CLI: A variety of command-line options to customize usage, and you can specify various input/output formats.
+- Inline Images: Include images directly in your prompts using the `img` function, either by referencing local image files or remote URLs. The images are automatically encoded and attached to the prompt sent to the LLM.
 - Interactive Mode (OpenAI key required): After constructing your prompt you can continue your conversation in the command line, or load a previous conversation from JSON or text and continue in interactive mode. You can even use PromptShaper tags in interactive mode!
 
 ## Requirements
@@ -95,6 +96,30 @@ There's a few basic functions defined in the `functions.ts` file and you can add
 
 By default, the `parser.ts` uses the contents of `functions.ts` as built-in functions. You can add your own custom functions with `registerFunction`.
 
+- **load(filePath)**: Loads a file from the specified path and renders its content.
+```
+// loads and renders the content of file.ps.md
+{{load("file.ps.md")}}
+```
+
+- **loadDir(dirPath)**: Loads all files from the specified directory (and its subdirectories) that match certain extensions, and renders their contents. **Note**: The `loadDir` function uses the file extensions specified in the `--extensions` CLI option or the `PROMPT_SHAPER_FILE_EXTENSIONS` environment variable to determine which files to include. By default, it includes common text and code file extensions.
+```
+// loads and renders all files in the 'src' directory
+{{loadDir("src")}}
+```
+
+- **loadUrl(url)**: Loads content from the specified URL and uses the [@mozilla/readability](https://github.com/mozilla/readability) library to convert it into readable text.
+```
+// loads and renders the Prompt Shaper GitHub page
+{{loadUrl("https://github.com/PrajnaAvidya/prompt-shaper")}}
+```
+
+- **img(source)**: Loads an image from a local file path or a URL, encodes it, and attaches it as image content in your LLM prompt.
+```
+{{img("path/to/image.png")}}
+{{img("https://example.com/image.jpg")}}
+```
+
 - **add(a, b)**: Returns the sum of `a` and `b`.
 ```
 // outputs 5
@@ -118,25 +143,6 @@ By default, the `parser.ts` uses the contents of `functions.ts` as built-in func
 // outputs 2
 {{divide(6, 3)}}
 ```
-
-- **load(filePath)**: Loads a file from the specified path and renders its content.
-```
-// loads and renders the content of file.ps.md
-{{load("file.ps.md")}}
-```
-
-- **loadDir(dirPath)**: Loads all files from the specified directory (and its subdirectories) that match certain extensions, and renders their contents. **Note**: The `loadDir` function uses the file extensions specified in the `--extensions` CLI option or the `PROMPT_SHAPER_FILE_EXTENSIONS` environment variable to determine which files to include. By default, it includes common text and code file extensions.
-```
-// loads and renders all files in the 'src' directory
-{{loadDir("src")}}
-```
-
-- **loadUrl(url)**: Loads content from the specified URL and uses the [@mozilla/readability](https://github.com/mozilla/readability) library to convert it into readable text.
-```
-// loads and renders the Prompt Shaper GitHub page
-{{loadUrl("https://github.com/PrajnaAvidya/prompt-shaper")}}
-```
-
 
 ## String vs Number Parameters
 The only difference between string and number params is that numeric params can have basic arithmetic operations done on their output. Supported operations are `+ - * / ^`.

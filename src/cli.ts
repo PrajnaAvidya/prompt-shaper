@@ -176,7 +176,8 @@ async function handler(input: string, options: CLIOptions) {
 		const parserOptions = { returnParserMatches: false, showDebugMessages: options.debug as boolean, fileExtensions: options.extensions }
 
 		// parse template if not in raw mode
-		const parsed = options.raw ? template : await parseTemplate(template, variables, parserOptions)
+		const parserContext = { variables, options: parserOptions, attachments: [] }
+		const parsed = options.raw ? template : await parseTemplate(template, parserContext)
 		console.log(`user\n${[parsed]}\n-----`)
 
 		// check if user wants to send results to LLM
@@ -185,7 +186,7 @@ async function handler(input: string, options: CLIOptions) {
 				...startConversation(options.systemPrompt, options.developerPrompt, options.model),
 				{
 					role: 'user',
-					content: parsed,
+					content: [{ type: 'text', text: parsed }, ...parserContext.attachments.reverse()],
 				},
 			]
 
@@ -240,9 +241,12 @@ async function interactiveModeLoop(conversation: ChatCompletionMessageParam[], o
 
 		// collect user response and then parse response if not in raw mode
 		const response = (await prompt('Your response: ')) as string
-		const parsedResponse = options.raw
-			? response
-			: await parseTemplate(response, variables || {}, { showDebugMessages: options.debug, fileExtensions: options.extensions }, 0)
+		const parserContext = {
+			variables: variables || {},
+			options: { showDebugMessages: options.debug, fileExtensions: options.extensions },
+			attachments: [],
+		}
+		const parsedResponse = options.raw ? response : await parseTemplate(response, parserContext)
 		if (parsedResponse !== response) {
 			console.log(parsedResponse, '\n-----')
 		} else {

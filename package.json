@@ -14,7 +14,7 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "parse": "ts-node src/cli.ts",
-    "test": "PROMPT_SHAPER_TESTS=true mocha -r ts-node/register 'test/**/*.spec.ts' --timeout 5000"
+    "test": "PROMPT_SHAPER_TESTS=true mocha -r ts-node/register 'test/**/*.spec.ts' --timeout 3000"
   },
   "config": {
     "commitizen": {
@@ -49,7 +49,8 @@
   "dependencies": {
     "commander": "^11.0.0",
     "openai": "^4.85.3",
-    "peggy": "^3.0.2"
+    "peggy": "^3.0.2",
+    "sharp": "^0.34.1"
   },
   "optionalDependencies": {
     "@mozilla/readability": "^0.5.0",
@@ -62,6 +63,7 @@
     "@types/jsdom": "^21.1.7",
     "@types/mocha": "^10.0.1",
     "@types/node": "^20.3.3",
+    "@types/sharp": "^0.32.0",
     "@types/sinon": "^10.0.15",
     "@typescript-eslint/eslint-plugin": "^6.1.0",
     "@typescript-eslint/parser": "^6.1.0",

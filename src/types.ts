@@ -6,6 +6,21 @@ export interface ParserOptions {
 	showDebugMessages?: boolean // show verbose debug stuff
 }
 
+export interface ParserVariables {
+	[key: string]: {
+		name: string
+		type: ValueType
+		value: string | number
+		params: ParserParam[]
+	}
+}
+
+export interface ParserContext {
+	variables: ParserVariables
+	options: ParserOptions
+	attachments: Array<{ type: 'image_url'; image_url: { url: string } }>
+}
+
 export enum ParserType {
 	text = 'text',
 	variable = 'variable',
@@ -70,15 +85,6 @@ export interface TextLocation {
 	column: number
 	line: number
 	offset: number
-}
-
-export interface ParserVariables {
-	[key: string]: {
-		name: string
-		type: ValueType
-		value: string | number
-		params: ParserParam[]
-	}
 }
 
 export type ResponseFormat = 'text' | 'json_object'

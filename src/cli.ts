@@ -288,7 +288,7 @@ function saveConversationAsJson(conversation: ChatCompletionMessageParam[], opti
 
 function saveConversationAsText(conversation: ChatCompletionMessageParam[], options: CLIOptions) {
 	const filteredConvo = options.outputAssistant ? conversation.filter(m => m.role === 'assistant') : conversation
-	const conversationText = filteredConvo.map(m => `${m.role}\n\n${m.content}`).join('\n\n-----\n\n')
+	const conversationText = filteredConvo.map(m => (options.outputAssistant ? m.content : `${m.role}\n\n${m.content}`)).join('\n\n-----\n\n')
 
 	fs.writeFileSync(options.save!, conversationText)
 }

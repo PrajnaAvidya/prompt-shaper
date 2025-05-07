@@ -1,6 +1,6 @@
 import { assert, expect } from 'chai'
 import { parseTemplate } from '../src/parser'
-import { ParserVariables, ValueType } from '../src/types'
+import { ParserContext, ParserVariables, ValueType } from '../src/types'
 import { loadFileContent } from '../src/utils'
 
 describe('slots', () => {
@@ -25,8 +25,13 @@ describe('slots', () => {
 		const variables: ParserVariables = {
 			name: { name: 'name', type: ValueType.string, value: 'World', params: [] },
 		}
+		const parserContext: ParserContext = {
+			variables,
+			options: {},
+			attachments: [],
+		}
 
-		const result = await parseTemplate(template, variables)
+		const result = await parseTemplate(template, parserContext)
 
 		expect(result).to.equal('Hello, World!')
 	})
@@ -36,8 +41,13 @@ describe('slots', () => {
 		const variables: ParserVariables = {
 			age: { name: 'age', type: ValueType.number, value: 25, params: [] },
 		}
+		const parserContext: ParserContext = {
+			variables,
+			options: {},
+			attachments: [],
+		}
 
-		const result = await parseTemplate(template, variables)
+		const result = await parseTemplate(template, parserContext)
 
 		expect(result).to.equal('I am 25 years old.')
 	})
@@ -55,8 +65,13 @@ describe('slots', () => {
 				],
 			},
 		}
+		const parserContext: ParserContext = {
+			variables,
+			options: {},
+			attachments: [],
+		}
 
-		const result = await parseTemplate(template, variables)
+		const result = await parseTemplate(template, parserContext)
 
 		expect(result).to.equal('The sum of 1 and 2 is 3.')
 	})
@@ -91,8 +106,13 @@ describe('slots', () => {
 				params: [],
 			},
 		}
+		const parserContext: ParserContext = {
+			variables,
+			options: {},
+			attachments: [],
+		}
 
-		const result = await parseTemplate(template, variables)
+		const result = await parseTemplate(template, parserContext)
 
 		expect(result).to.equal('{{hello}}')
 	})

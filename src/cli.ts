@@ -14,6 +14,7 @@ interface CLIOptions {
 	debug?: boolean
 	extensions?: string
 	generate?: boolean
+	hidePrompt: boolean
 	interactive?: boolean
 	isString?: boolean
 	json?: string
@@ -62,6 +63,8 @@ const defaultFileExtensions = [
 	'.bat',
 	'.r',
 	'.jl',
+	'.tscn',
+	'.tres',
 
 	// config/data
 	'.json',
@@ -79,6 +82,7 @@ const envVars =
 				debug: process.env.PROMPT_SHAPER_DEBUG === 'true',
 				extensions: process.env.PROMPT_SHAPER_FILE_EXTENSIONS || defaultFileExtensions.join(','),
 				generate: process.env.PROMPT_SHAPER_GENERATE === 'true',
+				hidePrompt: process.env.PROMPT_SHAPER_HIDE_PROMPT === 'true',
 				isString: process.env.PROMPT_SHAPER_IS_STRING === 'true',
 				interactive: process.env.PROMPT_SHAPER_INTERACTIVE === 'true',
 				json: process.env.PROMPT_SHAPER_JSON,
@@ -174,8 +178,11 @@ async function handler(input: string, options: CLIOptions) {
 		const parserOptions = { returnParserMatches: false, showDebugMessages: options.debug as boolean, fileExtensions: options.extensions }
 
 		// parse template if not in raw mode
-		const parsed = options.raw ? template : await parseTemplate(template, variables, parserOptions)
-		console.log(`user\n${[parsed]}\n-----`)
+		const parserContext = { variables, options: parserOptions, attachments: [] }
+		const parsed = options.raw ? template : await parseTemplate(template, parserContext)
+		if (!options.hidePrompt) {
+			console.log(`user\n${[parsed]}\n-----`)
+		}
 
 		// check if user wants to send results to LLM
 		if (options.generate || options.interactive) {
@@ -183,7 +190,7 @@ async function handler(input: string, options: CLIOptions) {
 				...startConversation(options.systemPrompt, options.developerPrompt, options.model),
 				{
 					role: 'user',
-					content: parsed,
+					content: [{ type: 'text', text: parsed }, ...parserContext.attachments.reverse()],
 				},
 			]
 
@@ -238,9 +245,12 @@ async function interactiveModeLoop(conversation: ChatCompletionMessageParam[], o
 
 		// collect user response and then parse response if not in raw mode
 		const response = (await prompt('Your response: ')) as string
-		const parsedResponse = options.raw
-			? response
-			: await parseTemplate(response, variables || {}, { showDebugMessages: options.debug, fileExtensions: options.extensions }, 0)
+		const parserContext = {
+			variables: variables || {},
+			options: { showDebugMessages: options.debug, fileExtensions: options.extensions },
+			attachments: [],
+		}
+		const parsedResponse = options.raw ? response : await parseTemplate(response, parserContext)
 		if (parsedResponse !== response) {
 			console.log(parsedResponse, '\n-----')
 		} else {
@@ -282,7 +292,7 @@ function saveConversationAsJson(conversation: ChatCompletionMessageParam[], opti
 
 function saveConversationAsText(conversation: ChatCompletionMessageParam[], options: CLIOptions) {
 	const filteredConvo = options.outputAssistant ? conversation.filter(m => m.role === 'assistant') : conversation
-	const conversationText = filteredConvo.map(m => `${m.role}\n\n${m.content}`).join('\n\n-----\n\n')
+	const conversationText = filteredConvo.map(m => (options.outputAssistant ? m.content : `${m.role}\n\n${m.content}`)).join('\n\n-----\n\n')
 
 	fs.writeFileSync(options.save!, conversationText)
 }
@@ -297,6 +307,7 @@ program
 		envVars.extensions,
 	)
 	.option('-g, --generate', 'Send parsed template result to ChatGPT and return response', envVars.generate)
+	.option('-h, --hide-prompt', 'Hide the initial prompt in the console', envVars.hidePrompt)
 	.option('-is, --is-string', 'Indicate that the input is a string, not a file path', envVars.isString)
 	.option('-i, --interactive', 'Enable interactive mode', envVars.interactive)
 	.option('-js, --json <jsonString>', 'Input JSON variables as string', envVars.json)

@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { parseTemplate } from '../src/parser'
-import { ParserVariables, ValueType } from '../src/types'
+import { ParserContext, ParserVariables, ValueType } from '../src/types'
 import { loadFileContent } from '../src/utils'
 
 describe('comments', () => {
@@ -9,8 +9,13 @@ describe('comments', () => {
 		const variables: ParserVariables = {
 			name: { name: 'name', type: ValueType.string, value: 'World', params: [] },
 		}
+		const parserContext: ParserContext = {
+			variables,
+			options: {},
+			attachments: [],
+		}
 
-		const result = await parseTemplate(template, variables)
+		const result = await parseTemplate(template, parserContext)
 
 		expect(result).to.equal('Hello, World!')
 	})
@@ -20,8 +25,13 @@ describe('comments', () => {
 		const variables: ParserVariables = {
 			name: { name: 'name', type: ValueType.string, value: 'World', params: [] },
 		}
+		const parserContext: ParserContext = {
+			variables,
+			options: {},
+			attachments: [],
+		}
 
-		const result = await parseTemplate(template, variables)
+		const result = await parseTemplate(template, parserContext)
 
 		expect(result).to.equal('Hello, World!')
 	})
@@ -31,8 +41,13 @@ describe('comments', () => {
 		const variables: ParserVariables = {
 			name: { name: 'name', type: ValueType.string, value: 'World', params: [] },
 		}
+		const parserContext: ParserContext = {
+			variables,
+			options: {},
+			attachments: [],
+		}
 
-		const result = await parseTemplate(template, variables)
+		const result = await parseTemplate(template, parserContext)
 
 		expect(result).to.equal('Hello, World!')
 	})

@@ -118,12 +118,6 @@ export const startConversation = (systemPrompt: string, developerPrompt: string,
 	return conversation
 }
 
-// export const encodeLocalImageAsBase64 = (path: string): string => {
-// 	if (!existsSync(path)) throw new Error(`Image not found at path: ${path}`)
-// 	const content = readFileSync(path)
-// 	return content.toString('base64')
-// }
-
 export const encodeLocalImageAsBase64 = async (path: string): Promise<{ data: string; format: string }> => {
 	if (!existsSync(path)) throw new Error(`Image not found at path: ${path}`)
 

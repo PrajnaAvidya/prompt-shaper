@@ -62,6 +62,8 @@ const defaultFileExtensions = [
 	'.bat',
 	'.r',
 	'.jl',
+	'.tscn',
+	'.tres',
 
 	// config/data
 	'.json',

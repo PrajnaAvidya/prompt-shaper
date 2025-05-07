@@ -1,3 +1,19 @@
+# [5.0.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v4.0.0...v5.0.0) (2025-05-07)
+
+
+### Features
+
+* add option to hide initial prompt ([902eb3c](https://github.com/PrajnaAvidya/prompt-shaper/commit/902eb3c0396576aeca4ac7e0325208ec47b79bc1)), closes [#48](https://github.com/PrajnaAvidya/prompt-shaper/issues/48)
+* add support for img tag ([b60ca9d](https://github.com/PrajnaAvidya/prompt-shaper/commit/b60ca9dadf38b3cfbd57ae11ceecc675912e47d7)), closes [#39](https://github.com/PrajnaAvidya/prompt-shaper/issues/39)
+* add support for tscn/tres files by default (Godot engine) ([9bbc9bc](https://github.com/PrajnaAvidya/prompt-shaper/commit/9bbc9bc7e6247c72982f95f91e5d49f1387c853b)), closes [#45](https://github.com/PrajnaAvidya/prompt-shaper/issues/45)
+* remove "assistant" from text outputs ([57e8442](https://github.com/PrajnaAvidya/prompt-shaper/commit/57e844266873b8c30a4b2c321e9a6fb1e64aca33)), closes [#47](https://github.com/PrajnaAvidya/prompt-shaper/issues/47)
+
+
+### BREAKING CHANGES
+
+* if your workflow relies on finding/removing "assistant" at the beginning of outputs
+it will need to be updated
+
 # [4.0.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v3.0.0...v4.0.0) (2025-02-21)
 
 

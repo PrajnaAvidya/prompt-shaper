@@ -14,6 +14,7 @@ interface CLIOptions {
 	debug?: boolean
 	extensions?: string
 	generate?: boolean
+	hidePrompt: boolean
 	interactive?: boolean
 	isString?: boolean
 	json?: string
@@ -81,6 +82,7 @@ const envVars =
 				debug: process.env.PROMPT_SHAPER_DEBUG === 'true',
 				extensions: process.env.PROMPT_SHAPER_FILE_EXTENSIONS || defaultFileExtensions.join(','),
 				generate: process.env.PROMPT_SHAPER_GENERATE === 'true',
+				hidePrompt: process.env.PROMPT_SHAPER_HIDE_PROMPT === 'true',
 				isString: process.env.PROMPT_SHAPER_IS_STRING === 'true',
 				interactive: process.env.PROMPT_SHAPER_INTERACTIVE === 'true',
 				json: process.env.PROMPT_SHAPER_JSON,
@@ -178,7 +180,9 @@ async function handler(input: string, options: CLIOptions) {
 		// parse template if not in raw mode
 		const parserContext = { variables, options: parserOptions, attachments: [] }
 		const parsed = options.raw ? template : await parseTemplate(template, parserContext)
-		console.log(`user\n${[parsed]}\n-----`)
+		if (!options.hidePrompt) {
+			console.log(`user\n${[parsed]}\n-----`)
+		}
 
 		// check if user wants to send results to LLM
 		if (options.generate || options.interactive) {
@@ -303,6 +307,7 @@ program
 		envVars.extensions,
 	)
 	.option('-g, --generate', 'Send parsed template result to ChatGPT and return response', envVars.generate)
+	.option('-h, --hide-prompt', 'Hide the initial prompt in the console', envVars.hidePrompt)
 	.option('-is, --is-string', 'Indicate that the input is a string, not a file path', envVars.isString)
 	.option('-i, --interactive', 'Enable interactive mode', envVars.interactive)
 	.option('-js, --json <jsonString>', 'Input JSON variables as string', envVars.json)

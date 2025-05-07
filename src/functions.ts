@@ -1,4 +1,4 @@
-import { ParserContext,  ParserParam } from './types'
+import { ParserContext, ParserParam } from './types'
 import { encodeLocalImageAsBase64, loadDirectoryContents, loadFileContent, loadUrlReadableContents } from './utils'
 import { extname } from 'path'
 

@@ -27,12 +27,12 @@ This works: {{realVar}}`
 
 			const result = await parseTemplate(template, parserContext)
 
-			// Code block should be completely preserved
+			// code block should be completely preserved
 			expect(result).to.include('{problematic}')
 			expect(result).to.include('This has {{invalid var}} inside')
 			expect(result).to.include('{/problematic}')
 			expect(result).to.include('console.log({{problematic}});')
-			// External variable should work
+			// external variable should work
 			expect(result).to.include('This works: success')
 		})
 
@@ -66,12 +66,12 @@ Results:
 
 			const result = await parseTemplate(template, parserContext)
 
-			// Valid multiline should be parsed
+			// valid multiline should be parsed
 			expect(result).to.include('- Valid: Hello World')
-			// Code block should be preserved
+			// code block should be preserved
 			expect(result).to.include('{invalidVar}')
 			expect(result).to.include('Bad syntax: {{invalid var name}}')
-			// Problematic multiline should be raw
+			// problematic multiline should be raw
 			expect(result).to.include('This also has {braces} and {{bad spaces}}')
 		})
 
@@ -102,7 +102,7 @@ Final: {{outerValid}}`
 
 			const result = await parseTemplate(template, parserContext)
 
-			// Should properly handle all nested cases
+			// should properly handle all nested cases
 			expect(result).to.include('Outer with {{innerVar}}') // innerVar not parsed due to problematic content
 			expect(result).to.include('{codeExample}')
 			expect(result).to.include('Inside code: {{not_parsed}}')
@@ -117,7 +117,7 @@ Final: {{outerValid}}`
 Result: "{{empty}}"`
 
 			const result = await parseTemplate(template)
-			expect(result).to.include('Result: "\n"') // Empty multiline includes newlines
+			expect(result).to.include('Result: "\n"') // empty multiline includes newlines
 		})
 
 		it('should handle multiline variables with only whitespace', async () => {
@@ -150,7 +150,7 @@ Final: {{level1}}`
 
 			const result = await parseTemplate(template)
 
-			// Should handle deep nesting correctly
+			// should handle deep nesting correctly
 			expect(result).to.include('Level 2 with first')
 			expect(result).to.include('Level 3 with second')
 			expect(result).to.include('Back to level 2: Level 3 with second')

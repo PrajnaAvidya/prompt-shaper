@@ -29,7 +29,7 @@ describe('functions', () => {
 	it('should correctly evaluate loadUrl function', async () => {
 		const template = loadFileContent('./test/templates/functions/loadUrl.ps.md')
 
-		// Mock the fetch function to avoid making external HTTP requests
+		// mock the fetch function to avoid making external HTTP requests
 		const fetchStub = sinon.stub(global as never, 'fetch').resolves({
 			ok: true,
 			text: () => Promise.resolve('<html><body><h1>Test Page</h1><p>This is a test content.</p></body></html>'),

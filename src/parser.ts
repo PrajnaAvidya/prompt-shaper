@@ -168,7 +168,7 @@ async function evaluateVariable(
 			return variable.value
 		}
 
-		// Try to parse template content, but fall back to raw if it fails with syntax errors
+		// try to parse template content, but fall back to raw if it fails with syntax errors
 		try {
 			// map slot/variable params
 			const slotVariables: ParserVariables = variable.params.reduce((obj: ParserVariables, item, index) => {
@@ -192,11 +192,11 @@ async function evaluateVariable(
 
 			return (await parseTemplate(variable.value as string, parserContext, recursionDepth)) as string
 		} catch (error) {
-			// If parsing fails due to syntax errors, return raw content
+			// if parsing fails due to syntax errors, return raw content
 			if (error instanceof SyntaxError) {
 				return variable.value
 			}
-			// Re-throw other errors
+			// re-throw other errors
 			throw error
 		}
 	}

@@ -33,7 +33,7 @@ export const functions: Record<string, PromptShaperFunction> = {
 		// format
 		let result = ''
 		for (const [filePath, content] of Object.entries(contents)) {
-			const fileExt = extname(filePath).slice(1) // Remove leading dot for formatting
+			const fileExt = extname(filePath).slice(1) // remove leading dot for formatting
 			result += `\n\nFile: ${filePath}\n\`\`\`${fileExt}\n${content}\n\`\`\`\n\n`
 		}
 

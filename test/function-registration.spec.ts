@@ -4,9 +4,9 @@ import { registerFunction, unregisterFunction, functions } from '../src/function
 import { ParserContext, ParserParam } from '../src/types'
 
 describe('function registration', () => {
-	// Clean up after each test
+	// clean up after each test
 	afterEach(() => {
-		// Remove any test functions we might have added
+		// remove any test functions we might have added
 		const testFunctions = ['testFunction', 'anotherTest', 'existingFunction']
 		testFunctions.forEach(name => {
 			if (functions[name]) {
@@ -47,7 +47,7 @@ describe('function registration', () => {
 			const result = await parseTemplate(template)
 			expect(result).to.equal('Hello World!')
 
-			// Clean up
+			// clean up
 			unregisterFunction('greet')
 		})
 
@@ -64,7 +64,7 @@ describe('function registration', () => {
 			const result = await parseTemplate(template)
 			expect(result).to.equal('Async: test')
 
-			// Clean up
+			// clean up
 			unregisterFunction('asyncTest')
 		})
 	})
@@ -93,7 +93,7 @@ describe('function registration', () => {
 			const template = '{{tempFunction()}}'
 			const result = await parseTemplate(template)
 			
-			// Unregistered function call should remain as-is (undefined slot)
+			// unregistered function call should remain as-is (undefined slot)
 			expect(result).to.equal('{{tempFunction()}}')
 		})
 	})

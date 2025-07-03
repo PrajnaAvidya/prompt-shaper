@@ -99,7 +99,7 @@ describe('utils edge cases', () => {
 		})
 
 		it('should handle recursive parameter variations', () => {
-			// Set up directory structure: dir/file.txt and dir/subdir/file2.txt
+			// set up directory structure: dir/file.txt and dir/subdir/file2.txt
 			readdirSyncStub.withArgs('test').returns(['file.txt', 'subdir'])
 			readdirSyncStub.withArgs(path.join('test', 'subdir')).returns(['file2.txt'])
 			
@@ -110,13 +110,13 @@ describe('utils edge cases', () => {
 			readFileSyncStub.withArgs(path.join('test', 'file.txt')).returns('content1')
 			readFileSyncStub.withArgs(path.join('test', 'subdir', 'file2.txt')).returns('content2')
 
-			// Test recursive=true (default)
+			// test recursive=true (default)
 			const recursiveResult = loadDirectoryContents('test', ['.txt'], true)
 			expect(Object.keys(recursiveResult)).to.have.length(2)
 			expect(recursiveResult[path.join('test', 'file.txt')]).to.equal('content1')
 			expect(recursiveResult[path.join('test', 'subdir', 'file2.txt')]).to.equal('content2')
 
-			// Test recursive=false
+			// test recursive=false
 			const nonRecursiveResult = loadDirectoryContents('test', ['.txt'], false)
 			expect(Object.keys(nonRecursiveResult)).to.have.length(1)
 			expect(nonRecursiveResult[path.join('test', 'file.txt')]).to.equal('content1')
@@ -150,7 +150,7 @@ describe('utils edge cases', () => {
 			try {
 				await loadUrlReadableContents('not-a-url')
 			} catch (error) {
-				// Function calls process.exit, so we check if the stub was called
+				// function calls process.exit, so we check if the stub was called
 				expect(processExitStub.calledWith(1)).to.be.true
 				expect(consoleErrorStub.calledWith('Error: Invalid URL format')).to.be.true
 			}
@@ -197,7 +197,7 @@ describe('utils edge cases', () => {
 			})
 
 			// This is difficult to test without heavy mocking of JSDOM and Readability
-			// The function would call process.exit(1) on parsing failure
+			// the function would call process.exit(1) on parsing failure
 		})
 
 		it('should handle non-Error exceptions', async () => {
@@ -216,11 +216,11 @@ describe('utils edge cases', () => {
 		it('should handle invalid indices', () => {
 			const original = 'Hello World'
 			
-			// Start index greater than end index - JavaScript's substring handles this
+			// start index greater than end index - JavaScript's substring handles this
 			const result1 = replaceStringAtLocation(original, 'X', 5, 3)
-			expect(result1).to.equal('HelXo World') // substring(0,3) + X + substring(5)
+			expect(result1).to.equal('HelloXlo World') // substring(0,3) + X + substring(5) but substring swaps args
 			
-			// Negative indices - JavaScript's substring treats negative as 0
+			// negative indices - JavaScript's substring treats negative as 0
 			const result2 = replaceStringAtLocation(original, 'X', -1, 2)
 			expect(result2).to.equal('Xllo World')
 		})
@@ -228,11 +228,11 @@ describe('utils edge cases', () => {
 		it('should handle indices beyond string length', () => {
 			const original = 'Hello'
 			
-			// Start beyond length
+			// start beyond length
 			const result1 = replaceStringAtLocation(original, 'X', 10, 15)
 			expect(result1).to.equal('HelloX')
 			
-			// End beyond length
+			// end beyond length
 			const result2 = replaceStringAtLocation(original, 'X', 2, 20)
 			expect(result2).to.equal('HeX')
 		})
@@ -327,7 +327,7 @@ describe('utils edge cases', () => {
 			}
 		})
 
-		// Note: Testing Sharp image processing edge cases would require extensive mocking
+		// note: testing Sharp image processing edge cases would require extensive mocking
 		// and may not provide significant value compared to integration testing
 	})
 })

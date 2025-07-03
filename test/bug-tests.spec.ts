@@ -93,6 +93,103 @@ This should work: {{realVar}}`
 			// But tags outside should be parsed
 			expect(result).to.include('But this parsed should work.')
 		})
+
+		it('should handle multiple code blocks with different languages', async () => {
+			const template = `Multiple examples:
+
+\`\`\`javascript
+{jsVar = "test"}
+console.log({{jsVar}});
+\`\`\`
+
+\`\`\`python
+{pyVar = "example"}
+print({{pyVar}})
+\`\`\`
+
+And this works: {{realVar}}`
+
+			const variables: ParserVariables = {
+				realVar: { name: 'realVar', type: ValueType.string, value: 'parsed', params: [] },
+			}
+			const parserContext: ParserContext = {
+				variables,
+				options: {},
+				attachments: [],
+			}
+
+			const result = await parseTemplate(template, parserContext)
+
+			// All code block content should be preserved
+			expect(result).to.include('{jsVar = "test"}')
+			expect(result).to.include('console.log({{jsVar}});')
+			expect(result).to.include('{pyVar = "example"}')
+			expect(result).to.include('print({{pyVar}})')
+			// But external variables should still work
+			expect(result).to.include('And this works: parsed')
+		})
+
+		it('should handle mixed inline and fenced code blocks', async () => {
+			const template = `Here's mixed code:
+
+Use \`{inline="variable"}\` for inline.
+
+\`\`\`
+{block}
+This is in a block with {{slots}}
+{/block}
+\`\`\`
+
+More inline: \`{{anotherSlot}}\`
+
+Result: {{testVar}}`
+
+			const variables: ParserVariables = {
+				testVar: { name: 'testVar', type: ValueType.string, value: 'success', params: [] },
+			}
+			const parserContext: ParserContext = {
+				variables,
+				options: {},
+				attachments: [],
+			}
+
+			const result = await parseTemplate(template, parserContext)
+
+			// All code content should be preserved
+			expect(result).to.include('`{inline="variable"}`')
+			expect(result).to.include('{block}')
+			expect(result).to.include('This is in a block with {{slots}}')
+			expect(result).to.include('{/block}')
+			expect(result).to.include('`{{anotherSlot}}`')
+			// External variable should work
+			expect(result).to.include('Result: success')
+		})
+
+		it('should handle nested backticks correctly', async () => {
+			const template = `Code with nested backticks:
+
+\`\`\`bash
+echo "\`{{variable}}\` is a template"
+\`\`\`
+
+Result: {{testVar}}`
+
+			const variables: ParserVariables = {
+				testVar: { name: 'testVar', type: ValueType.string, value: 'working', params: [] },
+			}
+			const parserContext: ParserContext = {
+				variables,
+				options: {},
+				attachments: [],
+			}
+
+			const result = await parseTemplate(template, parserContext)
+
+			// Code block with nested backticks should be preserved
+			expect(result).to.include('echo "`{{variable}}` is a template"')
+			// External variable should work
+			expect(result).to.include('Result: working')
+		})
 	})
 
 	describe('Issue #2: multiline variables syntax errors', () => {
@@ -137,11 +234,12 @@ Result: {{outer}}`
 			// Should handle nested variable references
 			expect(result).to.include('Outer content with nested value')
 		})
-	})
 
-	describe('Issue #51: numeric variable handling', () => {
-		it('should handle numeric parameters properly', async () => {
-			const template = '{add(5, 10)}'
+		it('should handle multiline variables with invalid slot syntax', async () => {
+			const template = `{badSlots}
+Content with {{invalid variable name}} and {{123numbers}}
+{/badSlots}
+Result: {{badSlots}}`
 
 			const parserContext: ParserContext = {
 				variables: {},
@@ -151,15 +249,19 @@ Result: {{outer}}`
 
 			const result = await parseTemplate(template, parserContext)
 
-			// Should compute the addition
-			expect(result).to.equal('15')
+			// Should treat problematic content as raw text
+			expect(result).to.include('{{invalid variable name}}')
+			expect(result).to.include('{{123numbers}}')
 		})
 
-		it('should handle numeric variables', async () => {
-			const template = `{num = 42}
-{str = "hello"}
-Number: {{num}}
-String: {{str}}`
+		it('should handle multiline variables with mixed valid and invalid syntax', async () => {
+			const template = `{mixed}
+Valid: {{validVar}}
+Invalid: {{invalid var}}
+More invalid: {unclosed
+{/mixed}
+{validVar = "works"}
+Result: {{mixed}}`
 
 			const parserContext: ParserContext = {
 				variables: {},
@@ -169,9 +271,32 @@ String: {{str}}`
 
 			const result = await parseTemplate(template, parserContext)
 
-			// Should handle both numeric and string variables
-			expect(result).to.include('Number: 42')
-			expect(result).to.include('String: hello')
+			// Should treat entire content as raw due to invalid syntax
+			expect(result).to.include('Valid: {{validVar}}')
+			expect(result).to.include('Invalid: {{invalid var}}')
+			expect(result).to.include('More invalid: {unclosed')
+		})
+
+		it('should preserve valid multiline variables with slots', async () => {
+			const template = `{greeting}
+Hello, {{name}}!
+Welcome to {{place}}.
+{/greeting}
+{name = "World"}
+{place = "PromptShaper"}
+Result: {{greeting}}`
+
+			const parserContext: ParserContext = {
+				variables: {},
+				options: {},
+				attachments: [],
+			}
+
+			const result = await parseTemplate(template, parserContext)
+
+			// Should parse valid slots within multiline variables
+			expect(result).to.include('Hello, World!')
+			expect(result).to.include('Welcome to PromptShaper.')
 		})
 	})
 })

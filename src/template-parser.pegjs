@@ -106,7 +106,7 @@ escapedCharReturnSlash
 
 
 functionCall
-  = functionName:variableName "(" _ params:params _ ")" { return { type: 'function', value: functionName, params } }
+  = functionName:variableName "(" _ params:params? _ ")" { return { type: 'function', value: functionName, params: params || [] } }
 
 param
   = string

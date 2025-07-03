@@ -152,8 +152,6 @@ Templates can contain one or more inline variable definitions. They are defined 
 ```
 {stringVariable = "hello world"}
 
-{numberVariable = 42.1}
-
 {multilineVariable}
 This is a variable spanning multiple lines, but the tags can be used on a single line if desired. Multiline variables are always strings.
 {/multilineVariable}
@@ -163,8 +161,6 @@ A template can contain one or more slots which are rendered by replacing their c
 
 ```
 This will render the contents of the string variable: {{stringVariable}}
-
-This will render the contents of the number variable: {{numberVariable}}
 
 This will render the contents of the multiline variable, and the @ symbol means it will be rendered as raw text (will not be parsed): {{@multilineVariable}}
 ```
@@ -179,7 +175,7 @@ This variable contains a slot which is defined in the outer scope: {{stringVaria
 
 ## Parameters and Functions
 
-A multiline variable can also be specified with parameters (which are required if no default is provided) which can be referenced using slots. Parameters are strings or numbers.
+A multiline variable can also be specified with parameters (which are required if no default is provided) which can be referenced using slots. Parameters are strings.
 
 ```
 {variableWithParameters(requiredParameter, optionalParameter="hello")}
@@ -191,9 +187,6 @@ A multiline variable can also be specified with parameters (which are required i
 A slot or variable can be assigned the contents of a function, which is called using a function name and one or more parameters in parentheses.
 
 ```
-// this will assign the output of add(2,2) to a variable called sumOfTwoNumbers
-{sumOfTwoNumbers=add(2,2)}
-
 // this will load file.ps.md and render it in place
 {{load("file.ps.md")}}
 ```
@@ -230,48 +223,10 @@ By default, the `parser.ts` uses the contents of `functions.ts` as built-in func
 {{img("https://example.com/image.jpg")}}
 ```
 
-### Math Operations
-- **add(a, b)**: Returns the sum of `a` and `b`.
-```
-// outputs 5
-{{add(2, 3)}}
-```
 
-- **subtract(a, b)**: Returns the difference between `a` and `b`.
-```
-// outputs -1
-{{subtract(2, 3)}}
-```
+## String Parameters
 
-- **multiply(a, b)**: Returns the product of `a` and `b`.
-```
-// outputs 6
-{{multiply(2, 3)}}
-```
-
-- **divide(a, b)**: Returns the quotient of `a` divided by `b`. Throws an error when dividing by zero.
-```
-// outputs 2
-{{divide(6, 3)}}
-```
-
-## String vs Number Parameters
-
-The only difference between string and number params is that numeric params can have basic arithmetic operations done on their output. Supported operations are `+ - * / ^`.
-
-```
-{chapterTitle(chapterIndex)}
-Chapter {{chapterIndex+1}}
-{/chapterTitle}
-
-// this will output "Chapter 1"
-{{chapterTitle(chapterIndex=0)}}
-
-// this will output "Chapter 0" because operators are ignored for string parameters.
-{{chapterTitle(chapterIndex="0")}}
-```
-
-Strings must be double-quoted, and numbers are unquoted and can contain decimals.
+All parameters are strings and must be double-quoted.
 
 ## Special Features
 
@@ -318,7 +273,7 @@ See the `samples` directory for example templates you can try with the parser.
 - **Template** - A piece of text that is rendered by the parser. I'm using the .ps.md extension for the samples.
 - **Variable** - A value loaded from a template file, or defined inline in a template. Variables are defined using single braces and are either defined as a single tag, or with matching tags wrapped around text. String variables can be rendered as templates.
 - **Slot** - Renders the contents of a variable or function using double braces.
-- **Parameters** - One or more arguments passed to a slot or a function. Parameters can be strings or numbers.
+- **Parameters** - One or more arguments passed to a slot or a function. Parameters are strings.
 - **Function** - Does "something" and the result is rendered on page, or assigned to a variable.
 - **Raw Mode** - Processing mode where PromptShaper tags are not parsed, useful for code analysis or preserving exact syntax.
 

@@ -1,1 +1,1 @@
-The sum of 1 and 2 is {{sum}}.
+{{fileContent}}

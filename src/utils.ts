@@ -80,7 +80,7 @@ export const loadUrlReadableContents = async (url: string): Promise<string> => {
 }
 
 // used to replace a slot with its rendered contents
-export const replaceStringAtLocation = (str: string, replacement: string | number, start: number, end: number): string => {
+export const replaceStringAtLocation = (str: string, replacement: string, start: number, end: number): string => {
 	return str.substring(0, start) + replacement + str.substring(end)
 }
 
@@ -89,8 +89,8 @@ export const transformJsonToVariables = (json: { [key: string]: string | number 
 	Object.entries(json).reduce((variables, [key, value]) => {
 		variables[key] = {
 			name: key,
-			type: typeof value === 'number' ? ValueType.number : ValueType.string,
-			value: value,
+			type: ValueType.string,
+			value: value.toString(),
 			params: [],
 		}
 		return variables

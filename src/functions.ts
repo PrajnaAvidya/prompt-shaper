@@ -2,24 +2,9 @@ import { ParserContext, ParserParam } from './types'
 import { encodeLocalImageAsBase64, loadDirectoryContents, loadFileContent, loadUrlReadableContents } from './utils'
 import { extname } from 'path'
 
-type PromptShaperFunction = (context: ParserContext, ...args: ParserParam[]) => Promise<string | number> | string | number
+type PromptShaperFunction = (context: ParserContext, ...args: ParserParam[]) => Promise<string> | string
 
 export const functions: Record<string, PromptShaperFunction> = {
-	add: (_context: ParserContext, a: ParserParam, b: ParserParam): number => {
-		return (a.value as number) + (b.value as number)
-	},
-	subtract: (_context: ParserContext, a: ParserParam, b: ParserParam): number => {
-		return (a.value as number) - (b.value as number)
-	},
-	multiply: (_context: ParserContext, a: ParserParam, b: ParserParam): number => {
-		return (a.value as number) * (b.value as number)
-	},
-	divide: (_context: ParserContext, a: ParserParam, b: ParserParam): number => {
-		if ((b.value as number) == 0) {
-			throw new Error('Division by zero')
-		}
-		return (a.value as number) / (b.value as number)
-	},
 	load: (_context: ParserContext, filePath: ParserParam): string => {
 		if (!filePath.value || typeof filePath.value !== 'string') {
 			throw new Error('Invalid file path')

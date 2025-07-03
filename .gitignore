@@ -1,8 +1,7 @@
 .idea/*
-
 node_modules/*
 dist/*
-
+.nyc_output/*
 my_templates/*
 input*.*
 output*.*

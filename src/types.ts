@@ -12,6 +12,7 @@ export interface ParserVariables {
 		type: ValueType
 		value: string | number
 		params: ParserParam[]
+		raw?: boolean
 	}
 }
 

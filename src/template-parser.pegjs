@@ -34,27 +34,32 @@ fail
 // variables are defined with single braces
 // for multiline variables, we need to extract the raw content using regex so it can be rendered recursively if necessary
 variable
-  = "{" _ variableName:variableName _ "(" _ variableParams:variableParams _ ")"? _ "}" _ content:(variable / slot / text)* _ "{/" _ variableName _ "}"
+  = "{" _ variableName:variableName _ params:("(" _ variableParams _ ")")? _ "}" _ content:multilineContent _ "{/" _ endName:variableName _ "}"
     // multiline with parameters (always string)
     {
-      const varString = input.slice(location().start.offset, location().end.offset)
-      const regex = `(?<!{){${variableName}(?:\\(([^)]*)\\))?\\}([\\s\\S]*?){\\/${variableName}}(?!})`
-      const value = Array.from(varString.matchAll(new RegExp(regex, "g")))[0][2]
-      return { type: 'variable', variableName, params:variableParams, content:{ type:'string', value } }
+      if (variableName !== endName) {
+        throw new SyntaxError(`Mismatched variable tags: {${variableName}} ... {/${endName}}`);
+      }
+      const variableParams = params ? params[2] : [];
+      return { type: 'variable', variableName, params:variableParams, content:{ type:'string', value: content } }
     }
-  / "{" _ variableName:variableName _ "}" _ content:(variable / slot / text)* _ "{/" _ variableName _ "}"
+  / "{" _ variableName:variableName _ "}" _ content:multilineContent _ "{/" _ endName:variableName _ "}"
     // multiline without params (always string)
     {
-      const varString = input.slice(location().start.offset, location().end.offset)
-      const regex = `(?<!{){${variableName}(?:\\(([^)]*)\\))?\\}([\\s\\S]*?){\\/${variableName}}(?!})`
-      const value = Array.from(varString.matchAll(new RegExp(regex, "g")))[0][2]
-      return { type: 'variable', variableName, params:[], content:{ type:'string', value } }
+      if (variableName !== endName) {
+        throw new SyntaxError(`Mismatched variable tags: {${variableName}} ... {/${endName}}`);
+      }
+      return { type: 'variable', variableName, params:[], content:{ type:'string', value: content } }
     }
   / "{" _ variableName:variableName _ "=" _ value:value _ "}"
     // single line, content can be string or number or function (which may have params)
     {
       return { type: 'variable', variableName, content:value }
     }
+
+// match any content including special characters until we find {/
+multilineContent
+  = chars:(!"{/" c:. { return c })* { return chars.join('') }
 
 // slots are defined with double braces
 slot

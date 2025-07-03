@@ -36,20 +36,27 @@ export const parseTemplate = async (template: string, parserContext?: ParserCont
 	for (const value of parsedVariables.parsed as ParserSection[]) {
 		showDebug && console.log('DEBUG: Match: ', value)
 		switch (value.type) {
-			case ParserType.variable:
+			case ParserType.variable: {
 				// check for conflicts
 				if (value.variableName! in functions) {
 					throw new Error(`Variable name conflicts with function: ${value.variableName}`)
 				} else if (value.variableName! in parserContext.variables) {
 					throw new Error(`Variable name conflict: ${value.variableName}`)
 				}
+				const isMultiline = value.params !== undefined && value.params.length === 0
+				// check if content has valid slots ({{varName}} or {{@varName}})
+				const containsValidSlots = isMultiline && /\{\{@?\w+}\}/.test(value.content!.value as string)
+
 				parserContext.variables[value.variableName!] = {
 					name: value.variableName!,
 					type: value.content!.type,
 					value: value.content!.value,
 					params: (value.content!.type === 'function' ? value.content!.params : value.params) || [],
+					// mark as raw if multiline and doesn't contain valid slots
+					raw: isMultiline && !containsValidSlots,
 				}
 				break
+			}
 			case ParserType.slot:
 			case ParserType.text:
 				break
@@ -150,7 +157,8 @@ async function evaluateVariable(
 	} else if (variable.type === ValueType.number) {
 		return variable.value
 	} else if (variable.type === ValueType.string) {
-		if (raw) {
+		// always treat multiline variables as raw
+		if (raw || variable.raw) {
 			return variable.value
 		}
 

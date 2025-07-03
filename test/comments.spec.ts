@@ -62,7 +62,7 @@ const code = 1;
 // Another comment`
 
 		const child = spawn('npx', ['ts-node', 'src/cli.ts', '-r', '-is', testContent], {
-			env: { ...process.env, PROMPT_SHAPER_TESTS: 'true' }
+			env: { ...process.env, PROMPT_SHAPER_TESTS: 'true' },
 		})
 
 		let stdout = ''

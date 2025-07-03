@@ -149,7 +149,7 @@ Back to level 1: {{level2}}
 Final: {{level1}}`
 
 			const result = await parseTemplate(template)
-			
+
 			// Should handle deep nesting correctly
 			expect(result).to.include('Level 2 with first')
 			expect(result).to.include('Level 3 with second')

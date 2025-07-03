@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { parseTemplate } from '../src/parser'
 import { ParserContext, ParserVariables, ValueType } from '../src/types'
 
-describe("markdown code blocks - issue #20", () => {
+describe('markdown code blocks - issue #20', () => {
 	it('should not parse tags inside markdown code blocks', async () => {
 		const template = `Here's an example:
 \`\`\`markdown

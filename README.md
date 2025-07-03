@@ -1,51 +1,154 @@
 # PromptShaper
-PromptShaper is a templating language for efficiently constructing LLM prompts.
+
+PromptShaper is a templating language and CLI tool for efficiently constructing LLM prompts. Build dynamic, reusable prompts with variables, functions, and file/url loading capabilities.
 
 ## Why
+
 I'm a programmer, and like many I've seen productivity gains due to the assistance of LLMs. The standard way of interacting with a model through a chat interface works great for basic queries, but I do a lot of what I call "non-linear" workflows and found myself spending too much time copying and pasting text fragments to construct the exact prompts I wanted to run. I was working on my own custom LLM chat client and wanted to build a UI to construct dynamic and reusable prompts to send to the OpenAI API and realized I needed an engine to run it. Inspired by templating engines like Handlebars, I built my own variant specifically designed for executing highly customized GPT/LLM prompts.
 
 ## Features
-- Templating Engine: Work out of a text editor/IDE and save a lot of time by avoiding repetitive copy/pasting of text fragments. Through the use of slots, variables, and functions you can dynamically load and render text into LLM prompts.
-- CLI: A variety of command-line options to customize usage, and you can specify various input/output formats.
-- Inline Images: Include images directly in your prompts using the `img` function, either by referencing local image files or remote URLs. The images are automatically encoded and attached to the prompt sent to the LLM.
-- Interactive Mode (OpenAI key required): After constructing your prompt you can continue your conversation in the command line, or load a previous conversation from JSON or text and continue in interactive mode. You can even use PromptShaper tags in interactive mode!
+
+- **Templating Engine**: Work out of a text editor/IDE and save a lot of time by avoiding repetitive copy/pasting of text fragments. Through the use of slots, variables, and functions you can dynamically load and render text into LLM prompts.
+- **CLI**: A variety of command-line options to customize usage, and you can specify various input/output formats.
+- **Inline Images**: Include images directly in your prompts using the `img` function, either by referencing local image files or remote URLs. The images are automatically encoded and attached to the prompt sent to the LLM.
+- **Interactive Mode** (OpenAI key required): After constructing your prompt you can continue your conversation in the command line, or load a previous conversation from JSON or text and continue in interactive mode. You can even use PromptShaper tags in interactive mode!
 
 ## Requirements
-node/npm/npx - https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
 
-## Usage/CLI Options
-Run the CLI using this format: `npx prompt-shaper [options] <input>`
-Run `npx prompt-shaper -h` to see a complete list of CLI options. Here are some important ones:
-- `<input>` is treated as a file path by default, use `-is` or `--is-string` to treat input as a template string 
-  - Example (default file behavior): `npx prompt-shaper my_template.ps.md`
-  - Example (string input): `npx prompt-shaper -is "my PromptShaper template"`
-- Enter interactive mode by specifying `-i` (send the rendered prompt to the OpenAI API and continue the conversation)
-  - Example: `npx prompt-shaper my_template.ps.md -i`
-  - You can start a new conversation in interactive mode with: `npx prompt-shaper -i`
-- Save output to a text file: `-s <outputPath>`
-  - Example: `npx prompt-shaper my_template.ps.md -s output.md`
-- Load a previous conversation from text and continue in interactive mode with `-lt`
-  - Example: `npx prompt-shaper -lt output.md`
+- Node.js and yarn - https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
+- Yarn package manager - https://yarnpkg.com/getting-started/install
 
-**Note: you must set the OPENAI_API_KEY env var for calls to OpenAI to work.**
+## Installation & Usage
+
+Run the CLI using npx (no installation required):
+```bash
+npx prompt-shaper [options] <input>
+```
+
+Or install globally with yarn:
+```bash
+yarn global add prompt-shaper
+prompt-shaper [options] <input>
+```
+
+Run `npx prompt-shaper --help` to see a complete list of CLI options.
+
+## CLI Options
+
+### Input/Output Options
+- `<input>` - Template file path or string (required unless using `-i` for new conversation)
+- `-is, --is-string` - Treat input as a template string instead of file path
+- `-s, --save <filePath>` - Save output to file path
+- `-sj, --save-json <filePath>` - Save conversation as JSON file
+
+### Mode Options
+- `-r, --raw` - Raw mode (don't parse any PromptShaper tags)
+- `-i, --interactive` - Enable interactive mode with OpenAI
+- `-g, --generate` - Send parsed template to OpenAI and return single response
+
+### LLM Configuration
+- `-m, --model <modelType>` - OpenAI model to use (default: "gpt-4o")
+- `-sp, --system-prompt <promptString>` - System prompt for LLM conversation
+- `-dp, --developer-prompt <promptString>` - Developer prompt for LLM conversation (used for o1/o3 models)
+- `-rf, --response-format <format>` - Response format: "text" or "json_object" (default: "text")
+- `-re, --reasoning-effort <effort>` - Reasoning effort for o1/o3 models: "low", "medium", or "high" (default: "high")
+
+### Variable Input
+- `-js, --json <jsonString>` - Input JSON variables as string
+- `-jf, --json-file <filePath>` - Input JSON variables from file
+
+### Conversation Management
+- `-lj, --load-json <filePath>` - Load conversation from JSON file and continue in interactive mode
+- `-lt, --load-text <filePath>` - Load conversation from text/markdown file and continue in interactive mode
+
+### Display Options
+- `-h, --hide-prompt` - Hide the initial prompt in the console output
+- `-oa, --output-assistant` - Save only assistant responses to output files (filters out user prompts)
+- `-d, --debug` - Show debug messages during parsing
+
+### File Processing
+- `-e, --extensions <extensions>` - Comma-separated list of file extensions to include when using `loadDir()` function
 
 ## Environment Variables
-In addition to command-line options, PromptShaper supports environment variables to configure default behavior. Command-line options take precedence over environment variables if both are specified. For example `PROMPT_SHAPER_MODEL` to change the default OpenAI model and `PROMPT_SHAPER_PROMPT` to change the system prompt. See `cli.ts` for the complete list.
 
-## Examples
-See the `samples` directory and try running them with the parser.
+All CLI options can be set using environment variables. Command-line options take precedence over environment variables.
 
-## Terminology
-- **Template** - A piece of text that is rendered by the parser. I'm using the .ps.md extension for the samples.
-- **Variable** - A value loaded from a template file, or defined inline in a template. Variables are defined using single braces and are either defined as a single tag, or with matching tags wrapped around text. String variables can be rendered as templates.
-- **Slot** - Renders the contents of a variable or function using double braces.
-- **Parameters** - One or more arguments passed to a slot or a function. Parameters can be strings or numbers.
-- **Function** - Does "something" and the result is rendered on page, or assigned to a variable.
+| Environment Variable | CLI Option | Description |
+|---------------------|------------|-------------|
+| `OPENAI_API_KEY` | N/A | **Required** for OpenAI integration |
+| `PROMPT_SHAPER_DEBUG` | `-d, --debug` | Show debug messages ("true"/"false") |
+| `PROMPT_SHAPER_FILE_EXTENSIONS` | `-e, --extensions` | Comma-separated file extensions |
+| `PROMPT_SHAPER_GENERATE` | `-g, --generate` | Send to OpenAI for single response ("true"/"false") |
+| `PROMPT_SHAPER_HIDE_PROMPT` | `-h, --hide-prompt` | Hide initial prompt ("true"/"false") |
+| `PROMPT_SHAPER_IS_STRING` | `-is, --is-string` | Treat input as string ("true"/"false") |
+| `PROMPT_SHAPER_INTERACTIVE` | `-i, --interactive` | Enable interactive mode ("true"/"false") |
+| `PROMPT_SHAPER_JSON` | `-js, --json` | JSON variables string |
+| `PROMPT_SHAPER_JSON_FILE` | `-jf, --json-file` | JSON variables file path |
+| `PROMPT_SHAPER_LOAD_JSON` | `-lj, --load-json` | Load conversation from JSON |
+| `PROMPT_SHAPER_LOAD_TEXT` | `-lt, --load-text` | Load conversation from text |
+| `PROMPT_SHAPER_MODEL` | `-m, --model` | OpenAI model name |
+| `PROMPT_SHAPER_OUTPUT_ASSISTANT` | `-oa, --output-assistant` | Output only assistant responses ("true"/"false") |
+| `PROMPT_SHAPER_SYSTEM_PROMPT` | `-sp, --system-prompt` | System prompt text |
+| `PROMPT_SHAPER_DEVELOPER_PROMPT` | `-dp, --developer-prompt` | Developer prompt text |
+| `PROMPT_SHAPER_RAW` | `-r, --raw` | Raw mode ("true"/"false") |
+| `PROMPT_SHAPER_SAVE` | `-s, --save` | Output file path |
+| `PROMPT_SHAPER_SAVE_JSON` | `-sj, --save-json` | JSON output file path |
+| `PROMPT_SHAPER_RESPONSE_FORMAT` | `-rf, --response-format` | Response format ("text"/"json_object") |
+| `PROMPT_SHAPER_REASONING_EFFORT` | `-re, --reasoning-effort` | Reasoning effort ("low"/"medium"/"high") |
+
+## Usage Examples
+
+### Basic Template Processing
+```bash
+# Process a template file
+npx prompt-shaper my_template.ps.md
+
+# Process a template string
+npx prompt-shaper -is "Hello, {{name}}!" -js '{"name": "World"}'
+
+# Save output to file
+npx prompt-shaper my_template.ps.md -s output.md
+```
+
+### Interactive Mode with OpenAI
+```bash
+# Start new conversation in interactive mode
+npx prompt-shaper -i
+
+# Process template and continue conversation
+npx prompt-shaper my_template.ps.md -i
+
+# Load previous conversation and continue
+npx prompt-shaper -lt previous_conversation.md
+```
+
+### Raw Mode (No Parsing)
+```bash
+# Process file without parsing PromptShaper tags
+npx prompt-shaper -r my_file.js
+
+# Useful for code analysis while preserving syntax
+npx prompt-shaper -r -i my_code.py
+```
+
+### Advanced Usage
+```bash
+# Use specific model with custom prompts
+npx prompt-shaper my_template.ps.md -m gpt-4 -sp "You are a code reviewer"
+
+# Generate single response with JSON output
+npx prompt-shaper my_template.ps.md -g -rf json_object
+
+# Load variables from file and hide initial prompt
+npx prompt-shaper my_template.ps.md -jf variables.json -h
+```
 
 ## Templates, Slots, Variables
+
 A template is a file or string that gets loaded into a variable by the PromptShaper parser and is then rendered.
 
-Templates can contain one or more inline variable definitions. They are defined using single braces can be single line or multi line using tags.
+Templates can contain one or more inline variable definitions. They are defined using single braces and can be single line or multi line using tags.
+
 ```
 {stringVariable = "hello world"}
 
@@ -57,6 +160,7 @@ This is a variable spanning multiple lines, but the tags can be used on a single
 ```
 
 A template can contain one or more slots which are rendered by replacing their content with variables.
+
 ```
 This will render the contents of the string variable: {{stringVariable}}
 
@@ -66,6 +170,7 @@ This will render the contents of the multiline variable, and the @ symbol means 
 ```
 
 A multiline variable can contain slot tags, which will be rendered recursively when the template is rendered.
+
 ```
 {variableWithSlots}
 This variable contains a slot which is defined in the outer scope: {{stringVariable}}
@@ -73,7 +178,9 @@ This variable contains a slot which is defined in the outer scope: {{stringVaria
 ```
 
 ## Parameters and Functions
-A multiline variable can also be specified with parameters (which are required if no default is provided) which can be referenced using slots. Parameters are strings or numbers
+
+A multiline variable can also be specified with parameters (which are required if no default is provided) which can be referenced using slots. Parameters are strings or numbers.
+
 ```
 {variableWithParameters(requiredParameter, optionalParameter="hello")}
 {{requiredParameter}}
@@ -82,6 +189,7 @@ A multiline variable can also be specified with parameters (which are required i
 ```
 
 A slot or variable can be assigned the contents of a function, which is called using a function name and one or more parameters in parentheses.
+
 ```
 // this will assign the output of add(2,2) to a variable called sumOfTwoNumbers
 {sumOfTwoNumbers=add(2,2)}
@@ -92,10 +200,11 @@ A slot or variable can be assigned the contents of a function, which is called u
 
 There's a few basic functions defined in the `functions.ts` file and you can add your own using `registerFunction`.
 
-#### Built-in Functions
+## Built-in Functions
 
 By default, the `parser.ts` uses the contents of `functions.ts` as built-in functions. You can add your own custom functions with `registerFunction`.
 
+### File Operations
 - **load(filePath)**: Loads a file from the specified path and renders its content.
 ```
 // loads and renders the content of file.ps.md
@@ -114,12 +223,14 @@ By default, the `parser.ts` uses the contents of `functions.ts` as built-in func
 {{loadUrl("https://github.com/PrajnaAvidya/prompt-shaper")}}
 ```
 
-- **img(source)**: Loads an image from a local file path or a URL, encodes it, and attaches it as image content in your LLM prompt.
+### Image Processing
+- **img(source)**: Loads an image from a local file path or a URL, encodes it, and attaches it as image content in your LLM prompt. Images are automatically converted to JPEG format for OpenAI compatibility.
 ```
 {{img("path/to/image.png")}}
 {{img("https://example.com/image.jpg")}}
 ```
 
+### Math Operations
 - **add(a, b)**: Returns the sum of `a` and `b`.
 ```
 // outputs 5
@@ -131,8 +242,8 @@ By default, the `parser.ts` uses the contents of `functions.ts` as built-in func
 // outputs -1
 {{subtract(2, 3)}}
 ```
-- **multiply(a, b)**: Returns the product of `a` and `b`.
 
+- **multiply(a, b)**: Returns the product of `a` and `b`.
 ```
 // outputs 6
 {{multiply(2, 3)}}
@@ -145,7 +256,9 @@ By default, the `parser.ts` uses the contents of `functions.ts` as built-in func
 ```
 
 ## String vs Number Parameters
+
 The only difference between string and number params is that numeric params can have basic arithmetic operations done on their output. Supported operations are `+ - * / ^`.
+
 ```
 {chapterTitle(chapterIndex)}
 Chapter {{chapterIndex+1}}
@@ -160,17 +273,53 @@ Chapter {{chapterIndex+1}}
 
 Strings must be double-quoted, and numbers are unquoted and can contain decimals.
 
-## Misc
-Comments are marked with double slashes `// this is a comment` or `/* mutliline style */` and are removed before rendering.
+## Special Features
 
+### Comment Handling
+Comments are marked with double slashes `// this is a comment` or `/* multiline style */` and are removed before rendering in normal mode. In raw mode (`-r`), all comments are preserved.
+
+### Escaping
 You can escape braces with backslashes so they won't be parsed as tags: `\{\{escapedSlot\}\}`
 
 You can escape braces or double quotes in string parameters: `{{functionCall("param \" with \} special chars")}}`
 
-## Template parsing/rendering order
-1) remove comments
-2) match and validate all variables and slots
-3) remove variables
-4) render slots with variable data from the bottom up
-5) string variables will be parsed recursively (variables/slots within them will be rendered)
-6) remove excess whitespace
+### Markdown Code Block Protection
+PromptShaper automatically detects and preserves content inside markdown code blocks:
+
+```markdown
+Here's some code:
+```javascript
+{variable = "this won't be parsed"}
+console.log({{variable}});
+```
+But this {{will}} be parsed.
+```
+
+Both fenced code blocks (triple backticks) and inline code (`single backticks`) are protected.
+
+## Template Parsing/Rendering Order
+
+1. Mask markdown code blocks to prevent parsing their content
+2. Preprocess multiline variables that contain problematic syntax
+3. Remove comments (unless in raw mode)
+4. Match and validate all variables and slots  
+5. Remove variable definitions from output
+6. Render slots with variable data from the bottom up
+7. String variables will be parsed recursively (variables/slots within them will be rendered)
+8. Restore masked code blocks
+9. Remove excess whitespace
+
+## Examples
+
+See the `samples` directory for example templates you can try with the parser.
+
+## Terminology
+
+- **Template** - A piece of text that is rendered by the parser. I'm using the .ps.md extension for the samples.
+- **Variable** - A value loaded from a template file, or defined inline in a template. Variables are defined using single braces and are either defined as a single tag, or with matching tags wrapped around text. String variables can be rendered as templates.
+- **Slot** - Renders the contents of a variable or function using double braces.
+- **Parameters** - One or more arguments passed to a slot or a function. Parameters can be strings or numbers.
+- **Function** - Does "something" and the result is rendered on page, or assigned to a variable.
+- **Raw Mode** - Processing mode where PromptShaper tags are not parsed, useful for code analysis or preserving exact syntax.
+
+**Note: You must set the OPENAI_API_KEY environment variable for calls to OpenAI to work.**

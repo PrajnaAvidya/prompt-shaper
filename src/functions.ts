@@ -23,10 +23,22 @@ export const functions: Record<string, PromptShaperFunction> = {
 		const dirPath = dirPathParam.value as string
 
 		// get the extensions list from cli params
-		const extensions = (context.options.fileExtensions || '')
+		const extensionsRaw = context.options.fileExtensions
+		let extensionsString: string
+
+		if (Array.isArray(extensionsRaw)) {
+			extensionsString = extensionsRaw.join(',')
+		} else if (typeof extensionsRaw === 'string') {
+			extensionsString = extensionsRaw
+		} else {
+			extensionsString = ''
+		}
+
+		const extensions = extensionsString
 			.split(',')
-			.map(ext => ext.trim())
-			.map(ext => (ext.startsWith('.') ? ext : `.${ext}`))
+			.map((ext: string) => ext.trim())
+			.filter((ext: string) => ext.length > 0)
+			.map((ext: string) => (ext.startsWith('.') ? ext : `.${ext}`))
 
 		// get ignore patterns from parameter or context options
 		let ignorePatterns: string[] = []

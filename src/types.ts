@@ -1,7 +1,7 @@
 import { ChatCompletionMessageParam, ChatCompletionReasoningEffort } from 'openai/resources/chat/completions/completions'
 
 export interface ParserOptions {
-	fileExtensions?: string // what file extensions to include when reading files from directories with loadDir
+	fileExtensions?: string | string[] // what file extensions to include when reading files from directories with loadDir
 	ignorePatterns?: string // comma-separated patterns to ignore when loading directories
 	returnParserMatches?: boolean // return array of parser matches instead of rendered template
 	showDebugMessages?: boolean // show verbose debug stuff

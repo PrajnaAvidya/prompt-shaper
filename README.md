@@ -10,6 +10,7 @@ I'm a programmer, and like many I've seen productivity gains due to the assistan
 
 - **Templating Engine**: Work out of a text editor/IDE and save a lot of time by avoiding repetitive copy/pasting of text fragments. Through the use of slots, variables, and functions you can dynamically load and render text into LLM prompts.
 - **CLI**: A variety of command-line options to customize usage, and you can specify various input/output formats.
+- **Directory Loading with Ignore Patterns**: Load entire codebases while intelligently excluding build artifacts, dependencies, and other unwanted files using glob patterns (`node_modules`, `*.log`, `temp*`, etc.).
 - **Inline Images**: Include images directly in your prompts using the `img` function, either by referencing local image files or remote URLs. The images are automatically encoded and attached to the prompt sent to the LLM.
 - **Interactive Mode** (OpenAI key required): After constructing your prompt you can continue your conversation in the command line, or load a previous conversation from JSON or text and continue in interactive mode. You can even use PromptShaper tags in interactive mode!
 
@@ -68,6 +69,7 @@ Run `npx prompt-shaper --help` to see a complete list of CLI options.
 
 ### File Processing
 - `-e, --extensions <extensions>` - Comma-separated list of file extensions to include when using `loadDir()` function
+- `--ignore-patterns <patterns>` - Comma-separated patterns to ignore when loading directories (supports glob patterns like `*.log`, `temp*`)
 
 ## Environment Variables
 
@@ -78,6 +80,7 @@ All CLI options can be set using environment variables. Command-line options tak
 | `OPENAI_API_KEY` | N/A | **Required** for OpenAI integration |
 | `PROMPT_SHAPER_DEBUG` | `-d, --debug` | Show debug messages ("true"/"false") |
 | `PROMPT_SHAPER_FILE_EXTENSIONS` | `-e, --extensions` | Comma-separated file extensions |
+| `PROMPT_SHAPER_IGNORE_PATTERNS` | `--ignore-patterns` | Comma-separated ignore patterns |
 | `PROMPT_SHAPER_GENERATE` | `-g, --generate` | Send to OpenAI for single response ("true"/"false") |
 | `PROMPT_SHAPER_HIDE_PROMPT` | `-h, --hide-prompt` | Hide initial prompt ("true"/"false") |
 | `PROMPT_SHAPER_IS_STRING` | `-is, --is-string` | Treat input as string ("true"/"false") |
@@ -129,6 +132,21 @@ npx prompt-shaper -r my_file.js
 
 # Useful for code analysis while preserving syntax
 npx prompt-shaper -r -i my_code.py
+```
+
+### Directory Loading with Ignore Patterns
+```bash
+# Method 1: Using ignore patterns in the template function
+echo '{{loadDir(".", "node_modules,.git,dist,*.log")}}' > load_project.ps.md
+npx prompt-shaper load_project.ps.md -e "js,ts,md"
+
+# Method 2: Using CLI ignore patterns option (applies to all loadDir calls)
+echo '{{loadDir(".")}}' > load_project.ps.md
+npx prompt-shaper load_project.ps.md -e "js,ts,md" --ignore-patterns "node_modules,.git,dist,*.log"
+
+# Method 3: Using environment variable
+export PROMPT_SHAPER_IGNORE_PATTERNS="node_modules,.git,dist,*.log"
+npx prompt-shaper load_project.ps.md -e "js,ts,md"
 ```
 
 ### Advanced Usage
@@ -204,10 +222,16 @@ By default, the `parser.ts` uses the contents of `functions.ts` as built-in func
 {{load("file.ps.md")}}
 ```
 
-- **loadDir(dirPath)**: Loads all files from the specified directory (and its subdirectories) that match certain extensions, and renders their contents. **Note**: The `loadDir` function uses the file extensions specified in the `--extensions` CLI option or the `PROMPT_SHAPER_FILE_EXTENSIONS` environment variable to determine which files to include. By default, it includes common text and code file extensions.
+- **loadDir(dirPath, ignorePatterns)**: Loads all files from the specified directory (and its subdirectories) that match certain extensions, and renders their contents. **Note**: The `loadDir` function uses the file extensions specified in the `--extensions` CLI option or the `PROMPT_SHAPER_FILE_EXTENSIONS` environment variable to determine which files to include. By default, it includes common text and code file extensions.
 ```
 // loads and renders all files in the 'src' directory
 {{loadDir("src")}}
+
+// loads files but ignores node_modules, .git, and dist directories
+{{loadDir("src", "node_modules,.git,dist")}}
+
+// supports glob patterns - ignores all .log files and temp* files
+{{loadDir("logs", "*.log,temp*,.DS_Store")}}
 ```
 
 - **loadUrl(url)**: Loads content from the specified URL and uses the [@mozilla/readability](https://github.com/mozilla/readability) library to convert it into readable text.
@@ -237,6 +261,25 @@ Comments are marked with double slashes `// this is a comment` or `/* multiline 
 You can escape braces with backslashes so they won't be parsed as tags: `\{\{escapedSlot\}\}`
 
 You can escape braces or double quotes in string parameters: `{{functionCall("param \" with \} special chars")}}`
+
+### Ignore Patterns for Directory Loading
+The `loadDir` function supports ignore patterns to exclude specific files and directories:
+
+- **Exact names**: `node_modules`, `.git`, `.DS_Store`
+- **Glob patterns**: `*.log`, `temp*`, `*.test.*`
+- **Pattern examples**:
+  - `node_modules` - ignores any file/directory named exactly "node_modules"
+  - `*.log` - ignores all files ending with ".log" 
+  - `temp*` - ignores all files/directories starting with "temp"
+  - `.DS_Store` - ignores macOS system files
+
+```
+// ignore common development directories
+{{loadDir(".", "node_modules,.git,dist,coverage")}}
+
+// ignore temporary and log files
+{{loadDir("src", "*.tmp,*.log,temp*")}}
+```
 
 ### Markdown Code Block Protection
 PromptShaper automatically detects and preserves content inside markdown code blocks:

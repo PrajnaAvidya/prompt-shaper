@@ -13,6 +13,7 @@ import * as readline from 'readline'
 interface CLIOptions {
 	debug?: boolean
 	extensions?: string
+	ignorePatterns?: string
 	generate?: boolean
 	hidePrompt: boolean
 	interactive?: boolean
@@ -81,6 +82,7 @@ const envVars =
 		? {
 				debug: process.env.PROMPT_SHAPER_DEBUG === 'true',
 				extensions: process.env.PROMPT_SHAPER_FILE_EXTENSIONS || defaultFileExtensions.join(','),
+				ignorePatterns: process.env.PROMPT_SHAPER_IGNORE_PATTERNS,
 				generate: process.env.PROMPT_SHAPER_GENERATE === 'true',
 				hidePrompt: process.env.PROMPT_SHAPER_HIDE_PROMPT === 'true',
 				isString: process.env.PROMPT_SHAPER_IS_STRING === 'true',
@@ -181,7 +183,12 @@ async function handler(input: string, options: CLIOptions) {
 
 	// run the parser
 	try {
-		const parserOptions = { returnParserMatches: false, showDebugMessages: options.debug as boolean, fileExtensions: options.extensions }
+		const parserOptions = {
+			returnParserMatches: false,
+			showDebugMessages: options.debug as boolean,
+			fileExtensions: options.extensions,
+			ignorePatterns: options.ignorePatterns,
+		}
 
 		// parse template if not in raw mode
 		const parserContext = { variables, options: parserOptions, attachments: [] }
@@ -311,6 +318,11 @@ program
 		'-e, --extensions',
 		'What file extensions to include when loading a directory, list separated by commas (see cli.ts for default file extensions)',
 		envVars.extensions,
+	)
+	.option(
+		'--ignore-patterns <patterns>',
+		'Comma-separated patterns to ignore when loading directories (supports glob patterns like *.log, temp*)',
+		envVars.ignorePatterns,
 	)
 	.option('-g, --generate', 'Send parsed template result to ChatGPT and return response', envVars.generate)
 	.option('-h, --hide-prompt', 'Hide the initial prompt in the console', envVars.hidePrompt)

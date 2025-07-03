@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { parseTemplate } from '../src/parser'
 import { ParserContext, ParserVariables, ValueType } from '../src/types'
-import { exec } from 'child_process'
+import { exec, spawn } from 'child_process'
 
 describe('Bug Tests', () => {
 	describe('Issue #50: parseTemplate removes comments from raw files', () => {
@@ -9,12 +9,21 @@ describe('Bug Tests', () => {
 			const testContent = `// This is a JavaScript comment
 /* This is a multi-line
    comment that should be preserved */
-const code = "// this is not a comment";
+const code = 1;
 // Another comment`
 
-			exec(`ts-node src/cli.ts -r -is "${testContent}"`, (error, stdout) => {
-				if (error) {
-					throw new Error(error.message)
+			const child = spawn('npx', ['ts-node', 'src/cli.ts', '-r', '-is', testContent], {
+				env: { ...process.env, PROMPT_SHAPER_TESTS: 'true' }
+			})
+
+			let stdout = ''
+			child.stdout.on('data', data => {
+				stdout += data.toString()
+			})
+
+			child.on('close', code => {
+				if (code !== 0) {
+					throw new Error(`CLI exited with code ${code}`)
 				}
 				// In raw mode, comments should be preserved
 				expect(stdout).to.include('// This is a JavaScript comment')

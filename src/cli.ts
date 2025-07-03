@@ -110,6 +110,7 @@ async function handler(input: string, options: CLIOptions) {
 		const conversation: ChatCompletionMessageParam[] = JSON.parse(fs.readFileSync(options.loadJson, 'utf8'))
 		await startSavedConversation(conversation, options)
 
+		rl.close()
 		process.exit(0)
 	}
 
@@ -124,6 +125,7 @@ async function handler(input: string, options: CLIOptions) {
 			})
 		await startSavedConversation(conversation, options)
 
+		rl.close()
 		process.exit(0)
 	}
 
@@ -132,12 +134,14 @@ async function handler(input: string, options: CLIOptions) {
 		const conversation: ChatCompletionMessageParam[] = startConversation(options.systemPrompt, options.developerPrompt, options.model)
 		await startSavedConversation(conversation, options)
 
+		rl.close()
 		process.exit(0)
 	}
 
 	// all other options require an input
 	if (!input) {
 		console.error('Input value is required')
+		rl.close()
 		process.exit(1)
 	}
 
@@ -160,6 +164,7 @@ async function handler(input: string, options: CLIOptions) {
 			variables = transformJsonToVariables(JSON.parse(options.json))
 		} catch (error) {
 			console.error('Invalid JSON string provided:', error)
+			rl.close()
 			process.exit(1)
 		}
 	} else if (options.jsonFile) {
@@ -169,6 +174,7 @@ async function handler(input: string, options: CLIOptions) {
 			variables = transformJsonToVariables(JSON.parse(jsonString))
 		} catch (error) {
 			console.error('Could not read JSON file:', error)
+			rl.close()
 			process.exit(1)
 		}
 	}
@@ -181,11 +187,11 @@ async function handler(input: string, options: CLIOptions) {
 		const parserContext = { variables, options: parserOptions, attachments: [] }
 		const parsed = options.raw ? template : await parseTemplate(template, parserContext)
 		if (!options.hidePrompt) {
-			console.log(`user\n${[parsed]}\n-----`)
+			console.log(`user\n${parsed}\n-----`)
 		}
 
-		// check if user wants to send results to LLM
-		if (options.generate || options.interactive) {
+		// check if user wants to send results to LLM (but not in raw mode)
+		if (!options.raw && (options.generate || options.interactive)) {
 			const conversation: ChatCompletionMessageParam[] = [
 				...startConversation(options.systemPrompt, options.developerPrompt, options.model),
 				{
@@ -210,13 +216,16 @@ async function handler(input: string, options: CLIOptions) {
 	} catch (error: Error | unknown) {
 		if (error instanceof Error) {
 			console.error(`Error: ${error.message}`)
+			rl.close()
 			process.exit(1)
 		} else {
 			console.error(`An unknown error occurred: ${error}`)
+			rl.close()
 			process.exit(1)
 		}
 	}
 
+	rl.close()
 	process.exit(0)
 }
 

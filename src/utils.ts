@@ -9,6 +9,24 @@ import sharp from 'sharp'
 
 const fileCache: { [key: string]: string } = {}
 
+// helper function to check if a file/directory should be ignored
+function shouldIgnore(name: string, ignorePatterns: string[]): boolean {
+	if (!ignorePatterns.length) return false
+
+	return ignorePatterns.some(pattern => {
+		// exact match
+		if (pattern === name) return true
+
+		// simple glob pattern support
+		if (pattern.includes('*')) {
+			const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$')
+			return regex.test(name)
+		}
+
+		return false
+	})
+}
+
 // load the contents of file (cache results)
 export const loadFileContent = (filePath: string): string => {
 	if (filePath in fileCache) {
@@ -20,12 +38,22 @@ export const loadFileContent = (filePath: string): string => {
 }
 
 // load a directory of files by extension, recursively if specified
-export const loadDirectoryContents = (directoryPath: string, extensions: string[], recursive: boolean = true): { [filePath: string]: string } => {
+export const loadDirectoryContents = (
+	directoryPath: string,
+	extensions: string[],
+	recursive: boolean = true,
+	ignorePatterns: string[] = [],
+): { [filePath: string]: string } => {
 	const results: { [filePath: string]: string } = {}
 
 	function readDir(dir: string, recursive: boolean) {
 		const list = readdirSync(dir)
 		list.forEach(file => {
+			// check if this file/directory should be ignored
+			if (shouldIgnore(file, ignorePatterns)) {
+				return
+			}
+
 			const filePath = join(dir, file)
 			const stat = statSync(filePath)
 			if (stat) {

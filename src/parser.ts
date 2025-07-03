@@ -146,7 +146,6 @@ export const parseTemplate = async (template: string, parserContext?: ParserCont
 	)
 }
 
-
 // evaluate the contents of a variable (which may contain a static value or a function evaluation)
 async function evaluateVariable(
 	variableName: string,

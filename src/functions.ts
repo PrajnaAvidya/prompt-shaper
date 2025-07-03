@@ -15,7 +15,7 @@ export const functions: Record<string, PromptShaperFunction> = {
 
 		return `\n\nFile: ${filePath.value}\n\`\`\`${extension}\n${loadFileContent(filePath.value) as string}\n\`\`\`\n\n`
 	},
-	loadDir: (context: ParserContext, dirPathParam: ParserParam): string => {
+	loadDir: (context: ParserContext, dirPathParam: ParserParam, ignorePatternsParam?: ParserParam): string => {
 		// validate params
 		if (!dirPathParam || !dirPathParam.value || typeof dirPathParam.value !== 'string') {
 			throw new Error('Invalid directory path')
@@ -28,7 +28,21 @@ export const functions: Record<string, PromptShaperFunction> = {
 			.map(ext => ext.trim())
 			.map(ext => (ext.startsWith('.') ? ext : `.${ext}`))
 
-		const contents = loadDirectoryContents(dirPath, extensions)
+		// get ignore patterns from parameter or context options
+		let ignorePatterns: string[] = []
+		if (ignorePatternsParam && ignorePatternsParam.value && typeof ignorePatternsParam.value === 'string') {
+			ignorePatterns = ignorePatternsParam.value
+				.split(',')
+				.map(pattern => pattern.trim())
+				.filter(p => p.length > 0)
+		} else if (context.options.ignorePatterns && typeof context.options.ignorePatterns === 'string') {
+			ignorePatterns = context.options.ignorePatterns
+				.split(',')
+				.map(pattern => pattern.trim())
+				.filter(p => p.length > 0)
+		}
+
+		const contents = loadDirectoryContents(dirPath, extensions, true, ignorePatterns)
 
 		// format
 		let result = ''

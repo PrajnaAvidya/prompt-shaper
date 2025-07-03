@@ -10,5 +10,4 @@ describe('single-line-variables', () => {
 
 		expect(result).to.equal('Hello World')
 	})
-
 })

@@ -2,7 +2,6 @@ import { expect } from 'chai'
 import { parseTemplate } from '../src/parser'
 import { ParserContext } from '../src/types'
 import sinon from 'sinon'
-import { loadDirectoryContents } from '../src/utils'
 
 describe('loadDir function', () => {
 	let loadDirectoryContentsStub: sinon.SinonStub
@@ -19,21 +18,21 @@ describe('loadDir function', () => {
 	it('should load directory contents with default extensions', async () => {
 		loadDirectoryContentsStub.returns({
 			'test/file1.js': 'console.log("file1");',
-			'test/file2.ts': 'console.log("file2");'
+			'test/file2.ts': 'console.log("file2");',
 		})
 
 		const template = '{{loadDir("test/directory")}}'
 		const context: ParserContext = {
 			variables: {},
 			options: { fileExtensions: 'js,ts' },
-			attachments: []
+			attachments: [],
 		}
 
 		const result = await parseTemplate(template, context)
 
 		expect(loadDirectoryContentsStub.calledOnce).to.be.true
 		expect(loadDirectoryContentsStub.calledWith('test/directory', ['.js', '.ts'])).to.be.true
-		
+
 		expect(result).to.include('File: test/file1.js')
 		expect(result).to.include('```js\nconsole.log("file1");')
 		expect(result).to.include('File: test/file2.ts')
@@ -42,14 +41,14 @@ describe('loadDir function', () => {
 
 	it('should handle directory parameter without leading dot in extensions', async () => {
 		loadDirectoryContentsStub.returns({
-			'src/main.py': 'print("hello")'
+			'src/main.py': 'print("hello")',
 		})
 
 		const template = '{{loadDir("src")}}'
 		const context: ParserContext = {
 			variables: {},
 			options: { fileExtensions: 'py,txt' }, // no leading dots
-			attachments: []
+			attachments: [],
 		}
 
 		await parseTemplate(template, context)
@@ -59,14 +58,14 @@ describe('loadDir function', () => {
 
 	it('should handle extensions that already have leading dots', async () => {
 		loadDirectoryContentsStub.returns({
-			'docs/readme.md': '# Title'
+			'docs/readme.md': '# Title',
 		})
 
 		const template = '{{loadDir("docs")}}'
 		const context: ParserContext = {
 			variables: {},
 			options: { fileExtensions: '.md,.txt' }, // with leading dots
-			attachments: []
+			attachments: [],
 		}
 
 		await parseTemplate(template, context)
@@ -81,7 +80,7 @@ describe('loadDir function', () => {
 		const context: ParserContext = {
 			variables: {},
 			options: { fileExtensions: '.js,py,.ts,md' }, // mixed formats
-			attachments: []
+			attachments: [],
 		}
 
 		await parseTemplate(template, context)
@@ -96,7 +95,7 @@ describe('loadDir function', () => {
 		const context: ParserContext = {
 			variables: {},
 			options: { fileExtensions: '' },
-			attachments: []
+			attachments: [],
 		}
 
 		await parseTemplate(template, context)
@@ -111,7 +110,7 @@ describe('loadDir function', () => {
 		const context: ParserContext = {
 			variables: {},
 			options: {}, // no fileExtensions
-			attachments: []
+			attachments: [],
 		}
 
 		await parseTemplate(template, context)
@@ -126,7 +125,7 @@ describe('loadDir function', () => {
 		const context: ParserContext = {
 			variables: {},
 			options: { fileExtensions: ' js , ts , py ' }, // with whitespace
-			attachments: []
+			attachments: [],
 		}
 
 		await parseTemplate(template, context)
@@ -138,14 +137,14 @@ describe('loadDir function', () => {
 		loadDirectoryContentsStub.returns({
 			'src/index.js': 'console.log("index");',
 			'src/utils.ts': 'export const util = () => {};',
-			'docs/README.md': '# Project'
+			'docs/README.md': '# Project',
 		})
 
 		const template = '{{loadDir("src")}}'
 		const context: ParserContext = {
 			variables: {},
 			options: { fileExtensions: 'js,ts,md' },
-			attachments: []
+			attachments: [],
 		}
 
 		const result = await parseTemplate(template, context)
@@ -163,7 +162,7 @@ describe('loadDir function', () => {
 		const context: ParserContext = {
 			variables: {},
 			options: { fileExtensions: 'js,ts' },
-			attachments: []
+			attachments: [],
 		}
 
 		const result = await parseTemplate(template, context)
@@ -174,7 +173,7 @@ describe('loadDir function', () => {
 
 	it('should throw error for invalid directory path parameter', async () => {
 		const template = '{{loadDir()}}'
-		
+
 		try {
 			await parseTemplate(template)
 			throw new Error('Expected function to throw, but it did not')
@@ -187,7 +186,7 @@ describe('loadDir function', () => {
 		// this would require modifying the template parser to allow non-string params
 		// for now, we test the validation logic indirectly
 		const template = '{{loadDir("")}}'
-		
+
 		try {
 			await parseTemplate(template)
 			throw new Error('Expected function to throw, but it did not')
@@ -199,15 +198,10 @@ describe('loadDir function', () => {
 	it('should handle files without extensions correctly', async () => {
 		loadDirectoryContentsStub.returns({
 			'scripts/build': '#!/bin/bash\necho "building"',
-			'config/settings': 'key=value'
+			'config/settings': 'key=value',
 		})
 
 		const template = '{{loadDir("scripts")}}'
-		const context: ParserContext = {
-			variables: {},
-			options: { fileExtensions: 'sh,conf' },
-			attachments: []
-		}
 
 		const result = await parseTemplate(template)
 

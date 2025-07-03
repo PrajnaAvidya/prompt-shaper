@@ -1,15 +1,14 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { 
-	loadFileContent, 
-	loadDirectoryContents, 
-	loadUrlReadableContents, 
-	replaceStringAtLocation, 
+import {
+	loadFileContent,
+	loadDirectoryContents,
+	loadUrlReadableContents,
+	replaceStringAtLocation,
 	transformJsonToVariables,
-	encodeLocalImageAsBase64
+	encodeLocalImageAsBase64,
 } from '../src/utils'
 import { ValueType } from '../src/types'
-import { existsSync } from 'node:fs'
 
 const fs = require('fs')
 const path = require('path')
@@ -43,7 +42,7 @@ describe('utils edge cases', () => {
 		})
 
 		it('should handle binary file with toString conversion', () => {
-			const binaryBuffer = Buffer.from([0x89, 0x50, 0x4E, 0x47]) // PNG header
+			const binaryBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47]) // PNG header
 			readFileSyncStub.returns(binaryBuffer)
 
 			const result = loadFileContent('image.png')
@@ -102,11 +101,11 @@ describe('utils edge cases', () => {
 			// set up directory structure: dir/file.txt and dir/subdir/file2.txt
 			readdirSyncStub.withArgs('test').returns(['file.txt', 'subdir'])
 			readdirSyncStub.withArgs(path.join('test', 'subdir')).returns(['file2.txt'])
-			
+
 			statSyncStub.withArgs(path.join('test', 'file.txt')).returns({ isDirectory: () => false })
 			statSyncStub.withArgs(path.join('test', 'subdir')).returns({ isDirectory: () => true })
 			statSyncStub.withArgs(path.join('test', 'subdir', 'file2.txt')).returns({ isDirectory: () => false })
-			
+
 			readFileSyncStub.withArgs(path.join('test', 'file.txt')).returns('content1')
 			readFileSyncStub.withArgs(path.join('test', 'subdir', 'file2.txt')).returns('content2')
 
@@ -170,7 +169,7 @@ describe('utils edge cases', () => {
 		it('should handle HTTP error responses', async () => {
 			fetchStub.resolves({
 				ok: false,
-				statusText: 'Not Found'
+				statusText: 'Not Found',
 			})
 
 			try {
@@ -179,25 +178,6 @@ describe('utils edge cases', () => {
 				expect(processExitStub.calledWith(1)).to.be.true
 				expect(consoleErrorStub.calledWith('Error: Failed to fetch content: Not Found')).to.be.true
 			}
-		})
-
-		it('should handle HTML parsing failures', async () => {
-			const mockJSDOM = {
-				window: {
-					document: {}
-				}
-			}
-			const mockReadability = {
-				parse: () => null
-			}
-
-			fetchStub.resolves({
-				ok: true,
-				text: () => Promise.resolve('<html></html>')
-			})
-
-			// This is difficult to test without heavy mocking of JSDOM and Readability
-			// the function would call process.exit(1) on parsing failure
 		})
 
 		it('should handle non-Error exceptions', async () => {
@@ -215,11 +195,11 @@ describe('utils edge cases', () => {
 	describe('replaceStringAtLocation', () => {
 		it('should handle invalid indices', () => {
 			const original = 'Hello World'
-			
+
 			// start index greater than end index - JavaScript's substring handles this
 			const result1 = replaceStringAtLocation(original, 'X', 5, 3)
 			expect(result1).to.equal('HelloXlo World') // substring(0,3) + X + substring(5) but substring swaps args
-			
+
 			// negative indices - JavaScript's substring treats negative as 0
 			const result2 = replaceStringAtLocation(original, 'X', -1, 2)
 			expect(result2).to.equal('Xllo World')
@@ -227,11 +207,11 @@ describe('utils edge cases', () => {
 
 		it('should handle indices beyond string length', () => {
 			const original = 'Hello'
-			
+
 			// start beyond length
 			const result1 = replaceStringAtLocation(original, 'X', 10, 15)
 			expect(result1).to.equal('HelloX')
-			
+
 			// end beyond length
 			const result2 = replaceStringAtLocation(original, 'X', 2, 20)
 			expect(result2).to.equal('HeX')
@@ -259,30 +239,30 @@ describe('utils edge cases', () => {
 		it('should handle JSON with number values', () => {
 			const json = { age: 25, count: 100 }
 			const result = transformJsonToVariables(json)
-			
+
 			expect(result.age).to.deep.equal({
 				name: 'age',
 				type: ValueType.string,
 				value: '25',
-				params: []
+				params: [],
 			})
 			expect(result.count).to.deep.equal({
 				name: 'count',
 				type: ValueType.string,
 				value: '100',
-				params: []
+				params: [],
 			})
 		})
 
 		it('should handle JSON with mixed value types', () => {
-			const json = { 
-				name: 'test', 
-				value: 42, 
-				flag: 'true', 
-				data: 'null' 
+			const json = {
+				name: 'test',
+				value: 42,
+				flag: 'true',
+				data: 'null',
 			}
 			const result = transformJsonToVariables(json)
-			
+
 			expect(result.name.value).to.equal('test')
 			expect(result.value.value).to.equal('42')
 			expect(result.flag.value).to.equal('true')
@@ -290,13 +270,13 @@ describe('utils edge cases', () => {
 		})
 
 		it('should handle special string values', () => {
-			const json = { 
-				empty: '', 
-				whitespace: '   ', 
-				special: '"quotes" and \\slashes\\' 
+			const json = {
+				empty: '',
+				whitespace: '   ',
+				special: '"quotes" and \\slashes\\',
 			}
 			const result = transformJsonToVariables(json)
-			
+
 			expect(result.empty.value).to.equal('')
 			expect(result.whitespace.value).to.equal('   ')
 			expect(result.special.value).to.equal('"quotes" and \\slashes\\')
@@ -305,7 +285,6 @@ describe('utils edge cases', () => {
 
 	describe('encodeLocalImageAsBase64', () => {
 		let existsSyncStub: sinon.SinonStub
-		let sharpStub: sinon.SinonStub
 
 		beforeEach(() => {
 			existsSyncStub = sinon.stub()

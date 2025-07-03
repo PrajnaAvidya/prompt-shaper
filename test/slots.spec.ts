@@ -59,9 +59,7 @@ describe('slots', () => {
 				name: 'fileContent',
 				type: ValueType.function,
 				value: 'load',
-				params: [
-					{ type: ValueType.string, value: './test/templates/single-line-variables/string.ps.md' },
-				],
+				params: [{ type: ValueType.string, value: './test/templates/single-line-variables/string.ps.md' }],
 			},
 		}
 		const parserContext: ParserContext = {

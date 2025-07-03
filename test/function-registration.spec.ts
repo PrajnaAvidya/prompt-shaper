@@ -92,7 +92,7 @@ describe('function registration', () => {
 
 			const template = '{{tempFunction()}}'
 			const result = await parseTemplate(template)
-			
+
 			// unregistered function call should remain as-is (undefined slot)
 			expect(result).to.equal('{{tempFunction()}}')
 		})

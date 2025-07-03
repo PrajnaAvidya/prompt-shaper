@@ -1,3 +1,12 @@
+## [5.0.1](https://github.com/PrajnaAvidya/prompt-shaper/compare/v5.0.0...v5.0.1) (2025-07-03)
+
+
+### Bug Fixes
+
+* 🐛 don't parse content inside markdown blocks ([9612115](https://github.com/PrajnaAvidya/prompt-shaper/commit/9612115da8ca799aed6b5c3e293e172170f5f0ed)), closes [#20](https://github.com/PrajnaAvidya/prompt-shaper/issues/20)
+* 🐛 don't parse content inside of multiline variables ([23fb5f5](https://github.com/PrajnaAvidya/prompt-shaper/commit/23fb5f50980fcf36efa0d333e8f1a00d9c503c15)), closes [#2](https://github.com/PrajnaAvidya/prompt-shaper/issues/2)
+* 🐛 don't remove comments in raw mode ([270988b](https://github.com/PrajnaAvidya/prompt-shaper/commit/270988b9459230aeefe17a85209b2fdf60f63ffd)), closes [#50](https://github.com/PrajnaAvidya/prompt-shaper/issues/50)
+
 # [5.0.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v4.0.0...v5.0.0) (2025-05-07)
 
 

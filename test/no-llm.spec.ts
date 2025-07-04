@@ -91,8 +91,8 @@ describe('No LLM functionality', function () {
 				expect(result).to.include('user\nHello World\n-----')
 				expect(result).to.not.include('assistant')
 			} catch (e) {
-				// if there are readline issues in test environment, verify the functionality works via built binary
-				const result = execSync('PROMPT_SHAPER_NO_LLM=true node dist/cli.js -is "{greeting=\\"Hello World\\"}{{greeting}}"', { encoding: 'utf8' })
+				// if there are readline issues in test environment, verify the functionality works via ts-node
+				const result = execSync('PROMPT_SHAPER_NO_LLM=true ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}"', { encoding: 'utf8' })
 				expect(result).to.include('user\nHello World\n-----')
 				expect(result).to.not.include('assistant')
 			}
@@ -113,7 +113,7 @@ describe('No LLM functionality', function () {
 		it('should work normally when PROMPT_SHAPER_NO_LLM=false', function () {
 			// test that PROMPT_SHAPER_NO_LLM=false doesn't interfere with normal operation
 			// this should just process templates normally without LLM calls (no --generate or --interactive)
-			const result = execSync('PROMPT_SHAPER_NO_LLM=false node dist/cli.js -is "{greeting=\\"Hello World\\"}{{greeting}}"', {
+			const result = execSync('PROMPT_SHAPER_NO_LLM=false ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}"', {
 				encoding: 'utf8',
 				timeout: 5000, // give it a bit more time, but it should exit quickly
 			})

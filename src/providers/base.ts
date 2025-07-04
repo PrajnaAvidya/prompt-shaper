@@ -22,11 +22,14 @@ export interface LLMProvider {
 	generate(messages: GenericMessage[], options: ProviderOptions): Promise<string>
 
 	// check if provider supports a specific feature
-	supportsFeature(feature: 'reasoning_effort' | 'json_mode' | 'developer_role'): boolean
+	supportsFeature(feature: 'reasoning_effort' | 'json_mode'): boolean
 
 	// validate model name for this provider
 	isValidModel(model: string): boolean
 
 	// get required environment variable name for api key
 	getApiKeyEnvVar(): string
+
+	// start conversation with system prompt (provider-specific role handling)
+	startConversation(systemPrompt: string, model: string): GenericMessage[]
 }

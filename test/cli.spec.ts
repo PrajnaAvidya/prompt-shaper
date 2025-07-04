@@ -144,8 +144,8 @@ describe('CLI', () => {
 			})
 		})
 
-		it('should accept developer prompt option without making LLM calls', done => {
-			exec('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" -dp "Test developer prompt"', (error, stdout) => {
+		it('should accept system prompt option without making LLM calls (additional test)', done => {
+			exec('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" -sp "Test system prompt"', (error, stdout) => {
 				if (error) {
 					throw new Error(error.message)
 				}

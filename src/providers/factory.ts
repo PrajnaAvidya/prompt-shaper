@@ -22,3 +22,9 @@ export async function generateWithProvider(
 		reasoningEffort,
 	})
 }
+
+// wrapper function for starting conversations with system prompts
+export function startConversationWithProvider(systemPrompt: string, model: string): GenericMessage[] {
+	const provider = createProvider()
+	return provider.startConversation(systemPrompt, model)
+}

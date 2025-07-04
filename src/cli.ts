@@ -4,10 +4,10 @@ import * as fs from 'fs'
 import { GenericMessage } from './providers/base'
 import * as path from 'path'
 import { program } from 'commander'
-import { loadFileContent, startConversation, transformJsonToVariables } from './utils'
+import { loadFileContent, transformJsonToVariables } from './utils'
 import { parseTemplate } from './parser'
 import { ParserVariables, ResponseFormat, ReasoningEffort } from './types'
-import { generateWithProvider } from './providers/factory'
+import { generateWithProvider, startConversationWithProvider } from './providers/factory'
 import * as readline from 'readline'
 
 interface CLIOptions {
@@ -26,7 +26,6 @@ interface CLIOptions {
 	model: string
 	outputAssistant: boolean
 	systemPrompt: string
-	developerPrompt: string
 	raw?: boolean
 	save?: string
 	saveJson?: string
@@ -96,7 +95,6 @@ const envVars =
 				llm: process.env.PROMPT_SHAPER_NO_LLM !== 'true',
 				outputAssistant: process.env.PROMPT_SHAPER_OUTPUT_ASSISTANT === 'true',
 				systemPrompt: process.env.PROMPT_SHAPER_SYSTEM_PROMPT,
-				developerPrompt: process.env.PROMPT_SHAPER_DEVELOPER_PROMPT,
 				raw: process.env.PROMPT_SHAPER_RAW === 'true',
 				save: process.env.PROMPT_SHAPER_SAVE,
 				saveJson: process.env.PROMPT_SHAPER_SAVE_JSON,
@@ -154,7 +152,7 @@ async function handler(input: string, options: CLIOptions) {
 
 	if (options.interactive && !input) {
 		// start new conversation
-		const conversation: GenericMessage[] = startConversation(options.systemPrompt, options.developerPrompt, options.model)
+		const conversation: GenericMessage[] = startConversationWithProvider(options.systemPrompt, options.model)
 		await startSavedConversation(conversation, options)
 
 		exitApp(0)
@@ -218,7 +216,7 @@ async function handler(input: string, options: CLIOptions) {
 				console.log(`user\n${parsed}\n-----`)
 			}
 			const conversation: GenericMessage[] = [
-				...startConversation(options.systemPrompt, options.developerPrompt, options.model),
+				...startConversationWithProvider(options.systemPrompt, options.model),
 				{
 					role: 'user',
 					content: [{ type: 'text', text: parsed }, ...parserContext.attachments.reverse()],
@@ -357,7 +355,6 @@ program
 	.option('--no-llm', 'Disable all LLM calls and interactive mode (template processing only)', envVars.llm)
 	.option('-oa --output-assistant', 'Save gpt output only to text/JSON (filters out prompt & user responses)', envVars.outputAssistant)
 	.option('-sp, --system-prompt <promptString>', 'System prompt for LLM conversation', envVars.systemPrompt || 'You are a helpful assistant.')
-	.option('-dp, --developer-prompt <promptString>', 'Developer prompt for LLM conversation', envVars.developerPrompt || 'Formatting re-enabled')
 	.option('-re, --reasoning-effort', 'Reasoning effort (low/medium/high) for o1/o3 models', envVars.reasoningEffort || 'high')
 	.option('-rf, --response-format', 'Response format (text/json_object)', envVars.responseFormat || 'text')
 	.option('-r, --raw', "Raw mode (don't parse any Prompt Shaper tags)", envVars.raw)

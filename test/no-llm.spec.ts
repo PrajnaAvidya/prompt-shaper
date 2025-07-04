@@ -125,7 +125,9 @@ describe('No LLM functionality', function () {
 
 	describe('Integration with existing functionality', function () {
 		it('should work with loadDir function when --disable-llm is used', function () {
-			const result = execSync('ts-node src/cli.ts -is "{{loadDir(\\"test/templates/single-line-variables\\")}}" --disable-llm -e md', { encoding: 'utf8' })
+			const result = execSync('ts-node src/cli.ts -is "{{loadDir(\\"test/templates/single-line-variables\\")}}" --disable-llm -e md', {
+				encoding: 'utf8',
+			})
 
 			// loadDir function should execute and show file contents
 			expect(result).to.include('File: test/templates/single-line-variables')

@@ -166,7 +166,7 @@ async function handler(input: string, cliOptions: CLIOptions) {
 		jsonFile: cliOptions.jsonFile ?? profileOptions.jsonFile ?? envVars.jsonFile,
 		loadJson: cliOptions.loadJson ?? profileOptions.loadJson ?? envVars.loadJson,
 		loadText: cliOptions.loadText ?? profileOptions.loadText ?? envVars.loadText,
-		llm: cliOptions.disableLlm ? false : (profileOptions.llm ?? envVars.llm ?? true),
+		llm: cliOptions.disableLlm ? false : profileOptions.llm ?? envVars.llm ?? true,
 		model: cliOptions.model ?? profileOptions.model ?? envVars.model ?? 'gpt-4o',
 		outputAssistant: cliOptions.outputAssistant ?? profileOptions.outputAssistant ?? envVars.outputAssistant ?? false,
 		profile: cliOptions.profile ?? profileOptions.profile ?? envVars.profile,

@@ -32,7 +32,7 @@ describe('Profiles functionality', function () {
 			const profile = {
 				debug: true,
 				model: 'gpt-4',
-				systemPrompt: 'You are a test assistant from profile'
+				systemPrompt: 'You are a test assistant from profile',
 			}
 			fs.writeFileSync(testProfilePath, JSON.stringify(profile))
 
@@ -74,12 +74,15 @@ describe('Profiles functionality', function () {
 		it('should load profile from PROMPT_SHAPER_PROFILE environment variable', function () {
 			const profile = {
 				debug: true,
-				model: 'gpt-3.5-turbo'
+				model: 'gpt-3.5-turbo',
 			}
 			fs.writeFileSync(testProfilePath, JSON.stringify(profile))
 
 			// Need to disable PROMPT_SHAPER_TESTS for env vars to work
-			const result = execSync(`PROMPT_SHAPER_TESTS=false PROMPT_SHAPER_PROFILE=${testProfilePath} ts-node src/cli.ts -is "test template" --disable-llm`, { encoding: 'utf8' })
+			const result = execSync(
+				`PROMPT_SHAPER_TESTS=false PROMPT_SHAPER_PROFILE=${testProfilePath} ts-node src/cli.ts -is "test template" --disable-llm`,
+				{ encoding: 'utf8' },
+			)
 
 			expect(result).to.include('DEBUG:') // debug from profile should be active
 			expect(result).to.include('test template')
@@ -90,7 +93,7 @@ describe('Profiles functionality', function () {
 		it('should prioritize CLI options over profile options', function () {
 			const profile = {
 				debug: true,
-				model: 'gpt-4'
+				model: 'gpt-4',
 			}
 			fs.writeFileSync(testProfilePath, JSON.stringify(profile))
 
@@ -104,19 +107,24 @@ describe('Profiles functionality', function () {
 		it('should prioritize profile options over environment variables', function () {
 			const profile = {
 				debug: false, // profile says no debug
-				model: 'gpt-4'
+				model: 'gpt-4',
 			}
 			fs.writeFileSync(testProfilePath, JSON.stringify(profile))
 
 			// Env var says debug=true, but profile should override
-			const result = execSync(`PROMPT_SHAPER_TESTS=false PROMPT_SHAPER_DEBUG=true ts-node src/cli.ts --profile ${testProfilePath} -is "test template" --disable-llm`, { encoding: 'utf8' })
+			const result = execSync(
+				`PROMPT_SHAPER_TESTS=false PROMPT_SHAPER_DEBUG=true ts-node src/cli.ts --profile ${testProfilePath} -is "test template" --disable-llm`,
+				{ encoding: 'utf8' },
+			)
 
 			// Debug should be false from profile, not true from env var
 			expect(result).to.not.include('DEBUG:')
 		})
 
 		it('should use environment variables when no profile provided', function () {
-			const result = execSync('PROMPT_SHAPER_TESTS=false PROMPT_SHAPER_DEBUG=true ts-node src/cli.ts -is "test template" --disable-llm', { encoding: 'utf8' })
+			const result = execSync('PROMPT_SHAPER_TESTS=false PROMPT_SHAPER_DEBUG=true ts-node src/cli.ts -is "test template" --disable-llm', {
+				encoding: 'utf8',
+			})
 
 			expect(result).to.include('DEBUG:') // debug from env var should be active
 		})
@@ -124,22 +132,25 @@ describe('Profiles functionality', function () {
 		it('should prioritize CLI profile over environment profile with warning', function () {
 			const profile1 = { debug: true, model: 'gpt-4' }
 			const profile2 = { debug: false, model: 'gpt-3.5-turbo' }
-			
+
 			fs.writeFileSync(testProfilePath, JSON.stringify(profile1))
 			fs.writeFileSync(testProfile2Path, JSON.stringify(profile2))
 
 			try {
-				const result = execSync(`PROMPT_SHAPER_TESTS=false PROMPT_SHAPER_PROFILE=${testProfilePath} ts-node src/cli.ts --profile ${testProfile2Path} -is "test template" --disable-llm`, { 
-					encoding: 'utf8',
-					stdio: ['pipe', 'pipe', 'inherit'] // capture stdout but show stderr
-				})
+				const result = execSync(
+					`PROMPT_SHAPER_TESTS=false PROMPT_SHAPER_PROFILE=${testProfilePath} ts-node src/cli.ts --profile ${testProfile2Path} -is "test template" --disable-llm`,
+					{
+						encoding: 'utf8',
+						stdio: ['pipe', 'pipe', 'inherit'], // capture stdout but show stderr
+					},
+				)
 
 				// Should use profile2 (debug=false), not profile1 (debug=true)
 				expect(result).to.not.include('DEBUG:')
 				expect(result).to.include('test template')
 			} catch (e) {
 				// If there's an error, still check the output
-				const execError = e as { stdout: string, stderr: string }
+				const execError = e as { stdout: string; stderr: string }
 				expect(execError.stdout || execError.stderr).to.include('test template')
 			}
 		})
@@ -150,21 +161,21 @@ describe('Profiles functionality', function () {
 			const profile = {
 				debug: true,
 				profile: 'self-reference.json', // should warn
-				model: 'gpt-4'
+				model: 'gpt-4',
 			}
 			fs.writeFileSync(testProfilePath, JSON.stringify(profile))
 
 			try {
-				const result = execSync(`ts-node src/cli.ts --profile ${testProfilePath} -is "test template" --disable-llm`, { 
+				const result = execSync(`ts-node src/cli.ts --profile ${testProfilePath} -is "test template" --disable-llm`, {
 					encoding: 'utf8',
-					stdio: ['pipe', 'pipe', 'inherit'] // let stderr go to console
+					stdio: ['pipe', 'pipe', 'inherit'], // let stderr go to console
 				})
 
 				expect(result).to.include('DEBUG:') // valid options should still work
 				expect(result).to.include('test template')
 			} catch (e) {
 				// If command fails, check the output anyway
-				const execError = e as { stdout: string, stderr: string }
+				const execError = e as { stdout: string; stderr: string }
 				const output = execError.stdout || execError.stderr || ''
 				expect(output).to.include('test template')
 			}
@@ -180,7 +191,7 @@ describe('Profiles functionality', function () {
 				systemPrompt: 'Test assistant',
 				raw: false,
 				responseFormat: 'text',
-				reasoningEffort: 'high'
+				reasoningEffort: 'high',
 			}
 			fs.writeFileSync(testProfilePath, JSON.stringify(profile))
 
@@ -196,11 +207,13 @@ describe('Profiles functionality', function () {
 		it('should work with template processing', function () {
 			const profile = {
 				debug: false,
-				extensions: 'md'
+				extensions: 'md',
 			}
 			fs.writeFileSync(testProfilePath, JSON.stringify(profile))
 
-			const result = execSync(`ts-node src/cli.ts --profile ${testProfilePath} -is "{greeting=\\"Hello World\\"}{{greeting}}" --disable-llm`, { encoding: 'utf8' })
+			const result = execSync(`ts-node src/cli.ts --profile ${testProfilePath} -is "{greeting=\\"Hello World\\"}{{greeting}}" --disable-llm`, {
+				encoding: 'utf8',
+			})
 
 			expect(result).to.include('Hello World')
 			expect(result).to.not.include('DEBUG:') // debug should be false from profile
@@ -209,11 +222,14 @@ describe('Profiles functionality', function () {
 		it('should work with loadDir function and extensions from profile', function () {
 			const profile = {
 				debug: false,
-				extensions: 'md'
+				extensions: 'md',
 			}
 			fs.writeFileSync(testProfilePath, JSON.stringify(profile))
 
-			const result = execSync(`ts-node src/cli.ts --profile ${testProfilePath} -is "{{loadDir(\\"test/templates/single-line-variables\\")}}" --disable-llm`, { encoding: 'utf8' })
+			const result = execSync(
+				`ts-node src/cli.ts --profile ${testProfilePath} -is "{{loadDir(\\"test/templates/single-line-variables\\")}}" --disable-llm`,
+				{ encoding: 'utf8' },
+			)
 
 			expect(result).to.include('File: test/templates/single-line-variables')
 			expect(result).to.include('singleLineNumberVar')
@@ -222,7 +238,7 @@ describe('Profiles functionality', function () {
 		it('should work with --disable-llm option', function () {
 			const profile = {
 				debug: true,
-				model: 'gpt-4'
+				model: 'gpt-4',
 			}
 			fs.writeFileSync(testProfilePath, JSON.stringify(profile))
 
@@ -234,7 +250,7 @@ describe('Profiles functionality', function () {
 
 		it('should handle conflicting options correctly', function () {
 			const profile = {
-				interactive: true // this conflicts with --disable-llm
+				interactive: true, // this conflicts with --disable-llm
 			}
 			fs.writeFileSync(testProfilePath, JSON.stringify(profile))
 
@@ -265,7 +281,7 @@ describe('Profiles functionality', function () {
 				debug: true,
 				unknownOption1: 'value1',
 				anotherUnknownOption: true,
-				model: 'gpt-4'
+				model: 'gpt-4',
 			}
 			fs.writeFileSync(testProfilePath, JSON.stringify(profile))
 

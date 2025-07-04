@@ -46,6 +46,7 @@ Run `npx prompt-shaper --help` to see a complete list of CLI options.
 - `-r, --raw` - Raw mode (don't parse any PromptShaper tags)
 - `-i, --interactive` - Enable interactive mode with OpenAI
 - `-g, --generate` - Send parsed template to OpenAI and return single response
+- `--no-llm` - Disable all LLM calls and interactive mode (template processing only)
 
 ### LLM Configuration
 - `-m, --model <modelType>` - OpenAI model to use (default: "gpt-4o")
@@ -90,6 +91,7 @@ All CLI options can be set using environment variables. Command-line options tak
 | `PROMPT_SHAPER_LOAD_JSON` | `-lj, --load-json` | Load conversation from JSON |
 | `PROMPT_SHAPER_LOAD_TEXT` | `-lt, --load-text` | Load conversation from text |
 | `PROMPT_SHAPER_MODEL` | `-m, --model` | OpenAI model name |
+| `PROMPT_SHAPER_NO_LLM` | `--no-llm` | Disable all LLM calls ("true"/"false") |
 | `PROMPT_SHAPER_OUTPUT_ASSISTANT` | `-oa, --output-assistant` | Output only assistant responses ("true"/"false") |
 | `PROMPT_SHAPER_SYSTEM_PROMPT` | `-sp, --system-prompt` | System prompt text |
 | `PROMPT_SHAPER_DEVELOPER_PROMPT` | `-dp, --developer-prompt` | Developer prompt text |
@@ -132,6 +134,25 @@ npx prompt-shaper -r my_file.js
 
 # Useful for code analysis while preserving syntax
 npx prompt-shaper -r -i my_code.py
+```
+
+### Template-Only Mode (No LLM)
+```bash
+# Process templates without any LLM integration
+npx prompt-shaper my_template.ps.md --no-llm
+
+# Save processed template to file
+npx prompt-shaper my_template.ps.md --no-llm -s output.md
+
+# Use with template strings
+npx prompt-shaper -is "{name=\"World\"}Hello {{name}}!" --no-llm
+
+# Using environment variable
+export PROMPT_SHAPER_NO_LLM=true
+npx prompt-shaper my_template.ps.md
+
+# Template processing with directory loading
+npx prompt-shaper -is "{{loadDir(\"src\")}}" --no-llm -e "js,ts"
 ```
 
 ### Directory Loading with Ignore Patterns
@@ -319,5 +340,6 @@ See the `samples` directory for example templates you can try with the parser.
 - **Parameters** - One or more arguments passed to a slot or a function. Parameters are strings.
 - **Function** - Does "something" and the result is rendered on page, or assigned to a variable.
 - **Raw Mode** - Processing mode where PromptShaper tags are not parsed, useful for code analysis or preserving exact syntax.
+- **Template-Only Mode** - Processing mode where LLM integration is disabled using `--no-llm`, useful for pure templating without requiring an OpenAI API key.
 
-**Note: You must set the OPENAI_API_KEY environment variable for calls to OpenAI to work.**
+**Note: You must set the OPENAI_API_KEY environment variable for LLM features (`--interactive`, `--generate`) to work. Template processing with `--no-llm` requires no API key.**

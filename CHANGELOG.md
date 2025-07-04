@@ -1,3 +1,10 @@
+# [6.1.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v6.0.0...v6.1.0) (2025-07-04)
+
+
+### Features
+
+* 🎸 add /rewind command to interactive mode ([9cc661e](https://github.com/PrajnaAvidya/prompt-shaper/commit/9cc661ec27e4a6c69397e830673fb755f747f7d2)), closes [#52](https://github.com/PrajnaAvidya/prompt-shaper/issues/52)
+
 # [6.0.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v5.0.1...v6.0.0) (2025-07-04)
 
 

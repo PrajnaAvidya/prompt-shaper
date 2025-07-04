@@ -13,7 +13,7 @@ Welcome to {{appName}} version {{version}}!
 
 Process templates without LLM integration:
 ```bash
-prompt-shaper samples/11-cli-modes.ps.md --no-llm
+prompt-shaper samples/11-cli-modes.ps.md --disable-llm
 ```
 
 ## Raw Mode
@@ -41,39 +41,39 @@ prompt-shaper samples/11-cli-modes.ps.md --generate
 
 ### Save Output
 ```bash
-prompt-shaper samples/11-cli-modes.ps.md --no-llm --save output.txt
+prompt-shaper samples/11-cli-modes.ps.md --disable-llm --save output.txt
 ```
 
 ### Hide Initial Prompt
 ```bash
-prompt-shaper samples/11-cli-modes.ps.md --no-llm --hide-prompt
+prompt-shaper samples/11-cli-modes.ps.md --disable-llm --hide-prompt
 ```
 
 ### Debug Mode
 ```bash
-prompt-shaper samples/11-cli-modes.ps.md --no-llm --debug
+prompt-shaper samples/11-cli-modes.ps.md --disable-llm --debug
 ```
 
 ### File Extensions for loadDir
 ```bash
-prompt-shaper samples/08-load-directories.ps.md --no-llm -e "js,json,md"
+prompt-shaper samples/08-load-directories.ps.md --disable-llm -e "js,json,md"
 ```
 
 ### Ignore Patterns
 ```bash
-prompt-shaper samples/08-load-directories.ps.md --no-llm --ignore-patterns "*.log,temp*"
+prompt-shaper samples/08-load-directories.ps.md --disable-llm --ignore-patterns "*.log,temp*"
 ```
 
 ## String Input
 
 Process template strings directly:
 ```bash
-prompt-shaper -is "{name=\"World\"}Hello {{name}}!" --no-llm
+prompt-shaper -is "{name=\"World\"}Hello {{name}}!" --disable-llm
 ```
 
 ## JSON Variables
 
 Provide variables via JSON:
 ```bash
-prompt-shaper -is "Hello {{name}}!" -js '{"name": "PromptShaper"}' --no-llm
+prompt-shaper -is "Hello {{name}}!" -js '{"name": "PromptShaper"}' --disable-llm
 ```

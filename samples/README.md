@@ -35,27 +35,27 @@ Start here: [`00-overview.ps.md`](00-overview.ps.md) - Complete feature overview
 ### Template-Only Mode (No LLM Required)
 ```bash
 # Process templates without LLM integration
-prompt-shaper samples/01-basic-variables.ps.md --no-llm
-prompt-shaper samples/07-load-files.ps.md --no-llm
+yarn parse -- samples/01-basic-variables.ps.md --disable-llm
+yarn parse -- samples/07-load-files.ps.md --disable-llm
 ```
 
 ### With File Extensions
 ```bash
 # Specify file extensions for loadDir examples
-prompt-shaper samples/08-load-directories.ps.md --no-llm -e "js,json,md,css"
+yarn parse -- samples/08-load-directories.ps.md --disable-llm -e "js,json,md,css"
 ```
 
 ### Raw Mode
 ```bash
 # View templates without processing
-prompt-shaper samples/05-escaping.ps.md --raw
+yarn parse -- samples/05-escaping.ps.md --raw
 ```
 
 ### Interactive Mode (Requires OpenAI API Key)
 ```bash
 # Start interactive chat with processed template
 export OPENAI_API_KEY="your-key-here"
-prompt-shaper samples/00-overview.ps.md --interactive
+yarn parse -- samples/00-overview.ps.md --interactive
 ```
 
 ## Sample Data
@@ -82,19 +82,19 @@ echo "Testing all PromptShaper samples..."
 # Basic samples (no external dependencies)
 for file in samples/0{0,1,2,3,4,5,6}-*.ps.md; do
     echo "Testing $file..."
-    prompt-shaper "$file" --no-llm > /dev/null || echo "❌ $file failed"
+    yarn parse -- "$file" --disable-llm > /dev/null || echo "❌ $file failed"
 done
 
 # File operation samples
 for file in samples/0{7,8}-*.ps.md; do
     echo "Testing $file..."
-    prompt-shaper "$file" --no-llm -e "js,json,md,css,txt" > /dev/null || echo "❌ $file failed"
+    yarn parse -- "$file" --disable-llm -e "js,json,md,css,txt" > /dev/null || echo "❌ $file failed"
 done
 
 # CLI and markdown samples
 for file in samples/{11,12}-*.ps.md; do
     echo "Testing $file..."
-    prompt-shaper "$file" --no-llm > /dev/null || echo "❌ $file failed"
+    yarn parse -- "$file" --disable-llm > /dev/null || echo "❌ $file failed"
 done
 
 echo "✅ Sample testing complete!"
@@ -109,7 +109,7 @@ echo "✅ Sample testing complete!"
 
 ## Notes
 
-- All samples are designed to work with the `--no-llm` flag for testing without LLM integration
+- All samples are designed to work with the `--disable-llm` flag for testing without LLM integration
 - File and directory loading examples use the `sample-data/` directory
 - Image examples include both local and remote image references
 - Samples demonstrate current v5.0 functionality only (no arithmetic functions)

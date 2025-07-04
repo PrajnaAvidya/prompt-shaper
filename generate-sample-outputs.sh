@@ -16,7 +16,7 @@ for file in samples/0{0,1,2,3,4,5,6}-*.ps.md; do
         output_file="sample-outputs/${filename}"
         echo -n "Generating output for $filename... "
         
-        if PROMPT_SHAPER_OUTPUT_ASSISTANT=false yarn parse "$file" --no-llm 2>/dev/null | sed '/^yarn run\|^\$ ts-node\|^Done in /d' > "$output_file"; then
+        if PROMPT_SHAPER_OUTPUT_ASSISTANT=false yarn parse "$file" --disable-llm 2>/dev/null | sed '/^yarn run\|^\$ ts-node\|^Done in /d' > "$output_file"; then
             echo "✅ Generated"
             generated_count=$((generated_count + 1))
         else
@@ -34,7 +34,7 @@ for file in samples/0{7,8}-*.ps.md; do
         output_file="sample-outputs/${filename}"
         echo -n "Generating output for $filename... "
         
-        if yarn parse "$file" --no-llm -e "js,json,md,css,txt" 2>/dev/null | sed '/^yarn run\|^\$ ts-node\|^Done in /d' > "$output_file"; then
+        if yarn parse "$file" --disable-llm -e "js,json,md,css,txt" 2>/dev/null | sed '/^yarn run\|^\$ ts-node\|^Done in /d' > "$output_file"; then
             echo "✅ Generated"
             generated_count=$((generated_count + 1))
         else
@@ -52,7 +52,7 @@ for file in samples/{09,10}-*.ps.md; do
         output_file="sample-outputs/${filename}"
         echo -n "Generating output for $filename (may fail due to dependencies)... "
         
-        if PROMPT_SHAPER_OUTPUT_ASSISTANT=false yarn parse "$file" --no-llm 2>/dev/null | sed '/^yarn run\|^\$ ts-node\|^Done in /d' > "$output_file"; then
+        if PROMPT_SHAPER_OUTPUT_ASSISTANT=false yarn parse "$file" --disable-llm 2>/dev/null | sed '/^yarn run\|^\$ ts-node\|^Done in /d' > "$output_file"; then
             echo "✅ Generated"
             generated_count=$((generated_count + 1))
         else
@@ -69,7 +69,7 @@ for file in samples/{11,12}-*.ps.md; do
         output_file="sample-outputs/${filename}"
         echo -n "Generating output for $filename... "
         
-        if PROMPT_SHAPER_OUTPUT_ASSISTANT=false yarn parse "$file" --no-llm 2>/dev/null | sed '/^yarn run\|^\$ ts-node\|^Done in /d' > "$output_file"; then
+        if PROMPT_SHAPER_OUTPUT_ASSISTANT=false yarn parse "$file" --disable-llm 2>/dev/null | sed '/^yarn run\|^\$ ts-node\|^Done in /d' > "$output_file"; then
             echo "✅ Generated"
             generated_count=$((generated_count + 1))
         else

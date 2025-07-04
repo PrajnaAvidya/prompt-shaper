@@ -89,21 +89,23 @@ describe('CLI', () => {
 
 	describe('File processing options', () => {
 		it('should work with extensions option', done => {
-			exec('ts-node src/cli.ts -is "{{loadDir(\\"test/templates/single-line-variables\\")}}" -e "md"', (error, stdout) => {
+			exec('ts-node src/cli.ts -is "{{loadDir(\\"test/templates/single-line-variables\\")}}" -e "md" --disable-llm', (error, stdout) => {
 				if (error) {
 					throw new Error(error.message)
 				}
-				expect(stdout).to.include('loadDir')
+				expect(stdout).to.include('File: test/templates/single-line-variables')
+				expect(stdout).to.include('singleLineNumberVar')
 				done()
 			})
 		})
 
 		it('should work with ignore patterns option', done => {
-			exec('ts-node src/cli.ts -is "{{loadDir(\\"test/templates\\")}}" --ignore-patterns "*.json,backup*" -e "md"', (error, stdout) => {
+			exec('ts-node src/cli.ts -is "{{loadDir(\\"test/templates\\")}}" --ignore-patterns "*.json,backup*" -e "md" --disable-llm', (error, stdout) => {
 				if (error) {
 					throw new Error(error.message)
 				}
-				expect(stdout).to.include('loadDir')
+				expect(stdout).to.include('File: test/templates')
+				expect(stdout).to.not.include('.json') // should be ignored
 				done()
 			})
 		})
@@ -111,7 +113,7 @@ describe('CLI', () => {
 
 	describe('Display options', () => {
 		it('should hide prompt when --hide-prompt is used', done => {
-			exec('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" --hide-prompt --no-llm', (error, stdout) => {
+			exec('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" --hide-prompt --disable-llm', (error, stdout) => {
 				if (error) {
 					throw new Error(error.message)
 				}
@@ -178,7 +180,7 @@ describe('CLI', () => {
 	describe('JSON output functionality', () => {
 		it('should accept save-json option without making LLM calls', done => {
 			// JSON save only works in interactive/LLM modes, but option should be accepted
-			exec('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" -sj "/tmp/test.json" --no-llm', (error, stdout) => {
+			exec('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" -sj "/tmp/test.json" --disable-llm', (error, stdout) => {
 				if (error) {
 					throw new Error(error.message)
 				}

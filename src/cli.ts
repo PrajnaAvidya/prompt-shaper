@@ -277,6 +277,35 @@ async function interactiveModeLoop(conversation: GenericMessage[], options: CLIO
 
 		// collect user response and then parse response if not in raw mode
 		const response = (await prompt('Your response: ')) as string
+
+		// handle /rewind command
+		if (response.trim() === '/rewind') {
+			if (
+				conversation.length >= 2 &&
+				conversation[conversation.length - 1].role === 'assistant' &&
+				conversation[conversation.length - 2].role === 'user'
+			) {
+				// remove the last user-assistant exchange
+				conversation.pop() // remove assistant response
+				conversation.pop() // remove user question
+				console.log('Rewound last exchange. Conversation has been reverted.\n-----')
+
+				// update saved files after rewind
+				if (options.saveJson) {
+					saveConversationAsJson(conversation, options)
+				}
+				if (options.save) {
+					saveConversationAsText(conversation, options)
+				}
+
+				// stay on user's turn since we just removed a complete exchange
+				continue
+			} else {
+				console.log('Cannot rewind: no previous exchange to remove.\n-----')
+				continue
+			}
+		}
+
 		const parserContext = {
 			variables: variables || {},
 			options: { showDebugMessages: options.debug, fileExtensions: options.extensions },

@@ -1,3 +1,15 @@
+# [6.2.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v6.1.0...v6.2.0) (2025-07-04)
+
+
+### Bug Fixes
+
+* 🐛 fix bug in sample testing ([0e9dc33](https://github.com/PrajnaAvidya/prompt-shaper/commit/0e9dc336eaef3b512e6f5407b74c161fd0322e75))
+
+
+### Features
+
+* 🎸 profiles feature ([63ddb92](https://github.com/PrajnaAvidya/prompt-shaper/commit/63ddb92563392357cad4c751a327065dfc4ead8c))
+
 # [6.1.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v6.0.0...v6.1.0) (2025-07-04)
 
 

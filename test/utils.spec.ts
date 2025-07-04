@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { loadDirectoryContents, loadFileContent, replaceStringAtLocation, startConversation, transformJsonToVariables } from '../src/utils'
+import { loadDirectoryContents, loadFileContent, replaceStringAtLocation, transformJsonToVariables } from '../src/utils'
 import { join } from 'path'
 import sinon from 'sinon'
 import { ParserVariables, ValueType } from '../src/types'
@@ -116,45 +116,5 @@ describe('transformJsonToVariables', () => {
 		}
 		const result = transformJsonToVariables(json)
 		expect(result).to.deep.equal(expected)
-	})
-})
-
-describe('startConversation', () => {
-	it('should use a developer role if model starts with "o1" or "o3"', () => {
-		const conversation1 = startConversation('systemPromptText', 'developerPromptText', 'o1-model')
-		expect(conversation1).to.deep.equal([
-			{
-				role: 'developer',
-				content: [
-					{
-						type: 'text',
-						text: 'developerPromptText',
-					},
-				],
-			},
-		])
-
-		const conversation2 = startConversation('systemPromptText', 'developerPromptText', 'o3-model')
-		expect(conversation2).to.deep.equal([
-			{
-				role: 'developer',
-				content: [
-					{
-						type: 'text',
-						text: 'developerPromptText',
-					},
-				],
-			},
-		])
-	})
-
-	it('should use a system role if model does not start with "o1" or "o3"', () => {
-		const conversation = startConversation('systemPromptText', 'developerPromptText', 'gpt-4')
-		expect(conversation).to.deep.equal([
-			{
-				role: 'system',
-				content: 'systemPromptText',
-			},
-		])
 	})
 })

@@ -50,8 +50,7 @@ Run `npx prompt-shaper --help` to see a complete list of CLI options.
 
 ### LLM Configuration
 - `-m, --model <modelType>` - OpenAI model to use (default: "gpt-4o")
-- `-sp, --system-prompt <promptString>` - System prompt for LLM conversation
-- `-dp, --developer-prompt <promptString>` - Developer prompt for LLM conversation (used for o1/o3 models)
+- `-sp, --system-prompt <promptString>` - System prompt for LLM conversation (automatically uses developer role for o1/o3 models)
 - `-rf, --response-format <format>` - Response format: "text" or "json_object" (default: "text")
 - `-re, --reasoning-effort <effort>` - Reasoning effort for o1/o3 models: "low", "medium", or "high" (default: "high")
 
@@ -94,7 +93,6 @@ All CLI options can be set using environment variables. Command-line options tak
 | `PROMPT_SHAPER_NO_LLM` | `--no-llm` | Disable all LLM calls ("true"/"false") |
 | `PROMPT_SHAPER_OUTPUT_ASSISTANT` | `-oa, --output-assistant` | Output only assistant responses ("true"/"false") |
 | `PROMPT_SHAPER_SYSTEM_PROMPT` | `-sp, --system-prompt` | System prompt text |
-| `PROMPT_SHAPER_DEVELOPER_PROMPT` | `-dp, --developer-prompt` | Developer prompt text |
 | `PROMPT_SHAPER_RAW` | `-r, --raw` | Raw mode ("true"/"false") |
 | `PROMPT_SHAPER_SAVE` | `-s, --save` | Output file path |
 | `PROMPT_SHAPER_SAVE_JSON` | `-sj, --save-json` | JSON output file path |

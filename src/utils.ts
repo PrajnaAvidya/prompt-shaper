@@ -1,6 +1,5 @@
 import { readdirSync, readFileSync, statSync } from 'fs'
 import { existsSync } from 'node:fs'
-import { ChatCompletionMessageParam } from 'openai/resources/chat/completions/completions'
 import { ParserVariables, ValueType } from './types'
 import { join, extname } from 'path'
 import { JSDOM } from 'jsdom'
@@ -123,28 +122,6 @@ export const transformJsonToVariables = (json: { [key: string]: string | number 
 		}
 		return variables
 	}, {} as ParserVariables)
-
-export const startConversation = (systemPrompt: string, developerPrompt: string, model: string): ChatCompletionMessageParam[] => {
-	const conversation: ChatCompletionMessageParam[] = []
-	if (model.startsWith('o1') || model.startsWith('o3')) {
-		conversation.push({
-			role: 'developer',
-			content: [
-				{
-					type: 'text',
-					text: developerPrompt,
-				},
-			],
-		})
-	} else {
-		conversation.push({
-			role: 'system',
-			content: systemPrompt,
-		})
-	}
-
-	return conversation
-}
 
 export const encodeLocalImageAsBase64 = async (path: string): Promise<{ data: string; format: string }> => {
 	if (!existsSync(path)) throw new Error(`Image not found at path: ${path}`)

@@ -4,20 +4,10 @@ This sample demonstrates the `loadUrl()` function for fetching content from web 
 
 **Note**: This requires the optional dependencies `@mozilla/readability` and `jsdom` to be installed.
 
-## Loading Web Pages
+## Loading Technical Documentation
 
-Loading the PromptShaper GitHub repository:
-{{loadUrl("https://github.com/PrajnaAvidya/prompt-shaper")}}
-
-## Loading Documentation
-
-Loading npm package information:
-{{loadUrl("https://www.npmjs.com/package/prompt-shaper")}}
-
-## Loading Documentation
-
-Loading README from GitHub:
-{{loadUrl("https://raw.githubusercontent.com/PrajnaAvidya/prompt-shaper/main/README.md")}}
+Loading the JSON specification (RFC 7159):
+{{loadUrl("https://tools.ietf.org/rfc/rfc7159.txt")}}
 
 ## Best Practices
 

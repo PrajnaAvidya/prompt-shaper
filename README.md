@@ -350,12 +350,17 @@ npx prompt-shaper samples/08-load-directories.ps.md --no-llm -e "js,json,md"
 
 ### Testing All Samples
 
-A comprehensive test script verifies that all samples work correctly:
+A comprehensive regression testing system verifies that all samples work correctly and detects any changes in behavior:
 
 ```bash
-# Run the automated sample test suite
+# Run the automated sample test suite with regression detection
 ./test-samples.sh
+
+# Regenerate reference outputs (after intentional changes)
+./generate-sample-outputs.sh
 ```
+
+The test system compares current sample outputs against reference outputs stored in `sample-outputs/` to catch regressions. It runs automatically in CI and will fail the build if any sample breaks or produces different output.
 
 ## Terminology
 

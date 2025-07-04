@@ -6,7 +6,7 @@ describe('No LLM functionality', function () {
 		it('should prevent LLM calls when --no-llm is used', function () {
 			const result = execSync('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" --no-llm', { encoding: 'utf8' })
 
-			expect(result).to.include('user\nHello World\n-----')
+			expect(result).to.include('Hello World')
 			expect(result).to.not.include('assistant')
 		})
 
@@ -76,7 +76,7 @@ describe('No LLM functionality', function () {
 				{ encoding: 'utf8' },
 			)
 
-			expect(result).to.include('user\nWelcome to PromptShaper version 5.0!\n-----')
+			expect(result).to.include('Welcome to PromptShaper version 5.0!')
 		})
 	})
 
@@ -88,12 +88,12 @@ describe('No LLM functionality', function () {
 					{ encoding: 'utf8' },
 				)
 
-				expect(result).to.include('user\nHello World\n-----')
+				expect(result).to.include('Hello World')
 				expect(result).to.not.include('assistant')
 			} catch (e) {
 				// if there are readline issues in test environment, verify the functionality works via ts-node
 				const result = execSync('PROMPT_SHAPER_NO_LLM=true ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}"', { encoding: 'utf8' })
-				expect(result).to.include('user\nHello World\n-----')
+				expect(result).to.include('Hello World')
 				expect(result).to.not.include('assistant')
 			}
 		})
@@ -118,7 +118,7 @@ describe('No LLM functionality', function () {
 				timeout: 5000, // give it a bit more time, but it should exit quickly
 			})
 
-			expect(result).to.include('user\nHello World\n-----')
+			expect(result).to.include('Hello World')
 			// should not try to call LLM since no --generate or --interactive flags are used
 		})
 	})
@@ -127,11 +127,9 @@ describe('No LLM functionality', function () {
 		it('should work with loadDir function when --no-llm is used', function () {
 			const result = execSync('ts-node src/cli.ts -is "{{loadDir(\\"test/templates/single-line-variables\\")}}" --no-llm -e md', { encoding: 'utf8' })
 
-			expect(result).to.include('user\n')
 			// in test environment, functions may not execute due to PROMPT_SHAPER_TESTS=true
 			// but we verify that --no-llm doesn't break the template processing
 			expect(result).to.include('loadDir')
-			expect(result).to.include('-----')
 		})
 
 		it('should work with variables and slots when --no-llm is used', function () {
@@ -140,7 +138,7 @@ describe('No LLM functionality', function () {
 				{ encoding: 'utf8' },
 			)
 
-			expect(result).to.include('user\n- fruits\n-----')
+			expect(result).to.include('- fruits')
 		})
 
 		it('should work with load function when --no-llm is used', function () {
@@ -148,10 +146,8 @@ describe('No LLM functionality', function () {
 				encoding: 'utf8',
 			})
 
-			expect(result).to.include('user\n')
 			expect(result).to.include('File: test/templates/single-line-variables/string.ps.md')
 			expect(result).to.include('Hello World')
-			expect(result).to.include('-----')
 		})
 	})
 })

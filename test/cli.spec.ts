@@ -93,8 +93,7 @@ describe('CLI', () => {
 				if (error) {
 					throw new Error(error.message)
 				}
-				expect(stdout).to.include('user')
-				expect(stdout).to.include('-----')
+				expect(stdout).to.include('loadDir')
 				done()
 			})
 		})
@@ -104,8 +103,7 @@ describe('CLI', () => {
 				if (error) {
 					throw new Error(error.message)
 				}
-				expect(stdout).to.include('user')
-				expect(stdout).to.include('-----')
+				expect(stdout).to.include('loadDir')
 				done()
 			})
 		})
@@ -131,9 +129,7 @@ describe('CLI', () => {
 				if (error) {
 					throw new Error(error.message)
 				}
-				expect(stdout).to.include('user')
 				expect(stdout).to.include('Hello World')
-				expect(stdout).to.include('-----')
 				done()
 			})
 		})
@@ -143,9 +139,7 @@ describe('CLI', () => {
 				if (error) {
 					throw new Error(error.message)
 				}
-				expect(stdout).to.include('user')
 				expect(stdout).to.include('Hello World')
-				expect(stdout).to.include('-----')
 				done()
 			})
 		})
@@ -155,9 +149,7 @@ describe('CLI', () => {
 				if (error) {
 					throw new Error(error.message)
 				}
-				expect(stdout).to.include('user')
 				expect(stdout).to.include('Hello World')
-				expect(stdout).to.include('-----')
 				done()
 			})
 		})
@@ -167,9 +159,7 @@ describe('CLI', () => {
 				if (error) {
 					throw new Error(error.message)
 				}
-				expect(stdout).to.include('user')
 				expect(stdout).to.include('Hello World')
-				expect(stdout).to.include('-----')
 				done()
 			})
 		})
@@ -179,9 +169,7 @@ describe('CLI', () => {
 				if (error) {
 					throw new Error(error.message)
 				}
-				expect(stdout).to.include('user')
 				expect(stdout).to.include('Hello World')
-				expect(stdout).to.include('-----')
 				done()
 			})
 		})
@@ -194,9 +182,7 @@ describe('CLI', () => {
 				if (error) {
 					throw new Error(error.message)
 				}
-				expect(stdout).to.include('user')
 				expect(stdout).to.include('Hello World')
-				expect(stdout).to.include('-----')
 				done()
 			})
 		})

@@ -1,11 +1,17 @@
 import { LLMProvider, GenericMessage } from './base'
 import { OpenAIProvider } from './openai'
 
+// singleton provider instance for efficiency
+let providerInstance: LLMProvider | null = null
+
 // simple factory for now - will be expanded later for other providers
 export function createProvider(): LLMProvider {
 	// for now, default to openai
 	// future: detect provider based on model name
-	return new OpenAIProvider()
+	if (!providerInstance) {
+		providerInstance = new OpenAIProvider()
+	}
+	return providerInstance
 }
 
 // wrapper function to maintain compatibility with existing gpt function

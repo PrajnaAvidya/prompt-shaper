@@ -14,7 +14,7 @@ export class OpenAIProvider implements LLMProvider {
 
 	constructor() {
 		this.client = new OpenAI({
-			apiKey: process.env.OPENAI_API_KEY || 'abc123',
+			apiKey: process.env[this.getApiKeyEnvVar()] || 'abc123',
 		})
 	}
 

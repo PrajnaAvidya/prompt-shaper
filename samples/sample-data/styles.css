@@ -1,0 +1,12 @@
+/* Sample CSS file */
+.prompt-shaper {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.template {
+    font-family: monospace;
+    white-space: pre-wrap;
+}

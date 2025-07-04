@@ -1,0 +1,11 @@
+{
+  "name": "PromptShaper",
+  "version": "5.0.0",
+  "description": "Templating language for LLM prompts",
+  "features": [
+    "variables",
+    "file loading",
+    "directory loading",
+    "image processing"
+  ]
+}

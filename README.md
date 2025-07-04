@@ -328,9 +328,34 @@ Both fenced code blocks (triple backticks) and inline code (`single backticks`) 
 8. Restore masked code blocks
 9. Remove excess whitespace
 
-## Examples
+## Examples and Samples
 
-See the `samples` directory for example templates you can try with the parser.
+The `samples` directory contains comprehensive examples demonstrating all PromptShaper features. These samples provide practical learning materials and reference implementations for every major capability.
+
+### Quick Start with Samples
+
+```bash
+# Run the overview sample for a complete feature demonstration
+npx prompt-shaper samples/00-overview.ps.md --no-llm
+
+# Try basic variable examples
+npx prompt-shaper samples/01-basic-variables.ps.md --no-llm
+
+# Explore file loading capabilities
+npx prompt-shaper samples/07-load-files.ps.md --no-llm
+
+# Test directory loading with file filtering
+npx prompt-shaper samples/08-load-directories.ps.md --no-llm -e "js,json,md"
+```
+
+### Testing All Samples
+
+A comprehensive test script verifies that all samples work correctly:
+
+```bash
+# Run the automated sample test suite
+./test-samples.sh
+```
 
 ## Terminology
 

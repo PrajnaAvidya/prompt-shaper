@@ -1,0 +1,2 @@
+Hello from an external file!
+This content is loaded using the load() function.

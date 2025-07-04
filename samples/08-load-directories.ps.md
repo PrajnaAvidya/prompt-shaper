@@ -16,13 +16,13 @@ Loading files but ignoring specific patterns:
 
 When using the CLI, you can specify file extensions:
 ```bash
-prompt-shaper samples/08-load-directories.ps.md -e "js,json,md"
+yarn parse -- samples/08-load-directories.ps.md -e "js,json,md"
 ```
 
 ## Loading with Multiple Ignore Patterns
 
 Loading samples/sample-data while ignoring temporary and backup files:
-{{loadDir("samples/sample-data", "*.tmp,*.bak,*.log,temp*,backup*,.*")}}
+{{loadDir("samples/sample-data", "*.tmp,*.bak,*.log,temp*,backup*")}}
 
 ## Best Practices
 

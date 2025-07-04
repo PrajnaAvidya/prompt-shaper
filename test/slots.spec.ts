@@ -12,12 +12,12 @@ describe('slots', () => {
 		expect(result).to.equal('This is a raw string: Hello')
 	})
 
-	it('should correctly render a slot with raw number', async () => {
-		const template = loadFileContent('./test/templates/slots/raw-number.ps.md')
+	it('should correctly render a slot with raw string number', async () => {
+		const template = loadFileContent('./test/templates/slots/raw-string-number.ps.md')
 
 		const result = await parseTemplate(template)
 
-		expect(result).to.equal('This is a raw number: 42')
+		expect(result).to.equal('This is a raw string: 42')
 	})
 
 	it('should correctly render a slot with string variable', async () => {
@@ -36,10 +36,10 @@ describe('slots', () => {
 		expect(result).to.equal('Hello, World!')
 	})
 
-	it('should correctly render a slot with number variable', async () => {
-		const template = loadFileContent('./test/templates/slots/number-variable.ps.md')
+	it('should correctly render a slot with string number variable', async () => {
+		const template = loadFileContent('./test/templates/slots/string-number-variable.ps.md')
 		const variables: ParserVariables = {
-			age: { name: 'age', type: ValueType.number, value: 25, params: [] },
+			age: { name: 'age', type: ValueType.string, value: '25', params: [] },
 		}
 		const parserContext: ParserContext = {
 			variables,
@@ -55,14 +55,11 @@ describe('slots', () => {
 	it('should correctly render a slot with function variable', async () => {
 		const template = loadFileContent('./test/templates/slots/function.ps.md')
 		const variables: ParserVariables = {
-			sum: {
-				name: 'sum',
+			fileContent: {
+				name: 'fileContent',
 				type: ValueType.function,
-				value: 'add',
-				params: [
-					{ type: ValueType.number, value: 1 },
-					{ type: ValueType.number, value: 2 },
-				],
+				value: 'load',
+				params: [{ type: ValueType.string, value: './test/templates/single-line-variables/string.ps.md' }],
 			},
 		}
 		const parserContext: ParserContext = {
@@ -73,7 +70,7 @@ describe('slots', () => {
 
 		const result = await parseTemplate(template, parserContext)
 
-		expect(result).to.equal('The sum of 1 and 2 is 3.')
+		expect(result).to.include('Hello World')
 	})
 
 	it('should not render slots that have no variable', async () => {

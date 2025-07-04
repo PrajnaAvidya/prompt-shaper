@@ -1,7 +1,8 @@
 import { ChatCompletionMessageParam, ChatCompletionReasoningEffort } from 'openai/resources/chat/completions/completions'
 
 export interface ParserOptions {
-	fileExtensions?: string // what file extensions to include when reading files from directories with loadDir
+	fileExtensions?: string | string[] // what file extensions to include when reading files from directories with loadDir
+	ignorePatterns?: string // comma-separated patterns to ignore when loading directories
 	returnParserMatches?: boolean // return array of parser matches instead of rendered template
 	showDebugMessages?: boolean // show verbose debug stuff
 }
@@ -10,7 +11,7 @@ export interface ParserVariables {
 	[key: string]: {
 		name: string
 		type: ValueType
-		value: string | number
+		value: string
 		params: ParserParam[]
 		raw?: boolean
 	}
@@ -30,13 +31,12 @@ export enum ParserType {
 
 export enum ValueType {
 	string = 'string',
-	number = 'number',
 	function = 'function',
 }
 
 export interface ParserParam {
 	type: ValueType
-	value: string | number
+	value: string
 	params?: ParserParam[]
 	variableName?: string
 	required?: boolean
@@ -55,31 +55,16 @@ export interface ParserSection {
 	}
 }
 
-type Operator = '+' | '-' | '*' | '/' | '^'
-
-export interface Operand {
-	type: ExpressionType
-	value: number | string | Operation
-	params?: ParserParam[]
-}
-
 export enum ExpressionType {
 	string = 'string',
-	number = 'number',
 	variable = 'variable',
 	function = 'function',
-	operation = 'operation',
 }
 
 export interface Expression {
 	type: ExpressionType
-	value: number | string | Operation
+	value: string
 	params?: ParserParam[]
-}
-
-export interface Operation {
-	operator: Operator
-	operands: Operand[]
 }
 
 export interface TextLocation {

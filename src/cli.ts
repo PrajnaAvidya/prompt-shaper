@@ -13,6 +13,7 @@ import * as readline from 'readline'
 interface CLIOptions {
 	debug?: boolean
 	extensions?: string
+	ignorePatterns?: string
 	generate?: boolean
 	hidePrompt: boolean
 	interactive?: boolean
@@ -21,6 +22,7 @@ interface CLIOptions {
 	jsonFile?: string
 	loadJson?: string
 	loadText?: string
+	llm?: boolean
 	model: string
 	outputAssistant: boolean
 	systemPrompt: string
@@ -81,6 +83,7 @@ const envVars =
 		? {
 				debug: process.env.PROMPT_SHAPER_DEBUG === 'true',
 				extensions: process.env.PROMPT_SHAPER_FILE_EXTENSIONS || defaultFileExtensions.join(','),
+				ignorePatterns: process.env.PROMPT_SHAPER_IGNORE_PATTERNS,
 				generate: process.env.PROMPT_SHAPER_GENERATE === 'true',
 				hidePrompt: process.env.PROMPT_SHAPER_HIDE_PROMPT === 'true',
 				isString: process.env.PROMPT_SHAPER_IS_STRING === 'true',
@@ -90,6 +93,7 @@ const envVars =
 				loadJson: process.env.PROMPT_SHAPER_LOAD_JSON,
 				loadText: process.env.PROMPT_SHAPER_LOAD_TEXT,
 				model: process.env.PROMPT_SHAPER_MODEL,
+				llm: process.env.PROMPT_SHAPER_NO_LLM !== 'true',
 				outputAssistant: process.env.PROMPT_SHAPER_OUTPUT_ASSISTANT === 'true',
 				systemPrompt: process.env.PROMPT_SHAPER_SYSTEM_PROMPT,
 				developerPrompt: process.env.PROMPT_SHAPER_DEVELOPER_PROMPT,
@@ -111,8 +115,23 @@ function exitApp(code: number = 0): never {
 }
 
 async function handler(input: string, options: CLIOptions) {
+	// convert llm flag to nollm for easier logic
+	const noLlm = options.llm === false
+
+	// check for conflicting options with no-llm
+	if (noLlm && (options.generate || options.loadJson || options.loadText)) {
+		console.error('Error: --no-llm cannot be used with interactive mode, generate, or conversation loading options')
+		exitApp(1)
+	}
+
+	// check for --interactive flag specifically
+	if (noLlm && options.interactive && !input) {
+		console.error('Error: --no-llm cannot be used with interactive mode, generate, or conversation loading options')
+		exitApp(1)
+	}
+
 	if (options.loadJson) {
-		// load json and continue in interactive
+		// load json and continue interactive
 		const conversation: ChatCompletionMessageParam[] = JSON.parse(fs.readFileSync(options.loadJson, 'utf8'))
 		await startSavedConversation(conversation, options)
 
@@ -120,7 +139,7 @@ async function handler(input: string, options: CLIOptions) {
 	}
 
 	if (options.loadText) {
-		// load text and continue in interactive
+		// load text and continue interactive
 		const conversation = fs
 			.readFileSync(options.loadText, 'utf8')
 			.split('\n\n-----\n\n')
@@ -134,7 +153,7 @@ async function handler(input: string, options: CLIOptions) {
 	}
 
 	if (options.interactive && !input) {
-		// start new conversation in interactive
+		// start new conversation
 		const conversation: ChatCompletionMessageParam[] = startConversation(options.systemPrompt, options.developerPrompt, options.model)
 		await startSavedConversation(conversation, options)
 
@@ -181,17 +200,23 @@ async function handler(input: string, options: CLIOptions) {
 
 	// run the parser
 	try {
-		const parserOptions = { returnParserMatches: false, showDebugMessages: options.debug as boolean, fileExtensions: options.extensions }
+		const parserOptions = {
+			returnParserMatches: false,
+			showDebugMessages: options.debug as boolean,
+			fileExtensions: options.extensions,
+			ignorePatterns: options.ignorePatterns,
+		}
 
 		// parse template if not in raw mode
 		const parserContext = { variables, options: parserOptions, attachments: [] }
 		const parsed = options.raw ? template : await parseTemplate(template, parserContext)
-		if (!options.hidePrompt) {
-			console.log(`user\n${parsed}\n-----`)
-		}
 
-		// check if user wants to send results to LLM (but not in raw mode)
-		if (!options.raw && (options.generate || options.interactive)) {
+		// check if user wants to send results to LLM (but not in raw mode or no-llm mode)
+		if (!options.raw && !noLlm && (options.generate || options.interactive)) {
+			// show conversational formatting when using llm features
+			if (!options.hidePrompt) {
+				console.log(`user\n${parsed}\n-----`)
+			}
 			const conversation: ChatCompletionMessageParam[] = [
 				...startConversation(options.systemPrompt, options.developerPrompt, options.model),
 				{
@@ -208,7 +233,10 @@ async function handler(input: string, options: CLIOptions) {
 				await interactiveModeLoop(conversation, options, variables)
 			}
 		} else {
-			// just return the generated text
+			// template-only mode: output parsed template directly
+			if (!options.hidePrompt) {
+				console.log(parsed)
+			}
 			if (options.save) {
 				fs.writeFileSync(options.save, parsed)
 			}
@@ -241,7 +269,7 @@ async function interactiveModeLoop(conversation: ChatCompletionMessageParam[], o
 		userTurn = true
 	}
 
-	// runs forever until user hits control+c
+	// runs until user exits
 	const running = true
 	while (running) {
 		if (!userTurn) {
@@ -312,6 +340,11 @@ program
 		'What file extensions to include when loading a directory, list separated by commas (see cli.ts for default file extensions)',
 		envVars.extensions,
 	)
+	.option(
+		'--ignore-patterns <patterns>',
+		'Comma-separated patterns to ignore when loading directories (supports glob patterns like *.log, temp*)',
+		envVars.ignorePatterns,
+	)
 	.option('-g, --generate', 'Send parsed template result to ChatGPT and return response', envVars.generate)
 	.option('-h, --hide-prompt', 'Hide the initial prompt in the console', envVars.hidePrompt)
 	.option('-is, --is-string', 'Indicate that the input is a string, not a file path', envVars.isString)
@@ -321,6 +354,7 @@ program
 	.option('-lj, --load-json <filePath>', 'Load conversation from JSON file and continue in interactive mode', envVars.loadJson)
 	.option('-lt, --load-text <filePath>', 'Load conversation from text/markdown file and continue in interactive mode', envVars.loadText)
 	.option('-m, --model <modelType>', 'OpenAI model to use', envVars.model || 'gpt-4o')
+	.option('--no-llm', 'Disable all LLM calls and interactive mode (template processing only)', envVars.llm)
 	.option('-oa --output-assistant', 'Save gpt output only to text/JSON (filters out prompt & user responses)', envVars.outputAssistant)
 	.option('-sp, --system-prompt <promptString>', 'System prompt for LLM conversation', envVars.systemPrompt || 'You are a helpful assistant.')
 	.option('-dp, --developer-prompt <promptString>', 'Developer prompt for LLM conversation', envVars.developerPrompt || 'Formatting re-enabled')

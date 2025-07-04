@@ -2,24 +2,9 @@ import { ParserContext, ParserParam } from './types'
 import { encodeLocalImageAsBase64, loadDirectoryContents, loadFileContent, loadUrlReadableContents } from './utils'
 import { extname } from 'path'
 
-type PromptShaperFunction = (context: ParserContext, ...args: ParserParam[]) => Promise<string | number> | string | number
+type PromptShaperFunction = (context: ParserContext, ...args: ParserParam[]) => Promise<string> | string
 
 export const functions: Record<string, PromptShaperFunction> = {
-	add: (_context: ParserContext, a: ParserParam, b: ParserParam): number => {
-		return (a.value as number) + (b.value as number)
-	},
-	subtract: (_context: ParserContext, a: ParserParam, b: ParserParam): number => {
-		return (a.value as number) - (b.value as number)
-	},
-	multiply: (_context: ParserContext, a: ParserParam, b: ParserParam): number => {
-		return (a.value as number) * (b.value as number)
-	},
-	divide: (_context: ParserContext, a: ParserParam, b: ParserParam): number => {
-		if ((b.value as number) == 0) {
-			throw new Error('Division by zero')
-		}
-		return (a.value as number) / (b.value as number)
-	},
 	load: (_context: ParserContext, filePath: ParserParam): string => {
 		if (!filePath.value || typeof filePath.value !== 'string') {
 			throw new Error('Invalid file path')
@@ -30,7 +15,7 @@ export const functions: Record<string, PromptShaperFunction> = {
 
 		return `\n\nFile: ${filePath.value}\n\`\`\`${extension}\n${loadFileContent(filePath.value) as string}\n\`\`\`\n\n`
 	},
-	loadDir: (context: ParserContext, dirPathParam: ParserParam): string => {
+	loadDir: (context: ParserContext, dirPathParam: ParserParam, ignorePatternsParam?: ParserParam): string => {
 		// validate params
 		if (!dirPathParam || !dirPathParam.value || typeof dirPathParam.value !== 'string') {
 			throw new Error('Invalid directory path')
@@ -38,17 +23,43 @@ export const functions: Record<string, PromptShaperFunction> = {
 		const dirPath = dirPathParam.value as string
 
 		// get the extensions list from cli params
-		const extensions = (context.options.fileExtensions || '')
-			.split(',')
-			.map(ext => ext.trim())
-			.map(ext => (ext.startsWith('.') ? ext : `.${ext}`))
+		const extensionsRaw = context.options.fileExtensions
+		let extensionsString: string
 
-		const contents = loadDirectoryContents(dirPath, extensions)
+		if (Array.isArray(extensionsRaw)) {
+			extensionsString = extensionsRaw.join(',')
+		} else if (typeof extensionsRaw === 'string') {
+			extensionsString = extensionsRaw
+		} else {
+			extensionsString = ''
+		}
+
+		const extensions = extensionsString
+			.split(',')
+			.map((ext: string) => ext.trim())
+			.filter((ext: string) => ext.length > 0)
+			.map((ext: string) => (ext.startsWith('.') ? ext : `.${ext}`))
+
+		// get ignore patterns from parameter or context options
+		let ignorePatterns: string[] = []
+		if (ignorePatternsParam && ignorePatternsParam.value && typeof ignorePatternsParam.value === 'string') {
+			ignorePatterns = ignorePatternsParam.value
+				.split(',')
+				.map(pattern => pattern.trim())
+				.filter(p => p.length > 0)
+		} else if (context.options.ignorePatterns && typeof context.options.ignorePatterns === 'string') {
+			ignorePatterns = context.options.ignorePatterns
+				.split(',')
+				.map(pattern => pattern.trim())
+				.filter(p => p.length > 0)
+		}
+
+		const contents = loadDirectoryContents(dirPath, extensions, true, ignorePatterns)
 
 		// format
 		let result = ''
 		for (const [filePath, content] of Object.entries(contents)) {
-			const fileExt = extname(filePath).slice(1) // Remove leading dot for formatting
+			const fileExt = extname(filePath).slice(1) // remove leading dot for formatting
 			result += `\n\nFile: ${filePath}\n\`\`\`${fileExt}\n${content}\n\`\`\`\n\n`
 		}
 
@@ -85,7 +96,7 @@ export const functions: Record<string, PromptShaperFunction> = {
 	},
 }
 
-// allow people to register their own functions
+// allow custom function registration
 export const registerFunction = (name: string, func: PromptShaperFunction): void => {
 	if (functions[name]) {
 		throw new Error(`Function ${name} is already registered.`)

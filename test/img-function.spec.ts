@@ -68,15 +68,17 @@ describe('img function', () => {
 		])
 	})
 
-	it('should throw an error for invalid parameter types', async () => {
-		const template = 'Invalid usage: {{img(123)}}'
+	it('should throw an error for invalid file paths', async () => {
+		const template = 'Invalid usage: {{img("nonexistent.png")}}'
 		const context: ParserContext = { variables: {}, options: {}, attachments: [] }
+
+		encodeLocalImageStub.rejects(new Error('Image not found at path: nonexistent.png'))
 
 		try {
 			await parseTemplate(template, context)
 			throw new Error('Test should have thrown but did not')
 		} catch (err: Error | unknown) {
-			expect((err as Error).message).to.equal('img() expects a string parameter.')
+			expect((err as Error).message).to.include('Image not found at path')
 		}
 	})
 

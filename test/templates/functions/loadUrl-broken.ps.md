@@ -1,1 +1,1 @@
-{{loadUrl(123)}}
+{{loadUrl("")}}

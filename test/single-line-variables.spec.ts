@@ -10,12 +10,4 @@ describe('single-line-variables', () => {
 
 		expect(result).to.equal('Hello World')
 	})
-
-	it('should correctly parse single-line number variables', async () => {
-		const template = loadFileContent('./test/templates/single-line-variables/number.ps.md')
-
-		const result = await parseTemplate(template)
-
-		expect(result).to.equal('42')
-	})
 })

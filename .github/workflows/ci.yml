@@ -26,3 +26,6 @@ jobs:
       - run: yarn lint
 
       - run: yarn test
+
+      - name: Test samples for regressions
+        run: ./test-samples.sh

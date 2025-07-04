@@ -1,18 +1,18 @@
 import peggy from 'peggy'
 
 import { loadFileContent, replaceStringAtLocation } from './utils'
-import { ExpressionType, Operand, Operation, ParserContext, ParserParam, ParserSection, ParserType, ParserVariables, ValueType } from './types'
+import { ExpressionType, ParserContext, ParserParam, ParserSection, ParserType, ParserVariables, ValueType } from './types'
 import { functions } from './functions'
 
 const isPackaged = process.argv[1].endsWith('.js') || process.argv[1].endsWith('prompt-shaper')
 const templateParser: peggy.Parser = isPackaged ? require('./template-parser.js') : peggy.generate(loadFileContent('src/template-parser.pegjs'))
 const maxRecursionDepth = 5
 
-// mask markdown blocks to prevent parsing of their content
+// mask markdown blocks to prevent parsing
 function maskCodeBlocks(template: string): { maskedTemplate: string; codeBlocks: string[] } {
 	const codeBlocks: string[] = []
 
-	// match fenced (```...```) and inline (`...`)
+	// match fenced and inline code blocks
 	const codeBlockRegex = /(`{3,}[\s\S]*?`{3,}|`[^`\n]*?`)/g
 
 	const maskedTemplate = template.replace(codeBlockRegex, match => {
@@ -24,27 +24,27 @@ function maskCodeBlocks(template: string): { maskedTemplate: string; codeBlocks:
 	return { maskedTemplate, codeBlocks }
 }
 
-// restore markdown blocks after parsing
+// restore markdown blocks
 function restoreCodeBlocks(template: string, codeBlocks: string[]): string {
 	return template.replace(/__CODE_BLOCK_(\d+)__/g, (match, index) => {
 		return codeBlocks[parseInt(index)] || match
 	})
 }
 
-// preprocess multiline variables that contain problematic syntax
+// preprocess problematic multiline variables
 function preprocessProblematicMultilineVars(template: string): { processedTemplate: string; problematicVars: Record<string, string> } {
 	const problematicVars: Record<string, string> = {}
 	const multilineVarRegex = /\{(\w+)\}([\s\S]*?)\{\/\1\}/g
 
 	const processedTemplate = template.replace(multilineVarRegex, (match, varName, content) => {
-		// check if content contains syntax that would cause parsing errors
+		// check for problematic syntax
 		try {
-			// try to parse a simple template with the content to see if it's problematic
+			// test parse to check if problematic
 			templateParser.parse(content.trim())
-			// if parsing succeeds, return original
+			// return original if parsing succeeds
 			return match
 		} catch (error) {
-			// if parsing fails, store the original content and replace with safe placeholder
+			// store original and replace with placeholder if parsing fails
 			problematicVars[varName] = content
 			return `{${varName}}__PROBLEMATIC_CONTENT__{/${varName}}`
 		}
@@ -68,11 +68,11 @@ export const parseTemplate = async (template: string, parserContext?: ParserCont
 
 	showDebug && console.log(`DEBUG: Parsing template:\n${template}`)
 
-	// preserve markdown blocks before parsing
+	// preserve markdown blocks
 	const { maskedTemplate, codeBlocks } = maskCodeBlocks(template)
 	showDebug && console.log(`DEBUG: Masked template:\n${maskedTemplate}`)
 
-	// preprocess problematic multiline variables
+	// preprocess problematic variables
 	const { processedTemplate: preprocessedTemplate, problematicVars } = preprocessProblematicMultilineVars(maskedTemplate)
 	showDebug && console.log(`DEBUG: Preprocessed template:\n${preprocessedTemplate}`)
 	showDebug && console.log(`DEBUG: Problematic vars:`, problematicVars)
@@ -97,7 +97,7 @@ export const parseTemplate = async (template: string, parserContext?: ParserCont
 				} else if (value.variableName! in parserContext.variables) {
 					throw new Error(`Variable name conflict: ${value.variableName}`)
 				}
-				// restore problematic content if this variable was preprocessed
+				// restore problematic content if preprocessed
 				const finalValue = value.variableName! in problematicVars ? problematicVars[value.variableName!] : value.content!.value
 
 				parserContext.variables[value.variableName!] = {
@@ -105,7 +105,7 @@ export const parseTemplate = async (template: string, parserContext?: ParserCont
 					type: value.content!.type,
 					value: finalValue,
 					params: (value.content!.type === 'function' ? value.content!.params : value.params) || [],
-					// mark as raw if it was problematic
+					// mark as raw if problematic
 					raw: value.variableName! in problematicVars,
 				}
 				break
@@ -119,11 +119,11 @@ export const parseTemplate = async (template: string, parserContext?: ParserCont
 	}
 	showDebug && console.log('DEBUG: Found single-line-variables:', parserContext.variables)
 
-	// parser returns the template with variable definitions removed
+	// parser returns template without variable definitions
 	const withoutVariables = parsedVariables.text
 	showDebug && console.log(`DEBUG: Final template to render:\n${withoutVariables}`)
 
-	// render slots from the bottom up
+	// render slots bottom-up
 	showDebug && console.log('DEBUG: Rendering slots')
 	const slots = parsedVariables.parsed.filter((p: ParserSection) => p.type === ParserType.slot).reverse()
 	let currentTemplate = withoutVariables
@@ -146,83 +146,32 @@ export const parseTemplate = async (template: string, parserContext?: ParserCont
 	)
 }
 
-// traverse an operation recursively as a syntax tree
-async function evaluateOperation(operation: Operation | Operand, parserContext: ParserContext): Promise<number> {
-	if ('type' in operation) {
-		switch (operation.type) {
-			case 'number':
-				return operation.value as number
-			case 'variable':
-				return (await evaluateVariable(operation.value as string, [], parserContext)) as number
-			case 'function':
-				return (await evaluateFunction(operation.value as string, operation.params || [], parserContext)) as number
-			case 'operation':
-				// this is when the operand is an operation inside parenthesis
-				return (await evaluateOperation(operation.value as Operation, parserContext)) as number
-		}
-	}
-
-	if ('operator' in operation) {
-		let result = await evaluateOperation(operation.operands[0], parserContext)
-
-		switch (operation.operator) {
-			case '+':
-				result += await evaluateOperation(operation.operands[1], parserContext)
-				break
-			case '-':
-				result -= await evaluateOperation(operation.operands[1], parserContext)
-				break
-			case '*':
-				result *= await evaluateOperation(operation.operands[1], parserContext)
-				break
-			case '/': {
-				const operand2 = await evaluateOperation(operation.operands[1], parserContext)
-				if (operand2 === 0) {
-					throw new Error('Division by zero')
-				}
-				result /= operand2
-				break
-			}
-			case '^':
-				result = Math.pow(result, await evaluateOperation(operation.operands[1], parserContext))
-				break
-		}
-
-		return result
-	}
-
-	// we should never reach this
-	throw new Error('Invalid operation')
-}
-
-// evaluate the contents of a variable (which may contain a static value or a function evaluation)
+// evaluate variable contents
 async function evaluateVariable(
 	variableName: string,
 	params: ParserParam[],
 	parserContext: ParserContext,
 	raw: boolean = false,
 	recursionDepth = 0,
-): Promise<string | number | undefined> {
+): Promise<string | undefined> {
 	const variable = parserContext.variables[variableName]
 	if (!variable) {
 		return undefined
 	}
 
 	if (variable.type === ValueType.function) {
-		return await evaluateFunction(variable.value as string, variable.params!, parserContext)
-	} else if (variable.type === ValueType.number) {
-		return variable.value
+		return await evaluateFunction(variable.value, variable.params!, parserContext)
 	} else if (variable.type === ValueType.string) {
-		// always treat multiline variables as raw
+		// treat multiline variables as raw
 		if (raw || variable.raw) {
 			return variable.value
 		}
 
-		// Try to parse template content, but fall back to raw if it fails with syntax errors
+		// parse template content, fallback to raw on syntax errors
 		try {
-			// map slot/variable params
+			// map slot params
 			const slotVariables: ParserVariables = variable.params.reduce((obj: ParserVariables, item, index) => {
-				// find matching slot param/value
+				// find matching slot param
 				const slotParam = params && index in params ? params[index] : null
 				if (!slotParam && item.required) {
 					throw new Error(`Required param for ${variableName} not found: ${item.variableName}`)
@@ -230,7 +179,7 @@ async function evaluateVariable(
 
 				obj[item.variableName!] = {
 					name: item.variableName!,
-					type: slotParam?.value === 'number' ? ValueType.number : ValueType.string,
+					type: ValueType.string,
 					value: slotParam ? slotParam.value : item.value,
 					params: [], // this will be used in the future when a function can be passed as a param
 				}
@@ -242,17 +191,17 @@ async function evaluateVariable(
 
 			return (await parseTemplate(variable.value as string, parserContext, recursionDepth)) as string
 		} catch (error) {
-			// If parsing fails due to syntax errors, return raw content
+			// return raw content on syntax errors
 			if (error instanceof SyntaxError) {
 				return variable.value
 			}
-			// Re-throw other errors
+			// re-throw other errors
 			throw error
 		}
 	}
 }
 
-async function evaluateFunction(functionName: string, params: ParserParam[], parserContext: ParserContext): Promise<string | number> {
+async function evaluateFunction(functionName: string, params: ParserParam[], parserContext: ParserContext): Promise<string> {
 	const func = functions[functionName]
 	if (!func) {
 		throw new Error(`Unknown function: ${functionName}`)
@@ -260,29 +209,26 @@ async function evaluateFunction(functionName: string, params: ParserParam[], par
 	return func(parserContext, ...params)
 }
 
-// render the contents of a slot to a string
+// render slot contents to string
 async function renderSlot(slot: ParserSection, parserContext: ParserContext, recursionDepth: number): Promise<string | undefined> {
 	switch (slot.expression!.type) {
-		case ExpressionType.number:
 		case ExpressionType.string:
-			return slot.expression!.value as string
+			return slot.expression!.value
 		case ExpressionType.variable:
 		case ExpressionType.function:
 			if ((slot.expression!.value as string) in functions) {
-				return (await evaluateFunction(slot.expression!.value as string, slot.expression!.params!, parserContext)) as string
+				return await evaluateFunction(slot.expression!.value as string, slot.expression!.params!, parserContext)
 			} else if ((slot.expression!.value as string) in parserContext.variables) {
-				return (await evaluateVariable(
+				return await evaluateVariable(
 					slot.expression!.value as string,
 					slot.expression!.params || [],
 					parserContext,
 					slot.raw || false,
 					recursionDepth,
-				)) as string
+				)
 			} else {
 				return undefined
 			}
-		case ExpressionType.operation:
-			return (await evaluateOperation(slot.expression!.value as Operation, parserContext)).toString()
 		default:
 			return undefined
 	}

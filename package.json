@@ -14,7 +14,8 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "parse": "ts-node src/cli.ts",
-    "test": "PROMPT_SHAPER_TESTS=true mocha -r ts-node/register 'test/**/*.spec.ts' --timeout 3000"
+    "test": "PROMPT_SHAPER_TESTS=true mocha -r ts-node/register 'test/**/*.spec.ts' --timeout 3000",
+    "test:file": "PROMPT_SHAPER_TESTS=true mocha -r ts-node/register --timeout 3000"
   },
   "config": {
     "commitizen": {

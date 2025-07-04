@@ -109,8 +109,8 @@ describe('transformJsonToVariables', () => {
 			},
 			var2: {
 				name: 'var2',
-				type: ValueType.number,
-				value: 42,
+				type: ValueType.string,
+				value: '42',
 				params: [],
 			},
 		}

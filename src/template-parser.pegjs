@@ -58,7 +58,7 @@ variable
       return { type: 'variable', variableName, params:[], content:{ type:'string', value } }
     }
   / "{" _ variableName:variableName _ "=" _ value:value _ "}"
-    // single line, content can be string or number or function (which may have params)
+    // single line, content can be string or function (which may have params)
     {
       return { type: 'variable', variableName, content:value }
     }
@@ -72,32 +72,9 @@ slot
     }
 
 expression
-  = head:additive tail:(_ operator:addSubOperator _ additive:additive)*
-    { return tail.reduce((result, element) => { return { type: 'operation', value: { operator: element[1], operands: [result, element[3]] } } }, head) }
-
-additive
-  = head:multiplicative tail:(_ operator:mulDivOperator _ multiplicative:multiplicative)*
-    { return tail.reduce((result, element) => { return { type: 'operation', value: { operator: element[1], operands: [result, element[3]] } } }, head) }
-
-multiplicative
-  = head:primary tail:(_ operator:powOperator _ primary:primary)*
-    { return tail.reduce((result, element) => { return { type: 'operation', value: { operator: element[1], operands: [result, element[3]] } } }, head) }
-
-primary
-  = "(" _ expression:expression _ ")" { return expression }
-  / functionCall
+  = functionCall
   / variableObject
-  / number
   / string
-
-addSubOperator
-  = "+" / "-"
-
-mulDivOperator
-  = "*" / "/"
-
-powOperator
-  = "^"
 
 params
   = head:param tail:(_ "," _ param)*
@@ -115,7 +92,6 @@ defaultParam
 
 value
   = string
-  / number
   / functionCall
 
 string
@@ -128,15 +104,12 @@ escapedChars
 escapedCharReturnSlash
   = "\\" char:$["{}\""] { return "\\" + char }
 
-number
-  = value:$([0-9]+ ("." [0-9]+)?) { return { type: 'number', value: parseFloat(value) } }
 
 functionCall
-  = functionName:variableName "(" _ params:params _ ")" { return { type: 'function', value: functionName, params } }
+  = functionName:variableName "(" _ params:params? _ ")" { return { type: 'function', value: functionName, params: params || [] } }
 
 param
   = string
-  / number
 
 // variable names must start with a letter and contain letters, numbers, underscores
 variableName

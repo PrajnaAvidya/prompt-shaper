@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 import * as fs from 'fs'
-import { ChatCompletionMessageParam, ChatCompletionReasoningEffort } from 'openai/resources/chat/completions/completions'
+import { GenericMessage } from './providers/base'
 import * as path from 'path'
 import { program } from 'commander'
 import { loadFileContent, startConversation, transformJsonToVariables } from './utils'
 import { parseTemplate } from './parser'
-import { ParserVariables, ResponseFormat } from './types'
-import { gpt } from './models/openai'
+import { ParserVariables, ResponseFormat, ReasoningEffort } from './types'
+import { generateWithProvider } from './providers/factory'
 import * as readline from 'readline'
 
 interface CLIOptions {
@@ -31,7 +31,7 @@ interface CLIOptions {
 	save?: string
 	saveJson?: string
 	responseFormat: ResponseFormat
-	reasoningEffort: ChatCompletionReasoningEffort
+	reasoningEffort: ReasoningEffort
 }
 
 const defaultFileExtensions = [
@@ -132,7 +132,7 @@ async function handler(input: string, options: CLIOptions) {
 
 	if (options.loadJson) {
 		// load json and continue interactive
-		const conversation: ChatCompletionMessageParam[] = JSON.parse(fs.readFileSync(options.loadJson, 'utf8'))
+		const conversation: GenericMessage[] = JSON.parse(fs.readFileSync(options.loadJson, 'utf8'))
 		await startSavedConversation(conversation, options)
 
 		exitApp(0)
@@ -145,7 +145,7 @@ async function handler(input: string, options: CLIOptions) {
 			.split('\n\n-----\n\n')
 			.map(message => {
 				const [role, ...content] = message.split('\n\n')
-				return { role, content: content.join('\n\n') } as ChatCompletionMessageParam
+				return { role, content: content.join('\n\n') } as GenericMessage
 			})
 		await startSavedConversation(conversation, options)
 
@@ -154,7 +154,7 @@ async function handler(input: string, options: CLIOptions) {
 
 	if (options.interactive && !input) {
 		// start new conversation
-		const conversation: ChatCompletionMessageParam[] = startConversation(options.systemPrompt, options.developerPrompt, options.model)
+		const conversation: GenericMessage[] = startConversation(options.systemPrompt, options.developerPrompt, options.model)
 		await startSavedConversation(conversation, options)
 
 		exitApp(0)
@@ -217,7 +217,7 @@ async function handler(input: string, options: CLIOptions) {
 			if (!options.hidePrompt) {
 				console.log(`user\n${parsed}\n-----`)
 			}
-			const conversation: ChatCompletionMessageParam[] = [
+			const conversation: GenericMessage[] = [
 				...startConversation(options.systemPrompt, options.developerPrompt, options.model),
 				{
 					role: 'user',
@@ -254,7 +254,7 @@ async function handler(input: string, options: CLIOptions) {
 	exitApp(0)
 }
 
-async function startSavedConversation(conversation: ChatCompletionMessageParam[], options: CLIOptions) {
+async function startSavedConversation(conversation: GenericMessage[], options: CLIOptions) {
 	// show convo history to user
 	for (const message of conversation) {
 		console.log(`${message.role}\n${JSON.stringify(message.content)}\n-----`)
@@ -263,7 +263,7 @@ async function startSavedConversation(conversation: ChatCompletionMessageParam[]
 	await interactiveModeLoop(conversation, options)
 }
 
-async function interactiveModeLoop(conversation: ChatCompletionMessageParam[], options: CLIOptions, variables?: ParserVariables) {
+async function interactiveModeLoop(conversation: GenericMessage[], options: CLIOptions, variables?: ParserVariables) {
 	let userTurn = false
 	if (conversation.length === 0 || conversation[conversation.length - 1].role !== 'user') {
 		userTurn = true
@@ -303,9 +303,9 @@ async function interactiveModeLoop(conversation: ChatCompletionMessageParam[], o
 	}
 }
 
-async function makeCompletionRequest(conversation: ChatCompletionMessageParam[], options: CLIOptions) {
+async function makeCompletionRequest(conversation: GenericMessage[], options: CLIOptions) {
 	console.log('assistant')
-	const result = await gpt(conversation, options.model, options.responseFormat, options.reasoningEffort)
+	const result = await generateWithProvider(conversation, options.model, options.responseFormat, options.reasoningEffort)
 	console.log('\n-----')
 
 	// update/save chat history
@@ -318,13 +318,13 @@ async function makeCompletionRequest(conversation: ChatCompletionMessageParam[],
 	}
 }
 
-function saveConversationAsJson(conversation: ChatCompletionMessageParam[], options: CLIOptions) {
+function saveConversationAsJson(conversation: GenericMessage[], options: CLIOptions) {
 	const filteredConvo = options.outputAssistant ? conversation.filter(m => m.role === 'assistant') : conversation
 
 	fs.writeFileSync(options.saveJson!, JSON.stringify(filteredConvo))
 }
 
-function saveConversationAsText(conversation: ChatCompletionMessageParam[], options: CLIOptions) {
+function saveConversationAsText(conversation: GenericMessage[], options: CLIOptions) {
 	const filteredConvo = options.outputAssistant ? conversation.filter(m => m.role === 'assistant') : conversation
 	const conversationText = filteredConvo.map(m => (options.outputAssistant ? m.content : `${m.role}\n\n${m.content}`)).join('\n\n-----\n\n')
 

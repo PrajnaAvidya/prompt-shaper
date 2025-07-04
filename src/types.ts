@@ -1,4 +1,4 @@
-import { ChatCompletionMessageParam, ChatCompletionReasoningEffort } from 'openai/resources/chat/completions/completions'
+import { GenericMessage, GenericContent } from './providers/base'
 
 export interface ParserOptions {
 	fileExtensions?: string | string[] // what file extensions to include when reading files from directories with loadDir
@@ -20,7 +20,7 @@ export interface ParserVariables {
 export interface ParserContext {
 	variables: ParserVariables
 	options: ParserOptions
-	attachments: Array<{ type: 'image_url'; image_url: { url: string } }>
+	attachments: GenericContent[]
 }
 
 export enum ParserType {
@@ -74,12 +74,8 @@ export interface TextLocation {
 }
 
 export type ResponseFormat = 'text' | 'json_object'
+export type ReasoningEffort = 'low' | 'medium' | 'high'
 
 export interface Generate {
-	(
-		messages: ChatCompletionMessageParam[],
-		model: string,
-		responseFormat: ResponseFormat,
-		reasoningEffort: ChatCompletionReasoningEffort,
-	): Promise<string>
+	(messages: GenericMessage[], model: string, responseFormat: ResponseFormat, reasoningEffort: ReasoningEffort): Promise<string>
 }

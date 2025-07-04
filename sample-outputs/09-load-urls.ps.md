@@ -4,1001 +4,725 @@ This sample demonstrates the `loadUrl()` function for fetching content from web 
 
 **Note**: This requires the optional dependencies `@mozilla/readability` and `jsdom` to be installed.
 
-## Loading Web Pages
+## Loading Technical Documentation
+
+Loading the JSON specification (RFC 7159):
+
+URL: tools.ietf.org/rfc/rfc7159.txt
+```Internet Engineering Task Force (IETF)                      T. Bray, Ed.
+Request for Comments: 7159                                  Google, Inc.
+Obsoletes: 4627, 7158                                         March 2014
+Category: Standards Track
+ISSN: 2070-1721
+
+     The JavaScript Object Notation (JSON) Data Interchange Format
+
+Abstract
+
+   JavaScript Object Notation (JSON) is a lightweight, text-based,
+   language-independent data interchange format.  It was derived from
+   the ECMAScript Programming Language Standard.  JSON defines a small
+   set of formatting rules for the portable representation of structured
+   data.
+
+   This document removes inconsistencies with other specifications of
+   JSON, repairs specification errors, and offers experience-based
+   interoperability guidance.
+
+Status of This Memo
+
+   This is an Internet Standards Track document.
+
+   This document is a product of the Internet Engineering Task Force
+   (IETF).  It represents the consensus of the IETF community.  It has
+   received public review and has been approved for publication by the
+   Internet Engineering Steering Group (IESG).  Further information on
+   Internet Standards is available in Section 2 of RFC 5741.
+
+   Information about the current status of this document, any errata,
+   and how to provide feedback on it may be obtained at
+   http:
+
+Bray                         Standards Track                    [Page 1]
+
+RFC 7159                          JSON                        March 2014
+
+Copyright Notice
+
+   Copyright (c) 2014 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (http:
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+   This document may contain material from IETF Documents or IETF
+   Contributions published or made publicly available before November
+   10, 2008.  The person(s) controlling the copyright in some of this
+   material may not have granted the IETF Trust the right to allow
+   modifications of such material outside the IETF Standards Process.
+   Without obtaining an adequate license from the person(s) controlling
+   the copyright in such materials, this document may not be modified
+   outside the IETF Standards Process, and derivative works of it may
+   not be created outside the IETF Standards Process, except to format
+   it for publication as an RFC or to translate it into languages other
+   than English.
+
+Bray                         Standards Track                    [Page 2]
+
+RFC 7159                          JSON                        March 2014
+
+Table of Contents
+
+   1. Introduction ....................................................3
+      1.1. Conventions Used in This Document ..........................4
+      1.2. Specifications of JSON .....................................4
+      1.3. Introduction to This Revision ..............................4
+   2. JSON Grammar ....................................................4
+   3. Values ..........................................................5
+   4. Objects .........................................................6
+   5. Arrays ..........................................................6
+   6. Numbers .........................................................6
+   7. Strings .........................................................8
+   8. String and Character Issues .....................................9
+      8.1. Character Encoding .........................................9
+      8.2. Unicode Characters .........................................9
+      8.3. String Comparison ..........................................9
+   9. Parsers ........................................................10
+   10. Generators ....................................................10
+   11. IANA Considerations ...........................................10
+   12. Security Considerations .......................................11
+   13. Examples ......................................................12
+   14. Contributors ..................................................13
+   15. References ....................................................13
+      15.1. Normative References .....................................13
+      15.2. Informative References ...................................13
+   Appendix A. Changes from RFC 4627 .................................15
 
-Loading the PromptShaper GitHub repository:
+1.  Introduction
 
-URL: github.com/PrajnaAvidya/prompt-shaper
-```PromptShaper
-PromptShaper is a templating language and CLI tool for efficiently constructing LLM prompts. Build dynamic, reusable prompts with variables, functions, and file/url loading capabilities.
-Why
-I'm a programmer, and like many I've seen productivity gains due to the assistance of LLMs. The standard way of interacting with a model through a chat interface works great for basic queries, but I do a lot of what I call "non-linear" workflows and found myself spending too much time copying and pasting text fragments to construct the exact prompts I wanted to run. I was working on my own custom LLM chat client and wanted to build a UI to construct dynamic and reusable prompts to send to the OpenAI API and realized I needed an engine to run it. Inspired by templating engines like Handlebars, I built my own variant specifically designed for executing highly customized GPT/LLM prompts.
-Features
+   JavaScript Object Notation (JSON) is a text format for the
+   serialization of structured data.  It is derived from the object
+   literals of JavaScript, as defined in the ECMAScript Programming
+   Language Standard, Third Edition [ECMA-262].
 
-Templating Engine: Work out of a text editor/IDE and save a lot of time by avoiding repetitive copy/pasting of text fragments. Through the use of slots, variables, and functions you can dynamically load and render text into LLM prompts.
-CLI: A variety of command-line options to customize usage, and you can specify various input/output formats.
-Inline Images: Include images directly in your prompts using the img function, either by referencing local image files or remote URLs. The images are automatically encoded and attached to the prompt sent to the LLM.
-Interactive Mode (OpenAI key required): After constructing your prompt you can continue your conversation in the command line, or load a previous conversation from JSON or text and continue in interactive mode. You can even use PromptShaper tags in interactive mode!
+   JSON can represent four primitive types (strings, numbers, booleans,
+   and null) and two structured types (objects and arrays).
 
-Requirements
+   A string is a sequence of zero or more Unicode characters [UNICODE].
+   Note that this citation references the latest version of Unicode
+   rather than a specific release.  It is not expected that future
+   changes in the UNICODE specification will impact the syntax of JSON.
 
-Node.js and yarn - https:
-Yarn package manager - https:
+   An object is an unordered collection of zero or more name/value
+   pairs, where a name is a string and a value is a string, number,
+   boolean, null, object, or array.
 
-Installation & Usage
-Run the CLI using npx (no installation required):
-npx prompt-shaper [options] <input>
-Or install globally with yarn:
-yarn global add prompt-shaper
-prompt-shaper [options] <input>
-Run npx prompt-shaper --help to see a complete list of CLI options.
-CLI Options
-Input/Output Options
+   An array is an ordered sequence of zero or more values.
 
-<input> - Template file path or string (required unless using -i for new conversation)
--is, --is-string - Treat input as a template string instead of file path
--s, --save <filePath> - Save output to file path
--sj, --save-json <filePath> - Save conversation as JSON file
+Bray                         Standards Track                    [Page 3]
+
+RFC 7159                          JSON                        March 2014
 
-Mode Options
+   The terms "object" and "array" come from the conventions of
+   JavaScript.
 
--r, --raw - Raw mode (don't parse any PromptShaper tags)
--i, --interactive - Enable interactive mode with OpenAI
--g, --generate - Send parsed template to OpenAI and return single response
+   JSON's design goals were for it to be minimal, portable, textual, and
+   a subset of JavaScript.
 
-LLM Configuration
+1.1.  Conventions Used in This Document
 
--m, --model <modelType> - OpenAI model to use (default: "gpt-4o")
--sp, --system-prompt <promptString> - System prompt for LLM conversation
--dp, --developer-prompt <promptString> - Developer prompt for LLM conversation (used for o1/o3 models)
--rf, --response-format <format> - Response format: "text" or "json_object" (default: "text")
--re, --reasoning-effort <effort> - Reasoning effort for o1/o3 models: "low", "medium", or "high" (default: "high")
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in [RFC2119].
 
-Variable Input
+   The grammatical rules in this document are to be interpreted as
+   described in [RFC5234].
 
--js, --json <jsonString> - Input JSON variables as string
--jf, --json-file <filePath> - Input JSON variables from file
+1.2.  Specifications of JSON
 
-Conversation Management
+   This document updates [RFC4627], which describes JSON and registers
+   the media type "application/json".
 
--lj, --load-json <filePath> - Load conversation from JSON file and continue in interactive mode
--lt, --load-text <filePath> - Load conversation from text/markdown file and continue in interactive mode
+   A description of JSON in ECMAScript terms appears in Version 5.1 of
+   the ECMAScript specification [ECMA-262], Section 15.12.  JSON is also
+   described in [ECMA-404].
 
-Display Options
+   All of the specifications of JSON syntax agree on the syntactic
+   elements of the language.
 
--h, --hide-prompt - Hide the initial prompt in the console output
--oa, --output-assistant - Save only assistant responses to output files (filters out user prompts)
--d, --debug - Show debug messages during parsing
+1.3.  Introduction to This Revision
 
-File Processing
+   In the years since the publication of RFC 4627, JSON has found very
+   wide use.  This experience has revealed certain patterns, which,
+   while allowed by its specifications, have caused interoperability
+   problems.
 
--e, --extensions <extensions> - Comma-separated list of file extensions to include when using loadDir() function
+   Also, a small number of errata have been reported (see RFC Errata IDs
+   607 [Err607] and 3607 [Err3607]).
 
-Environment Variables
-All CLI options can be set using environment variables. Command-line options take precedence over environment variables.
+   This document's goal is to apply the errata, remove inconsistencies
+   with other specifications of JSON, and highlight practices that can
+   lead to interoperability problems.
 
-Environment Variable
-CLI Option
-Description
+2.  JSON Grammar
 
-OPENAI_API_KEY
-N/A
-Required for OpenAI integration
+   A JSON text is a sequence of tokens.  The set of tokens includes six
+   structural characters, strings, numbers, and three literal names.
 
-PROMPT_SHAPER_DEBUG
--d, --debug
-Show debug messages ("true"/"false")
+   A JSON text is a serialized value.  Note that certain previous
+   specifications of JSON constrained a JSON text to be an object or an
 
-PROMPT_SHAPER_FILE_EXTENSIONS
--e, --extensions
-Comma-separated file extensions
+Bray                         Standards Track                    [Page 4]
+
+RFC 7159                          JSON                        March 2014
 
-PROMPT_SHAPER_GENERATE
--g, --generate
-Send to OpenAI for single response ("true"/"false")
+   array.  Implementations that generate only objects or arrays where a
+   JSON text is called for will be interoperable in the sense that all
+   implementations will accept these as conforming JSON texts.
 
-PROMPT_SHAPER_HIDE_PROMPT
--h, --hide-prompt
-Hide initial prompt ("true"/"false")
+      JSON-text = ws value ws
 
-PROMPT_SHAPER_IS_STRING
--is, --is-string
-Treat input as string ("true"/"false")
+   These are the six structural characters:
 
-PROMPT_SHAPER_INTERACTIVE
--i, --interactive
-Enable interactive mode ("true"/"false")
-
-PROMPT_SHAPER_JSON
--js, --json
-JSON variables string
+      begin-array     = ws %x5B ws  ; [ left square bracket
 
-PROMPT_SHAPER_JSON_FILE
--jf, --json-file
-JSON variables file path
+      begin-object    = ws %x7B ws  ; { left curly bracket
 
-PROMPT_SHAPER_LOAD_JSON
--lj, --load-json
-Load conversation from JSON
+      end-array       = ws %x5D ws  ; ] right square bracket
 
-PROMPT_SHAPER_LOAD_TEXT
--lt, --load-text
-Load conversation from text
-
-PROMPT_SHAPER_MODEL
--m, --model
-OpenAI model name
+      end-object      = ws %x7D ws  ; } right curly bracket
 
-PROMPT_SHAPER_OUTPUT_ASSISTANT
--oa, --output-assistant
-Output only assistant responses ("true"/"false")
+      name-separator  = ws %x3A ws  ; : colon
 
-PROMPT_SHAPER_SYSTEM_PROMPT
--sp, --system-prompt
-System prompt text
+      value-separator = ws %x2C ws  ; , comma
 
-PROMPT_SHAPER_DEVELOPER_PROMPT
--dp, --developer-prompt
-Developer prompt text
+   Insignificant whitespace is allowed before or after any of the six
+   structural characters.
 
-PROMPT_SHAPER_RAW
--r, --raw
-Raw mode ("true"/"false")
+      ws = *(
+              %x20 /              ; Space
+              %x09 /              ; Horizontal tab
+              %x0A /              ; Line feed or New line
+              %x0D )              ; Carriage return
 
-PROMPT_SHAPER_SAVE
--s, --save
-Output file path
+3.  Values
 
-PROMPT_SHAPER_SAVE_JSON
--sj, --save-json
-JSON output file path
+   A JSON value MUST be an object, array, number, or string, or one of
+   the following three literal names:
 
-PROMPT_SHAPER_RESPONSE_FORMAT
--rf, --response-format
-Response format ("text"/"json_object")
+      false null true
 
-PROMPT_SHAPER_REASONING_EFFORT
--re, --reasoning-effort
-Reasoning effort ("low"/"medium"/"high")
+   The literal names MUST be lowercase.  No other literal names are
+   allowed.
 
-Usage Examples
-Basic Template Processing
-# Process a template file
-npx prompt-shaper my_template.ps.md
+      value = false / null / true / object / array / number / string
 
-# Process a template string
-npx prompt-shaper -is "Hello, {{name}}!" -js '{"name": "World"}'
+      false = %x66.61.6c.73.65   ; false
 
-# Save output to file
-npx prompt-shaper my_template.ps.md -s output.md
-Interactive Mode with OpenAI
-# Start new conversation in interactive mode
-npx prompt-shaper -i
+      null  = %x6e.75.6c.6c      ; null
 
-# Process template and continue conversation
-npx prompt-shaper my_template.ps.md -i
+      true  = %x74.72.75.65      ; true
 
-# Load previous conversation and continue
-npx prompt-shaper -lt previous_conversation.md
-Raw Mode (No Parsing)
-# Process file without parsing PromptShaper tags
-npx prompt-shaper -r my_file.js
+Bray                         Standards Track                    [Page 5]
+
+RFC 7159                          JSON                        March 2014
 
-# Useful for code analysis while preserving syntax
-npx prompt-shaper -r -i my_code.py
-Advanced Usage
-# Use specific model with custom prompts
-npx prompt-shaper my_template.ps.md -m gpt-4 -sp "You are a code reviewer"
+4.  Objects
 
-# Generate single response with JSON output
-npx prompt-shaper my_template.ps.md -g -rf json_object
+   An object structure is represented as a pair of curly brackets
+   surrounding zero or more name/value pairs (or members).  A name is a
+   string.  A single colon comes after each name, separating the name
+   from the value.  A single comma separates a value from a following
+   name.  The names within an object SHOULD be unique.
 
-# Load variables from file and hide initial prompt
-npx prompt-shaper my_template.ps.md -jf variables.json -h
-Templates, Slots, Variables
-A template is a file or string that gets loaded into a variable by the PromptShaper parser and is then rendered.
-Templates can contain one or more inline variable definitions. They are defined using single braces and can be single line or multi line using tags.
-{stringVariable = "hello world"}
+      object = begin-object [ member *( value-separator member ) ]
+               end-object
 
-{numberVariable = 42.1}
+      member = string name-separator value
 
-{multilineVariable}
-This is a variable spanning multiple lines, but the tags can be used on a single line if desired. Multiline variables are always strings.
-{/multilineVariable}
+   An object whose names are all unique is interoperable in the sense
+   that all software implementations receiving that object will agree on
+   the name-value mappings.  When the names within an object are not
+   unique, the behavior of software that receives such an object is
+   unpredictable.  Many implementations report the last name/value pair
+   only.  Other implementations report an error or fail to parse the
+   object, and some implementations report all of the name/value pairs,
+   including duplicates.
 
-A template can contain one or more slots which are rendered by replacing their content with variables.
-This will render the contents of the string variable: {{stringVariable}}
+   JSON parsing libraries have been observed to differ as to whether or
+   not they make the ordering of object members visible to calling
+   software.  Implementations whose behavior does not depend on member
+   ordering will be interoperable in the sense that they will not be
+   affected by these differences.
 
-This will render the contents of the number variable: {{numberVariable}}
+5.  Arrays
 
-This will render the contents of the multiline variable, and the @ symbol means it will be rendered as raw text (will not be parsed): {{@multilineVariable}}
+   An array structure is represented as square brackets surrounding zero
+   or more values (or elements).  Elements are separated by commas.
 
-A multiline variable can contain slot tags, which will be rendered recursively when the template is rendered.
-{variableWithSlots}
-This variable contains a slot which is defined in the outer scope: {{stringVariable}}
-{/variableWithSlots}
+   array = begin-array [ value *( value-separator value ) ] end-array
 
-Parameters and Functions
-A multiline variable can also be specified with parameters (which are required if no default is provided) which can be referenced using slots. Parameters are strings or numbers.
-{variableWithParameters(requiredParameter, optionalParameter="hello")}
-{{requiredParameter}}
-{{optionalParameter}}
-{/variableWithParameters}
+   There is no requirement that the values in an array be of the same
+   type.
 
-A slot or variable can be assigned the contents of a function, which is called using a function name and one or more parameters in parentheses.
+6.  Numbers
 
-{sumOfTwoNumbers=add(2,2)}
+   The representation of numbers is similar to that used in most
+   programming languages.  A number is represented in base 10 using
+   decimal digits.  It contains an integer component that may be
+   prefixed with an optional minus sign, which may be followed by a
+   fraction part and/or an exponent part.  Leading zeros are not
+   allowed.
 
-{{load("file.ps.md")}}
+   A fraction part is a decimal point followed by one or more digits.
 
-There's a few basic functions defined in the functions.ts file and you can add your own using registerFunction.
-Built-in Functions
-By default, the parser.ts uses the contents of functions.ts as built-in functions. You can add your own custom functions with registerFunction.
-File Operations
+Bray                         Standards Track                    [Page 6]
+
+RFC 7159                          JSON                        March 2014
 
-load(filePath): Loads a file from the specified path and renders its content.
+   An exponent part begins with the letter E in upper or lower case,
+   which may be followed by a plus or minus sign.  The E and optional
+   sign are followed by one or more digits.
 
-{{load("file.ps.md")}}
+   Numeric values that cannot be represented in the grammar below (such
+   as Infinity and NaN) are not permitted.
 
-loadDir(dirPath): Loads all files from the specified directory (and its subdirectories) that match certain extensions, and renders their contents. Note: The loadDir function uses the file extensions specified in the --extensions CLI option or the PROMPT_SHAPER_FILE_EXTENSIONS environment variable to determine which files to include. By default, it includes common text and code file extensions.
+      number = [ minus ] int [ frac ] [ exp ]
 
-{{loadDir("src")}}
+      decimal-point = %x2E       ; .
 
-loadUrl(url): Loads content from the specified URL and uses the @mozilla/readability library to convert it into readable text.
+      digit1-9 = %x31-39         ; 1-9
 
-{{loadUrl("https:
+      e = %x65 / %x45            ; e E
 
-Image Processing
+      exp = e [ minus / plus ] 1*DIGIT
 
-img(source): Loads an image from a local file path or a URL, encodes it, and attaches it as image content in your LLM prompt. Images are automatically converted to JPEG format for OpenAI compatibility.
+      frac = decimal-point 1*DIGIT
 
-{{img("path/to/image.png")}}
-{{img("https:
+      int = zero / ( digit1-9 *DIGIT )
 
-Math Operations
+      minus = %x2D               ; -
 
-add(a, b): Returns the sum of a and b.
+      plus = %x2B                ; +
 
-{{add(2, 3)}}
+      zero = %x30                ; 0
 
-subtract(a, b): Returns the difference between a and b.
+   This specification allows implementations to set limits on the range
+   and precision of numbers accepted.  Since software that implements
+   IEEE 754-2008 binary64 (double precision) numbers [IEEE754] is
+   generally available and widely used, good interoperability can be
+   achieved by implementations that expect no more precision or range
+   than these provide, in the sense that implementations will
+   approximate JSON numbers within the expected precision.  A JSON
+   number such as 1E400 or 3.141592653589793238462643383279 may indicate
+   potential interoperability problems, since it suggests that the
+   software that created it expects receiving software to have greater
+   capabilities for numeric magnitude and precision than is widely
+   available.
 
-{{subtract(2, 3)}}
+   Note that when such software is used, numbers that are integers and
+   are in the range [-(2**53)+1, (2**53)-1] are interoperable in the
+   sense that implementations will agree exactly on their numeric
+   values.
 
-multiply(a, b): Returns the product of a and b.
+Bray                         Standards Track                    [Page 7]
+
+RFC 7159                          JSON                        March 2014
 
-{{multiply(2, 3)}}
+7.  Strings
 
-divide(a, b): Returns the quotient of a divided by b. Throws an error when dividing by zero.
+   The representation of strings is similar to conventions used in the C
+   family of programming languages.  A string begins and ends with
+   quotation marks.  All Unicode characters may be placed within the
+   quotation marks, except for the characters that must be escaped:
+   quotation mark, reverse solidus, and the control characters (U+0000
+   through U+001F).
 
-{{divide(6, 3)}}
+   Any character may be escaped.  If the character is in the Basic
+   Multilingual Plane (U+0000 through U+FFFF), then it may be
+   represented as a six-character sequence: a reverse solidus, followed
+   by the lowercase letter u, followed by four hexadecimal digits that
+   encode the character's code point.  The hexadecimal letters A though
+   F can be upper or lower case.  So, for example, a string containing
+   only a single reverse solidus character may be represented as
+   "\u005C".
 
-String vs Number Parameters
-The only difference between string and number params is that numeric params can have basic arithmetic operations done on their output. Supported operations are + - * / ^.
-{chapterTitle(chapterIndex)}
-Chapter {{chapterIndex+1}}
-{/chapterTitle}
+   Alternatively, there are two-character sequence escape
+   representations of some popular characters.  So, for example, a
+   string containing only a single reverse solidus character may be
+   represented more compactly as "\\".
 
-{{chapterTitle(chapterIndex=0)}}
+   To escape an extended character that is not in the Basic Multilingual
+   Plane, the character is represented as a 12-character sequence,
+   encoding the UTF-16 surrogate pair.  So, for example, a string
+   containing only the G clef character (U+1D11E) may be represented as
+   "\uD834\uDD1E".
 
-{{chapterTitle(chapterIndex="0")}}
+      string = quotation-mark *char quotation-mark
 
-Strings must be double-quoted, and numbers are unquoted and can contain decimals.
-Special Features
-Comment Handling
-Comments are marked with double slashes 
-Escaping
-You can escape braces with backslashes so they won't be parsed as tags: \{\{escapedSlot\}\}
-You can escape braces or double quotes in string parameters: {{functionCall("param \" with \} special chars")}}
-Markdown Code Block Protection
-PromptShaper automatically detects and preserves content inside markdown code blocks:
-Here's some code:
-```javascript
-{variable = "this won't be parsed"}
-console.log({{variable}});
-But this {{will}} be parsed.
+      char = unescaped /
+          escape (
+              %x22 /          ; "    quotation mark  U+0022
+              %x5C /          ; \    reverse solidus U+005C
+              %x2F /          ; /    solidus         U+002F
+              %x62 /          ; b    backspace       U+0008
+              %x66 /          ; f    form feed       U+000C
+              %x6E /          ; n    line feed       U+000A
+              %x72 /          ; r    carriage return U+000D
+              %x74 /          ; t    tab             U+0009
+              %x75 4HEXDIG )  ; uXXXX                U+XXXX
 
-Both fenced code blocks (triple backticks) and inline code (`single backticks`) are protected.
+      escape = %x5C              ; \
 
-## Template Parsing/Rendering Order
+      quotation-mark = %x22      ; "
 
-1. Mask markdown code blocks to prevent parsing their content
-2. Preprocess multiline variables that contain problematic syntax
-3. Remove comments (unless in raw mode)
-4. Match and validate all variables and slots  
-5. Remove variable definitions from output
-6. Render slots with variable data from the bottom up
-7. String variables will be parsed recursively (variables/slots within them will be rendered)
-8. Restore masked code blocks
-9. Remove excess whitespace
+      unescaped = %x20-21 / %x23-5B / %x5D-10FFFF
 
-## Examples
+Bray                         Standards Track                    [Page 8]
+
+RFC 7159                          JSON                        March 2014
 
-See the `samples` directory for example templates you can try with the parser.
+8.  String and Character Issues
 
-## Terminology
+8.1.  Character Encoding
 
-- **Template** - A piece of text that is rendered by the parser. I'm using the .ps.md extension for the samples.
-- **Variable** - A value loaded from a template file, or defined inline in a template. Variables are defined using single braces and are either defined as a single tag, or with matching tags wrapped around text. String variables can be rendered as templates.
-- **Slot** - Renders the contents of a variable or function using double braces.
-- **Parameters** - One or more arguments passed to a slot or a function. Parameters can be strings or numbers.
-- **Function** - Does "something" and the result is rendered on page, or assigned to a variable.
-- **Raw Mode** - Processing mode where PromptShaper tags are not parsed, useful for code analysis or preserving exact syntax.
+   JSON text SHALL be encoded in UTF-8, UTF-16, or UTF-32.  The default
+   encoding is UTF-8, and JSON texts that are encoded in UTF-8 are
+   interoperable in the sense that they will be read successfully by the
+   maximum number of implementations; there are many implementations
+   that cannot successfully read texts in other encodings (such as
+   UTF-16 and UTF-32).
 
-**Note: You must set the OPENAI_API_KEY environment variable for calls to OpenAI to work.**
+   Implementations MUST NOT add a byte order mark to the beginning of a
+   JSON text.  In the interests of interoperability, implementations
+   that parse JSON texts MAY ignore the presence of a byte order mark
+   rather than treating it as an error.
 
-```
+8.2.  Unicode Characters
 
-## Loading Documentation
+   When all the strings represented in a JSON text are composed entirely
+   of Unicode characters [UNICODE] (however escaped), then that JSON
+   text is interoperable in the sense that all software implementations
+   that parse it will agree on the contents of names and of string
+   values in objects and arrays.
 
-Loading npm package information:
+   However, the ABNF in this specification allows member names and
+   string values to contain bit sequences that cannot encode Unicode
+   characters; for example, "\uDEAD" (a single unpaired UTF-16
+   surrogate).  Instances of this have been observed, for example, when
+   a library truncates a UTF-16 string without checking whether the
+   truncation split a surrogate pair.  The behavior of software that
+   receives JSON texts containing such values is unpredictable; for
+   example, implementations might return different values for the length
+   of a string value or even suffer fatal runtime exceptions.
 
-URL: www.npmjs.com/package/prompt-shaper
-```PromptShaper
-PromptShaper is a templating language and CLI tool for efficiently constructing LLM prompts. Build dynamic, reusable prompts with variables, functions, and file/url loading capabilities.
-Why
-I'm a programmer, and like many I've seen productivity gains due to the assistance of LLMs. The standard way of interacting with a model through a chat interface works great for basic queries, but I do a lot of what I call "non-linear" workflows and found myself spending too much time copying and pasting text fragments to construct the exact prompts I wanted to run. I was working on my own custom LLM chat client and wanted to build a UI to construct dynamic and reusable prompts to send to the OpenAI API and realized I needed an engine to run it. Inspired by templating engines like Handlebars, I built my own variant specifically designed for executing highly customized GPT/LLM prompts.
-Features
+8.3.  String Comparison
 
-Templating Engine: Work out of a text editor/IDE and save a lot of time by avoiding repetitive copy/pasting of text fragments. Through the use of slots, variables, and functions you can dynamically load and render text into LLM prompts.
+   Software implementations are typically required to test names of
+   object members for equality.  Implementations that transform the
+   textual representation into sequences of Unicode code units and then
+   perform the comparison numerically, code unit by code unit, are
+   interoperable in the sense that implementations will agree in all
+   cases on equality or inequality of two strings.  For example,
+   implementations that compare strings with escaped characters
+   unconverted may incorrectly find that "a\\b" and "a\u005Cb" are not
+   equal.
 
-CLI: A variety of command-line options to customize usage, and you can specify various input/output formats.
+Bray                         Standards Track                    [Page 9]
+
+RFC 7159                          JSON                        March 2014
 
-Inline Images: Include images directly in your prompts using the img function, either by referencing local image files or remote URLs. The images are automatically encoded and attached to the prompt sent to the LLM.
+9.  Parsers
 
-Interactive Mode (OpenAI key required): After constructing your prompt you can continue your conversation in the command line, or load a previous conversation from JSON or text and continue in interactive mode. You can even use PromptShaper tags in interactive mode!
+   A JSON parser transforms a JSON text into another representation.  A
+   JSON parser MUST accept all texts that conform to the JSON grammar.
+   A JSON parser MAY accept non-JSON forms or extensions.
 
-Requirements
+   An implementation may set limits on the size of texts that it
+   accepts.  An implementation may set limits on the maximum depth of
+   nesting.  An implementation may set limits on the range and precision
+   of numbers.  An implementation may set limits on the length and
+   character contents of strings.
 
-Node.js and yarn - https:
+10.  Generators
 
-Yarn package manager - https:
+   A JSON generator produces JSON text.  The resulting text MUST
+   strictly conform to the JSON grammar.
 
-Installation & Usage
-Run the CLI using npx (no installation required):
-npx prompt-shaper [options] <input>
-Or install globally with yarn:
-yarn global add prompt-shaper
-prompt-shaper [options] <input>
-Run npx prompt-shaper --help to see a complete list of CLI options.
-CLI Options
-Input/Output Options
+11.  IANA Considerations
 
-<input> - Template file path or string (required unless using -i for new conversation)
+   The MIME media type for JSON text is application/json.
 
--is, --is-string - Treat input as a template string instead of file path
+   Type name:  application
 
--s, --save <filePath> - Save output to file path
+   Subtype name:  json
 
--sj, --save-json <filePath> - Save conversation as JSON file
+   Required parameters:  n/a
 
-Mode Options
+   Optional parameters:  n/a
 
--r, --raw - Raw mode (don't parse any PromptShaper tags)
+   Encoding considerations:  binary
 
--i, --interactive - Enable interactive mode with OpenAI
+   Security considerations:  See [RFC7159], Section 12.
 
--g, --generate - Send parsed template to OpenAI and return single response
+   Interoperability considerations:  Described in [RFC7159]
 
-LLM Configuration
+   Published specification:  [RFC7159]
 
--m, --model <modelType> - OpenAI model to use (default: "gpt-4o")
+   Applications that use this media type:
+      JSON has been used to exchange data between applications written
+      in all of these programming languages: ActionScript, C, C#,
+      Clojure, ColdFusion, Common Lisp, E, Erlang, Go, Java, JavaScript,
+      Lua, Objective CAML, Perl, PHP, Python, Rebol, Ruby, Scala, and
+      Scheme.
 
--sp, --system-prompt <promptString> - System prompt for LLM conversation
+Bray                         Standards Track                   [Page 10]
+
+RFC 7159                          JSON                        March 2014
 
--dp, --developer-prompt <promptString> - Developer prompt for LLM conversation (used for o1/o3 models)
+   Additional information:
+      Magic number(s): n/a
+      File extension(s): .json
+      Macintosh file type code(s): TEXT
 
--rf, --response-format <format> - Response format: "text" or "json_object" (default: "text")
+   Person & email address to contact for further information:
+      IESG
+      
 
--re, --reasoning-effort <effort> - Reasoning effort for o1/o3 models: "low", "medium", or "high" (default: "high")
+   Intended usage:  COMMON
 
-Variable Input
+   Restrictions on usage:  none
 
--js, --json <jsonString> - Input JSON variables as string
+   Author:
+      Douglas Crockford
+      
 
--jf, --json-file <filePath> - Input JSON variables from file
+   Change controller:
+      IESG
+      
 
-Conversation Management
+   Note:  No "charset" parameter is defined for this registration.
+      Adding one really has no effect on compliant recipients.
 
--lj, --load-json <filePath> - Load conversation from JSON file and continue in interactive mode
+12.  Security Considerations
 
--lt, --load-text <filePath> - Load conversation from text/markdown file and continue in interactive mode
+   Generally, there are security issues with scripting languages.  JSON
+   is a subset of JavaScript but excludes assignment and invocation.
 
-Display Options
+   Since JSON's syntax is borrowed from JavaScript, it is possible to
+   use that language's "eval()" function to parse JSON texts.  This
+   generally constitutes an unacceptable security risk, since the text
+   could contain executable code along with data declarations.  The same
+   consideration applies to the use of eval()-like functions in any
+   other programming language in which JSON texts conform to that
+   language's syntax.
 
--h, --hide-prompt - Hide the initial prompt in the console output
+Bray                         Standards Track                   [Page 11]
+
+RFC 7159                          JSON                        March 2014
 
--oa, --output-assistant - Save only assistant responses to output files (filters out user prompts)
+13.  Examples
 
--d, --debug - Show debug messages during parsing
+   This is a JSON object:
 
-File Processing
+      {
+        "Image": {
+            "Width":  800,
+            "Height": 600,
+            "Title":  "View from 15th Floor",
+            "Thumbnail": {
+                "Url":    "http:
+                "Height": 125,
+                "Width":  100
+            },
+            "Animated" : false,
+            "IDs": [116, 943, 234, 38793]
+          }
+      }
 
--e, --extensions <extensions> - Comma-separated list of file extensions to include when using loadDir() function
+   Its Image member is an object whose Thumbnail member is an object and
+   whose IDs member is an array of numbers.
 
-Environment Variables
-All CLI options can be set using environment variables. Command-line options take precedence over environment variables.
+   This is a JSON array containing two objects:
 
-Environment Variable
-CLI Option
-Description
+      [
+        {
+           "precision": "zip",
+           "Latitude":  37.7668,
+           "Longitude": -122.3959,
+           "Address":   "",
+           "City":      "SAN FRANCISCO",
+           "State":     "CA",
+           "Zip":       "94107",
+           "Country":   "US"
+        },
+        {
+           "precision": "zip",
+           "Latitude":  37.371991,
+           "Longitude": -122.026020,
+           "Address":   "",
+           "City":      "SUNNYVALE",
+           "State":     "CA",
+           "Zip":       "94085",
+           "Country":   "US"
+        }
+      ]
 
-OPENAI_API_KEY
-N/A
+Bray                         Standards Track                   [Page 12]
+
+RFC 7159                          JSON                        March 2014
 
-Required for OpenAI integration
+   Here are three small JSON texts containing only values:
 
-PROMPT_SHAPER_DEBUG
--d, --debug
-Show debug messages ("true"/"false")
+   "Hello world!"
 
-PROMPT_SHAPER_FILE_EXTENSIONS
--e, --extensions
-Comma-separated file extensions
+   42
 
-PROMPT_SHAPER_GENERATE
--g, --generate
-Send to OpenAI for single response ("true"/"false")
+   true
 
-PROMPT_SHAPER_HIDE_PROMPT
--h, --hide-prompt
-Hide initial prompt ("true"/"false")
+14.  Contributors
 
-PROMPT_SHAPER_IS_STRING
--is, --is-string
-Treat input as string ("true"/"false")
+   RFC 4627 was written by Douglas Crockford.  This document was
+   constructed by making a relatively small number of changes to that
+   document; thus, the vast majority of the text here is his.
 
-PROMPT_SHAPER_INTERACTIVE
--i, --interactive
-Enable interactive mode ("true"/"false")
+15.  References
 
-PROMPT_SHAPER_JSON
--js, --json
-JSON variables string
+15.1.  Normative References
 
-PROMPT_SHAPER_JSON_FILE
--jf, --json-file
-JSON variables file path
+   [IEEE754]  IEEE, "IEEE Standard for Floating-Point Arithmetic", IEEE
+              Standard 754, August 2008,
+              .
 
-PROMPT_SHAPER_LOAD_JSON
--lj, --load-json
-Load conversation from JSON
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
 
-PROMPT_SHAPER_LOAD_TEXT
--lt, --load-text
-Load conversation from text
+   [RFC5234]  Crocker, D. and P. Overell, "Augmented BNF for Syntax
+              Specifications: ABNF", STD 68, RFC 5234, January 2008.
 
-PROMPT_SHAPER_MODEL
--m, --model
-OpenAI model name
+   [UNICODE]  The Unicode Consortium, "The Unicode Standard",
+              .
 
-PROMPT_SHAPER_OUTPUT_ASSISTANT
--oa, --output-assistant
-Output only assistant responses ("true"/"false")
+15.2.  Informative References
 
-PROMPT_SHAPER_SYSTEM_PROMPT
--sp, --system-prompt
-System prompt text
+   [ECMA-262] Ecma International, "ECMAScript Language Specification
+              Edition 5.1", Standard ECMA-262, June 2011,
+              .
 
-PROMPT_SHAPER_DEVELOPER_PROMPT
--dp, --developer-prompt
-Developer prompt text
+   [ECMA-404] Ecma International, "The JSON Data Interchange Format",
+              Standard ECMA-404, October 2013,
+              .
 
-PROMPT_SHAPER_RAW
--r, --raw
-Raw mode ("true"/"false")
+   [Err3607]  RFC Errata, Errata ID 3607, RFC 3607,
+              .
 
-PROMPT_SHAPER_SAVE
--s, --save
-Output file path
+Bray                         Standards Track                   [Page 13]
+
+RFC 7159                          JSON                        March 2014
 
-PROMPT_SHAPER_SAVE_JSON
--sj, --save-json
-JSON output file path
+   [Err607]   RFC Errata, Errata ID 607, RFC 607,
+              .
 
-PROMPT_SHAPER_RESPONSE_FORMAT
--rf, --response-format
-Response format ("text"/"json_object")
+   [RFC4627]  Crockford, D., "The application/json Media Type for
+              JavaScript Object Notation (JSON)", RFC 4627, July 2006.
 
-PROMPT_SHAPER_REASONING_EFFORT
--re, --reasoning-effort
-Reasoning effort ("low"/"medium"/"high")
+Bray                         Standards Track                   [Page 14]
+
+RFC 7159                          JSON                        March 2014
 
-Usage Examples
-Basic Template Processing
-# Process a template file
-npx prompt-shaper my_template.ps.md
+Appendix A.  Changes from RFC 4627
 
-# Process a template string
-npx prompt-shaper -is "Hello, {{name}}!" -js '{"name": "World"}'
+   This section lists changes between this document and the text in RFC
+   4627.
 
-# Save output to file
-npx prompt-shaper my_template.ps.md -s output.md
-Interactive Mode with OpenAI
-# Start new conversation in interactive mode
-npx prompt-shaper -i
+   o  Changed the title and abstract of the document.
 
-# Process template and continue conversation
-npx prompt-shaper my_template.ps.md -i
+   o  Changed the reference to [UNICODE] to be not version specific.
 
-# Load previous conversation and continue
-npx prompt-shaper -lt previous_conversation.md
-Raw Mode (No Parsing)
-# Process file without parsing PromptShaper tags
-npx prompt-shaper -r my_file.js
+   o  Added a "Specifications of JSON" section.
 
-# Useful for code analysis while preserving syntax
-npx prompt-shaper -r -i my_code.py
-Advanced Usage
-# Use specific model with custom prompts
-npx prompt-shaper my_template.ps.md -m gpt-4 -sp "You are a code reviewer"
+   o  Added an "Introduction to This Revision" section.
 
-# Generate single response with JSON output
-npx prompt-shaper my_template.ps.md -g -rf json_object
+   o  Changed the definition of "JSON text" so that it can be any JSON
+      value, removing the constraint that it be an object or array.
 
-# Load variables from file and hide initial prompt
-npx prompt-shaper my_template.ps.md -jf variables.json -h
-Templates, Slots, Variables
-A template is a file or string that gets loaded into a variable by the PromptShaper parser and is then rendered.
-Templates can contain one or more inline variable definitions. They are defined using single braces and can be single line or multi line using tags.
-{stringVariable = "hello world"}
+   o  Added language about duplicate object member names, member
+      ordering, and interoperability.
 
-{numberVariable = 42.1}
+   o  Clarified the absence of a requirement that values in an array be
+      of the same JSON type.
 
-{multilineVariable}
-This is a variable spanning multiple lines, but the tags can be used on a single line if desired. Multiline variables are always strings.
-{/multilineVariable}
+   o  Applied erratum #607 from RFC 4627 to correctly align the artwork
+      for the definition of "object".
 
-A template can contain one or more slots which are rendered by replacing their content with variables.
-This will render the contents of the string variable: {{stringVariable}}
+   o  Changed "as sequences of digits" to "in the grammar below" in the
+      "Numbers" section, and made base-10-ness explicit.
 
-This will render the contents of the number variable: {{numberVariable}}
+   o  Added language about number interoperability as a function of
+      IEEE754, and added an IEEE754 reference.
 
-This will render the contents of the multiline variable, and the @ symbol means it will be rendered as raw text (will not be parsed): {{@multilineVariable}}
+   o  Added language about interoperability and Unicode characters and
+      about string comparisons.  To do this, turned the old "Encoding"
+      section into a "String and Character Issues" section, with three
+      subsections: "Character Encoding", "Unicode Characters", and
+      "String Comparison".
 
-A multiline variable can contain slot tags, which will be rendered recursively when the template is rendered.
-{variableWithSlots}
-This variable contains a slot which is defined in the outer scope: {{stringVariable}}
-{/variableWithSlots}
+   o  Changed guidance in the "Parsers" section to point out that
+      implementations may set limits on the range "and precision" of
+      numbers.
 
-Parameters and Functions
-A multiline variable can also be specified with parameters (which are required if no default is provided) which can be referenced using slots. Parameters are strings or numbers.
-{variableWithParameters(requiredParameter, optionalParameter="hello")}
-{{requiredParameter}}
-{{optionalParameter}}
-{/variableWithParameters}
+   o  Updated and tidied the "IANA Considerations" section.
 
-A slot or variable can be assigned the contents of a function, which is called using a function name and one or more parameters in parentheses.
+   o  Made a real "Security Considerations" section and lifted the text
+      out of the previous "IANA Considerations" section.
 
-{sumOfTwoNumbers=add(2,2)}
+Bray                         Standards Track                   [Page 15]
+
+RFC 7159                          JSON                        March 2014
 
-{{load("file.ps.md")}}
+   o  Applied erratum #3607 from RFC 4627 by removing the security
+      consideration that begins "A JSON text can be safely passed" and
+      the JavaScript code that went with that consideration.
 
-There's a few basic functions defined in the functions.ts file and you can add your own using registerFunction.
-Built-in Functions
-By default, the parser.ts uses the contents of functions.ts as built-in functions. You can add your own custom functions with registerFunction.
-File Operations
+   o  Added a note to the "Security Considerations" section pointing out
+      the risks of using the "eval()" function in JavaScript or any
+      other language in which JSON texts conform to that language's
+      syntax.
 
-load(filePath): Loads a file from the specified path and renders its content.
+   o  Added a note to the "IANA Considerations" clarifying the absence
+      of a "charset" parameter for the application/json media type.
 
-{{load("file.ps.md")}}
+   o  Changed "100" to 100 and added a boolean field, both in the first
+      example.
 
-loadDir(dirPath): Loads all files from the specified directory (and its subdirectories) that match certain extensions, and renders their contents. Note: The loadDir function uses the file extensions specified in the --extensions CLI option or the PROMPT_SHAPER_FILE_EXTENSIONS environment variable to determine which files to include. By default, it includes common text and code file extensions.
+   o  Added examples of JSON texts with simple values, neither objects
+      nor arrays.
 
-{{loadDir("src")}}
+   o  Added a "Contributors" section crediting Douglas Crockford.
 
-loadUrl(url): Loads content from the specified URL and uses the @mozilla/readability library to convert it into readable text.
+   o  Added a reference to RFC 4627.
 
-{{loadUrl("https:
+   o  Moved the ECMAScript reference from Normative to Informative and
+      updated it to reference ECMAScript 5.1, and added a reference to
+      ECMA 404.
 
-Image Processing
+Author's Address
 
-img(source): Loads an image from a local file path or a URL, encodes it, and attaches it as image content in your LLM prompt. Images are automatically converted to JPEG format for OpenAI compatibility.
+   Tim Bray (editor)
+   Google, Inc.
 
-{{img("path/to/image.png")}}
-{{img("https:
+   EMail: tbray@textuality.com
 
-Math Operations
+Bray                         Standards Track                   [Page 16]
+
 
-add(a, b): Returns the sum of a and b.
-
-{{add(2, 3)}}
-
-subtract(a, b): Returns the difference between a and b.
-
-{{subtract(2, 3)}}
-
-multiply(a, b): Returns the product of a and b.
-
-{{multiply(2, 3)}}
-
-divide(a, b): Returns the quotient of a divided by b. Throws an error when dividing by zero.
-
-{{divide(6, 3)}}
-
-String vs Number Parameters
-The only difference between string and number params is that numeric params can have basic arithmetic operations done on their output. Supported operations are + - * / ^.
-{chapterTitle(chapterIndex)}
-Chapter {{chapterIndex+1}}
-{/chapterTitle}
-
-{{chapterTitle(chapterIndex=0)}}
-
-{{chapterTitle(chapterIndex="0")}}
-
-Strings must be double-quoted, and numbers are unquoted and can contain decimals.
-Special Features
-Comment Handling
-Comments are marked with double slashes 
-Escaping
-You can escape braces with backslashes so they won't be parsed as tags: \{\{escapedSlot\}\}
-You can escape braces or double quotes in string parameters: {{functionCall("param \" with \} special chars")}}
-Markdown Code Block Protection
-PromptShaper automatically detects and preserves content inside markdown code blocks:
-Here's some code:
-```javascript
-{variable = "this won't be parsed"}
-console.log({{variable}});
-But this {{will}} be parsed.
-
-Both fenced code blocks (triple backticks) and inline code (`single backticks`) are protected.
-
-## Template Parsing/Rendering Order
-
-1. Mask markdown code blocks to prevent parsing their content
-2. Preprocess multiline variables that contain problematic syntax
-3. Remove comments (unless in raw mode)
-4. Match and validate all variables and slots  
-5. Remove variable definitions from output
-6. Render slots with variable data from the bottom up
-7. String variables will be parsed recursively (variables/slots within them will be rendered)
-8. Restore masked code blocks
-9. Remove excess whitespace
-
-## Examples
-
-See the `samples` directory for example templates you can try with the parser.
-
-## Terminology
-
-- **Template** - A piece of text that is rendered by the parser. I'm using the .ps.md extension for the samples.
-- **Variable** - A value loaded from a template file, or defined inline in a template. Variables are defined using single braces and are either defined as a single tag, or with matching tags wrapped around text. String variables can be rendered as templates.
-- **Slot** - Renders the contents of a variable or function using double braces.
-- **Parameters** - One or more arguments passed to a slot or a function. Parameters can be strings or numbers.
-- **Function** - Does "something" and the result is rendered on page, or assigned to a variable.
-- **Raw Mode** - Processing mode where PromptShaper tags are not parsed, useful for code analysis or preserving exact syntax.
-
-**Note: You must set the OPENAI_API_KEY environment variable for calls to OpenAI to work.**
-
-```
-
-## Loading Documentation
-
-Loading README from GitHub:
-
-URL: raw.githubusercontent.com/PrajnaAvidya/prompt-shaper/main/README.md
-```# PromptShaper
-
-PromptShaper is a templating language and CLI tool for efficiently constructing LLM prompts. Build dynamic, reusable prompts with variables, functions, and file/url loading capabilities.
-
-## Why
-
-I'm a programmer, and like many I've seen productivity gains due to the assistance of LLMs. The standard way of interacting with a model through a chat interface works great for basic queries, but I do a lot of what I call "non-linear" workflows and found myself spending too much time copying and pasting text fragments to construct the exact prompts I wanted to run. I was working on my own custom LLM chat client and wanted to build a UI to construct dynamic and reusable prompts to send to the OpenAI API and realized I needed an engine to run it. Inspired by templating engines like Handlebars, I built my own variant specifically designed for executing highly customized GPT/LLM prompts.
-
-## Features
-
-- **Templating Engine**: Work out of a text editor/IDE and save a lot of time by avoiding repetitive copy/pasting of text fragments. Through the use of slots, variables, and functions you can dynamically load and render text into LLM prompts.
-- **CLI**: A variety of command-line options to customize usage, and you can specify various input/output formats.
-- **Inline Images**: Include images directly in your prompts using the `img` function, either by referencing local image files or remote URLs. The images are automatically encoded and attached to the prompt sent to the LLM.
-- **Interactive Mode** (OpenAI key required): After constructing your prompt you can continue your conversation in the command line, or load a previous conversation from JSON or text and continue in interactive mode. You can even use PromptShaper tags in interactive mode!
-
-## Requirements
-
-- Node.js and yarn - https:
-- Yarn package manager - https:
-
-## Installation & Usage
-
-Run the CLI using npx (no installation required):
-```bash
-npx prompt-shaper [options] 
-```
-
-Or install globally with yarn:
-```bash
-yarn global add prompt-shaper
-prompt-shaper [options] 
-```
-
-Run `npx prompt-shaper --help` to see a complete list of CLI options.
-
-## CLI Options
-
-### Input/Output Options
-- `` - Template file path or string (required unless using `-i` for new conversation)
-- `-is, --is-string` - Treat input as a template string instead of file path
-- `-s, --save ` - Save output to file path
-- `-sj, --save-json ` - Save conversation as JSON file
-
-### Mode Options
-- `-r, --raw` - Raw mode (don't parse any PromptShaper tags)
-- `-i, --interactive` - Enable interactive mode with OpenAI
-- `-g, --generate` - Send parsed template to OpenAI and return single response
-
-### LLM Configuration
-- `-m, --model ` - OpenAI model to use (default: "gpt-4o")
-- `-sp, --system-prompt ` - System prompt for LLM conversation
-- `-dp, --developer-prompt ` - Developer prompt for LLM conversation (used for o1/o3 models)
-- `-rf, --response-format ` - Response format: "text" or "json_object" (default: "text")
-- `-re, --reasoning-effort ` - Reasoning effort for o1/o3 models: "low", "medium", or "high" (default: "high")
-
-### Variable Input
-- `-js, --json ` - Input JSON variables as string
-- `-jf, --json-file ` - Input JSON variables from file
-
-### Conversation Management
-- `-lj, --load-json ` - Load conversation from JSON file and continue in interactive mode
-- `-lt, --load-text ` - Load conversation from text/markdown file and continue in interactive mode
-
-### Display Options
-- `-h, --hide-prompt` - Hide the initial prompt in the console output
-- `-oa, --output-assistant` - Save only assistant responses to output files (filters out user prompts)
-- `-d, --debug` - Show debug messages during parsing
-
-### File Processing
-- `-e, --extensions ` - Comma-separated list of file extensions to include when using `loadDir()` function
-
-## Environment Variables
-
-All CLI options can be set using environment variables. Command-line options take precedence over environment variables.
-
-| Environment Variable | CLI Option | Description |
-|---------------------|------------|-------------|
-| `OPENAI_API_KEY` | N/A | **Required** for OpenAI integration |
-| `PROMPT_SHAPER_DEBUG` | `-d, --debug` | Show debug messages ("true"/"false") |
-| `PROMPT_SHAPER_FILE_EXTENSIONS` | `-e, --extensions` | Comma-separated file extensions |
-| `PROMPT_SHAPER_GENERATE` | `-g, --generate` | Send to OpenAI for single response ("true"/"false") |
-| `PROMPT_SHAPER_HIDE_PROMPT` | `-h, --hide-prompt` | Hide initial prompt ("true"/"false") |
-| `PROMPT_SHAPER_IS_STRING` | `-is, --is-string` | Treat input as string ("true"/"false") |
-| `PROMPT_SHAPER_INTERACTIVE` | `-i, --interactive` | Enable interactive mode ("true"/"false") |
-| `PROMPT_SHAPER_JSON` | `-js, --json` | JSON variables string |
-| `PROMPT_SHAPER_JSON_FILE` | `-jf, --json-file` | JSON variables file path |
-| `PROMPT_SHAPER_LOAD_JSON` | `-lj, --load-json` | Load conversation from JSON |
-| `PROMPT_SHAPER_LOAD_TEXT` | `-lt, --load-text` | Load conversation from text |
-| `PROMPT_SHAPER_MODEL` | `-m, --model` | OpenAI model name |
-| `PROMPT_SHAPER_OUTPUT_ASSISTANT` | `-oa, --output-assistant` | Output only assistant responses ("true"/"false") |
-| `PROMPT_SHAPER_SYSTEM_PROMPT` | `-sp, --system-prompt` | System prompt text |
-| `PROMPT_SHAPER_DEVELOPER_PROMPT` | `-dp, --developer-prompt` | Developer prompt text |
-| `PROMPT_SHAPER_RAW` | `-r, --raw` | Raw mode ("true"/"false") |
-| `PROMPT_SHAPER_SAVE` | `-s, --save` | Output file path |
-| `PROMPT_SHAPER_SAVE_JSON` | `-sj, --save-json` | JSON output file path |
-| `PROMPT_SHAPER_RESPONSE_FORMAT` | `-rf, --response-format` | Response format ("text"/"json_object") |
-| `PROMPT_SHAPER_REASONING_EFFORT` | `-re, --reasoning-effort` | Reasoning effort ("low"/"medium"/"high") |
-
-## Usage Examples
-
-### Basic Template Processing
-```bash
-# Process a template file
-npx prompt-shaper my_template.ps.md
-
-# Process a template string
-npx prompt-shaper -is "Hello, {{name}}!" -js '{"name": "World"}'
-
-# Save output to file
-npx prompt-shaper my_template.ps.md -s output.md
-```
-
-### Interactive Mode with OpenAI
-```bash
-# Start new conversation in interactive mode
-npx prompt-shaper -i
-
-# Process template and continue conversation
-npx prompt-shaper my_template.ps.md -i
-
-# Load previous conversation and continue
-npx prompt-shaper -lt previous_conversation.md
-```
-
-### Raw Mode (No Parsing)
-```bash
-# Process file without parsing PromptShaper tags
-npx prompt-shaper -r my_file.js
-
-# Useful for code analysis while preserving syntax
-npx prompt-shaper -r -i my_code.py
-```
-
-### Advanced Usage
-```bash
-# Use specific model with custom prompts
-npx prompt-shaper my_template.ps.md -m gpt-4 -sp "You are a code reviewer"
-
-# Generate single response with JSON output
-npx prompt-shaper my_template.ps.md -g -rf json_object
-
-# Load variables from file and hide initial prompt
-npx prompt-shaper my_template.ps.md -jf variables.json -h
-```
-
-## Templates, Slots, Variables
-
-A template is a file or string that gets loaded into a variable by the PromptShaper parser and is then rendered.
-
-Templates can contain one or more inline variable definitions. They are defined using single braces and can be single line or multi line using tags.
-
-```
-{stringVariable = "hello world"}
-
-{numberVariable = 42.1}
-
-{multilineVariable}
-This is a variable spanning multiple lines, but the tags can be used on a single line if desired. Multiline variables are always strings.
-{/multilineVariable}
-```
-
-A template can contain one or more slots which are rendered by replacing their content with variables.
-
-```
-This will render the contents of the string variable: {{stringVariable}}
-
-This will render the contents of the number variable: {{numberVariable}}
-
-This will render the contents of the multiline variable, and the @ symbol means it will be rendered as raw text (will not be parsed): {{@multilineVariable}}
-```
-
-A multiline variable can contain slot tags, which will be rendered recursively when the template is rendered.
-
-```
-{variableWithSlots}
-This variable contains a slot which is defined in the outer scope: {{stringVariable}}
-{/variableWithSlots}
-```
-
-## Parameters and Functions
-
-A multiline variable can also be specified with parameters (which are required if no default is provided) which can be referenced using slots. Parameters are strings or numbers.
-
-```
-{variableWithParameters(requiredParameter, optionalParameter="hello")}
-{{requiredParameter}}
-{{optionalParameter}}
-{/variableWithParameters}
-```
-
-A slot or variable can be assigned the contents of a function, which is called using a function name and one or more parameters in parentheses.
-
-```
-
-{sumOfTwoNumbers=add(2,2)}
-
-{{load("file.ps.md")}}
-```
-
-There's a few basic functions defined in the `functions.ts` file and you can add your own using `registerFunction`.
-
-## Built-in Functions
-
-By default, the `parser.ts` uses the contents of `functions.ts` as built-in functions. You can add your own custom functions with `registerFunction`.
-
-### File Operations
-- **load(filePath)**: Loads a file from the specified path and renders its content.
-```
-
-{{load("file.ps.md")}}
-```
-
-- **loadDir(dirPath)**: Loads all files from the specified directory (and its subdirectories) that match certain extensions, and renders their contents. **Note**: The `loadDir` function uses the file extensions specified in the `--extensions` CLI option or the `PROMPT_SHAPER_FILE_EXTENSIONS` environment variable to determine which files to include. By default, it includes common text and code file extensions.
-```
-
-{{loadDir("src")}}
-```
-
-- **loadUrl(url)**: Loads content from the specified URL and uses the [@mozilla/readability](https:
-```
-
-{{loadUrl("https:
-```
-
-### Image Processing
-- **img(source)**: Loads an image from a local file path or a URL, encodes it, and attaches it as image content in your LLM prompt. Images are automatically converted to JPEG format for OpenAI compatibility.
-```
-{{img("path/to/image.png")}}
-{{img("https:
-```
-
-### Math Operations
-- **add(a, b)**: Returns the sum of `a` and `b`.
-```
-
-{{add(2, 3)}}
-```
-
-- **subtract(a, b)**: Returns the difference between `a` and `b`.
-```
-
-{{subtract(2, 3)}}
-```
-
-- **multiply(a, b)**: Returns the product of `a` and `b`.
-```
-
-{{multiply(2, 3)}}
-```
-
-- **divide(a, b)**: Returns the quotient of `a` divided by `b`. Throws an error when dividing by zero.
-```
-
-{{divide(6, 3)}}
-```
-
-## String vs Number Parameters
-
-The only difference between string and number params is that numeric params can have basic arithmetic operations done on their output. Supported operations are `+ - * / ^`.
-
-```
-{chapterTitle(chapterIndex)}
-Chapter {{chapterIndex+1}}
-{/chapterTitle}
-
-{{chapterTitle(chapterIndex=0)}}
-
-{{chapterTitle(chapterIndex="0")}}
-```
-
-Strings must be double-quoted, and numbers are unquoted and can contain decimals.
-
-## Special Features
-
-### Comment Handling
-Comments are marked with double slashes `
-
-### Escaping
-You can escape braces with backslashes so they won't be parsed as tags: `\{\{escapedSlot\}\}`
-
-You can escape braces or double quotes in string parameters: `{{functionCall("param \" with \} special chars")}}`
-
-### Markdown Code Block Protection
-PromptShaper automatically detects and preserves content inside markdown code blocks:
-
-```markdown
-Here's some code:
-```javascript
-{variable = "this won't be parsed"}
-console.log({{variable}});
-```
-But this {{will}} be parsed.
-```
-
-Both fenced code blocks (triple backticks) and inline code (`single backticks`) are protected.
-
-## Template Parsing/Rendering Order
-
-1. Mask markdown code blocks to prevent parsing their content
-2. Preprocess multiline variables that contain problematic syntax
-3. Remove comments (unless in raw mode)
-4. Match and validate all variables and slots  
-5. Remove variable definitions from output
-6. Render slots with variable data from the bottom up
-7. String variables will be parsed recursively (variables/slots within them will be rendered)
-8. Restore masked code blocks
-9. Remove excess whitespace
-
-## Examples
-
-See the `samples` directory for example templates you can try with the parser.
-
-## Terminology
-
-- **Template** - A piece of text that is rendered by the parser. I'm using the .ps.md extension for the samples.
-- **Variable** - A value loaded from a template file, or defined inline in a template. Variables are defined using single braces and are either defined as a single tag, or with matching tags wrapped around text. String variables can be rendered as templates.
-- **Slot** - Renders the contents of a variable or function using double braces.
-- **Parameters** - One or more arguments passed to a slot or a function. Parameters can be strings or numbers.
-- **Function** - Does "something" and the result is rendered on page, or assigned to a variable.
-- **Raw Mode** - Processing mode where PromptShaper tags are not parsed, useful for code analysis or preserving exact syntax.
-
-**Note: You must set the OPENAI_API_KEY environment variable for calls to OpenAI to work.**
 ```
 
 ## Best Practices

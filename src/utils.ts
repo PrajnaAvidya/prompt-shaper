@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync, statSync } from 'fs'
 import { existsSync } from 'node:fs'
-import { ChatCompletionMessageParam } from 'openai/resources/chat/completions/completions'
+import { GenericMessage } from './providers/base'
 import { ParserVariables, ValueType } from './types'
 import { join, extname } from 'path'
 import { JSDOM } from 'jsdom'
@@ -124,8 +124,8 @@ export const transformJsonToVariables = (json: { [key: string]: string | number 
 		return variables
 	}, {} as ParserVariables)
 
-export const startConversation = (systemPrompt: string, developerPrompt: string, model: string): ChatCompletionMessageParam[] => {
-	const conversation: ChatCompletionMessageParam[] = []
+export const startConversation = (systemPrompt: string, developerPrompt: string, model: string): GenericMessage[] => {
+	const conversation: GenericMessage[] = []
 	if (model.startsWith('o1') || model.startsWith('o3')) {
 		conversation.push({
 			role: 'developer',

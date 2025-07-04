@@ -86,4 +86,185 @@ describe('CLI', () => {
 			done()
 		})
 	})
+
+	describe('File processing options', () => {
+		it('should work with extensions option', done => {
+			exec('ts-node src/cli.ts -is "{{loadDir(\\"test/templates/single-line-variables\\")}}" -e "md"', (error, stdout) => {
+				if (error) {
+					throw new Error(error.message)
+				}
+				expect(stdout).to.include('user')
+				expect(stdout).to.include('-----')
+				done()
+			})
+		})
+
+		it('should work with ignore patterns option', done => {
+			exec('ts-node src/cli.ts -is "{{loadDir(\\"test/templates\\")}}" --ignore-patterns "*.json,backup*" -e "md"', (error, stdout) => {
+				if (error) {
+					throw new Error(error.message)
+				}
+				expect(stdout).to.include('user')
+				expect(stdout).to.include('-----')
+				done()
+			})
+		})
+	})
+
+	describe('Display options', () => {
+		it('should hide prompt when --hide-prompt is used', done => {
+			exec('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" --hide-prompt --no-llm', (error, stdout) => {
+				if (error) {
+					throw new Error(error.message)
+				}
+				expect(stdout).to.not.include('user')
+				expect(stdout).to.not.include('-----')
+				expect(stdout.trim()).to.equal('')
+				done()
+			})
+		})
+	})
+
+	describe('LLM configuration options', () => {
+		it('should accept model option without making LLM calls', done => {
+			exec('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" -m "gpt-4"', (error, stdout) => {
+				if (error) {
+					throw new Error(error.message)
+				}
+				expect(stdout).to.include('user')
+				expect(stdout).to.include('Hello World')
+				expect(stdout).to.include('-----')
+				done()
+			})
+		})
+
+		it('should accept system prompt option without making LLM calls', done => {
+			exec('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" -sp "You are a helpful assistant"', (error, stdout) => {
+				if (error) {
+					throw new Error(error.message)
+				}
+				expect(stdout).to.include('user')
+				expect(stdout).to.include('Hello World')
+				expect(stdout).to.include('-----')
+				done()
+			})
+		})
+
+		it('should accept developer prompt option without making LLM calls', done => {
+			exec('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" -dp "Test developer prompt"', (error, stdout) => {
+				if (error) {
+					throw new Error(error.message)
+				}
+				expect(stdout).to.include('user')
+				expect(stdout).to.include('Hello World')
+				expect(stdout).to.include('-----')
+				done()
+			})
+		})
+
+		it('should accept response format option without making LLM calls', done => {
+			exec('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" -rf "json_object"', (error, stdout) => {
+				if (error) {
+					throw new Error(error.message)
+				}
+				expect(stdout).to.include('user')
+				expect(stdout).to.include('Hello World')
+				expect(stdout).to.include('-----')
+				done()
+			})
+		})
+
+		it('should accept reasoning effort option without making LLM calls', done => {
+			exec('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" -re "medium"', (error, stdout) => {
+				if (error) {
+					throw new Error(error.message)
+				}
+				expect(stdout).to.include('user')
+				expect(stdout).to.include('Hello World')
+				expect(stdout).to.include('-----')
+				done()
+			})
+		})
+	})
+
+	describe('JSON output functionality', () => {
+		it('should accept save-json option without making LLM calls', done => {
+			// JSON save only works in interactive/LLM modes, but option should be accepted
+			exec('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" -sj "/tmp/test.json" --no-llm', (error, stdout) => {
+				if (error) {
+					throw new Error(error.message)
+				}
+				expect(stdout).to.include('user')
+				expect(stdout).to.include('Hello World')
+				expect(stdout).to.include('-----')
+				done()
+			})
+		})
+	})
+
+	describe('Error handling', () => {
+		it('should handle invalid JSON string gracefully', done => {
+			exec('ts-node src/cli.ts -is "{{test}}" -js "invalid json"', error => {
+				if (error) {
+					expect(error.message).to.contain('Invalid JSON string provided')
+				} else {
+					throw new Error('Error not thrown by cli')
+				}
+				done()
+			})
+		})
+
+		it('should handle missing JSON file gracefully', done => {
+			exec('ts-node src/cli.ts -is "{{test}}" -jf "nonexistent.json"', error => {
+				if (error) {
+					expect(error.message).to.contain('Could not read JSON file')
+				} else {
+					throw new Error('Error not thrown by cli')
+				}
+				done()
+			})
+		})
+
+		it('should handle missing template file gracefully', done => {
+			exec('ts-node src/cli.ts "nonexistent-template.ps.md"', error => {
+				if (error) {
+					expect(error.message).to.contain('ENOENT')
+				} else {
+					throw new Error('Error not thrown by cli')
+				}
+				done()
+			})
+		})
+	})
+
+	describe('Combined options', () => {
+		it('should work with multiple options together', done => {
+			const outputPath = path.resolve(__dirname, '../combined-output.txt')
+			exec(
+				`ts-node src/cli.ts -is "{name=\\"PromptShaper\\"}{version=\\"5.0\\"}{{name}} v{{version}}" -d -s combined-output.txt --hide-prompt`,
+				error => {
+					if (error) {
+						throw new Error(error.message)
+					}
+					expect(fs.readFileSync(outputPath, 'utf8')).to.equal('PromptShaper v5.0')
+					// cleanup
+					exec(`rm -f ${outputPath}`)
+					done()
+				},
+			)
+		})
+
+		it('should work with JSON variables and save together', done => {
+			const outputPath = path.resolve(__dirname, '../json-output.txt')
+			exec(`ts-node src/cli.ts -is "Hello {{name}}!" -js '{"name": "World"}' -s json-output.txt`, error => {
+				if (error) {
+					throw new Error(error.message)
+				}
+				expect(fs.readFileSync(outputPath, 'utf8')).to.equal('Hello World!')
+				// cleanup
+				exec(`rm -f ${outputPath}`)
+				done()
+			})
+		})
+	})
 })

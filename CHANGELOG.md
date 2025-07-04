@@ -1,3 +1,30 @@
+# [6.0.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v5.0.1...v6.0.0) (2025-07-04)
+
+
+### Bug Fixes
+
+* 🐛 fix test error on github ([143679c](https://github.com/PrajnaAvidya/prompt-shaper/commit/143679c7e87c02b08bd3064ac79cdb9d7033213d))
+
+
+### Code Refactoring
+
+* 💡 remove numeric handling ([2ce5cda](https://github.com/PrajnaAvidya/prompt-shaper/commit/2ce5cda36a4d8d7b42b55d4eb25b791861fbfa55)), closes [#51](https://github.com/PrajnaAvidya/prompt-shaper/issues/51)
+* 💡 removed all openai-specific stuff from cli ([9b02675](https://github.com/PrajnaAvidya/prompt-shaper/commit/9b02675dc8eae62b1298376b7062df2f224d2786))
+
+
+### Features
+
+* 🎸 ability to ignore specific files/directories in loadDir ([5e6373b](https://github.com/PrajnaAvidya/prompt-shaper/commit/5e6373b9145789c3e663b44fbab9828f8d65188b)), closes [#44](https://github.com/PrajnaAvidya/prompt-shaper/issues/44)
+* 🎸 add CLI support for ignore patterns ([e083730](https://github.com/PrajnaAvidya/prompt-shaper/commit/e08373045e978a27582a78ab0fc67dc64168412e))
+* 🎸 added no-llm mode ([f878f80](https://github.com/PrajnaAvidya/prompt-shaper/commit/f878f8040b0be090811c42ec9b843b31c047ac05))
+* 🎸 only show user/hr when in interactive mode ([67e68f3](https://github.com/PrajnaAvidya/prompt-shaper/commit/67e68f3eadcaa140af225bf09e24c49412aa1e19))
+
+
+### BREAKING CHANGES
+
+* 🧨 developer prompt cli/env var no longer work
+* 🧨 any numeric types/arithmetic is broken
+
 ## [5.0.1](https://github.com/PrajnaAvidya/prompt-shaper/compare/v5.0.0...v5.0.1) (2025-07-03)
 
 

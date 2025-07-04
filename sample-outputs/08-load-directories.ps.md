@@ -5,12 +5,154 @@ This sample demonstrates the `loadDir()` function for loading multiple files fro
 ## Basic Directory Loading
 
 Loading all files from the sample-data directory:
-{{loadDir("samples/sample-data")}}
+
+File: samples/sample-data/README.md
+```md
+# Sample Data Directory
+
+This directory contains sample files used by PromptShaper examples.
+
+## Files:
+
+- `hello.txt` - Simple text file
+- `example.js` - JavaScript code example
+- `config.json` - Configuration file
+- `styles.css` - CSS stylesheet
+- `sub-template.ps.md` - PromptShaper sub-template
+```
+
+File: samples/sample-data/config.json
+```json
+{
+  "name": "PromptShaper",
+  "version": "5.0.0",
+  "description": "Templating language for LLM prompts",
+  "features": [
+    "variables",
+    "file loading",
+    "directory loading",
+    "image processing"
+  ]
+}
+```
+
+File: samples/sample-data/example.js
+```js
+
+function greet(name) {
+    return `Hello, ${name}! Welcome to PromptShaper.`;
+}
+
+const message = greet("Developer");
+console.log(message);
+```
+
+File: samples/sample-data/hello.txt
+```txt
+Hello from an external file!
+This content is loaded using the load() function.
+```
+
+File: samples/sample-data/styles.css
+```css
+
+.prompt-shaper {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.template {
+    font-family: monospace;
+    white-space: pre-wrap;
+}
+```
+
+File: samples/sample-data/sub-template.ps.md
+```md
+{subTitle = "Sub-template Content"}
+
+## {{subTitle}}
+
+This is content from a sub-template that demonstrates nested template loading.
+```
 
 ## Directory Loading with Ignore Patterns
 
 Loading files but ignoring specific patterns:
-{{loadDir("samples/sample-data", "*.log,temp*,backup*")}}
+
+File: samples/sample-data/README.md
+```md
+# Sample Data Directory
+
+This directory contains sample files used by PromptShaper examples.
+
+## Files:
+
+- `hello.txt` - Simple text file
+- `example.js` - JavaScript code example
+- `config.json` - Configuration file
+- `styles.css` - CSS stylesheet
+- `sub-template.ps.md` - PromptShaper sub-template
+```
+
+File: samples/sample-data/config.json
+```json
+{
+  "name": "PromptShaper",
+  "version": "5.0.0",
+  "description": "Templating language for LLM prompts",
+  "features": [
+    "variables",
+    "file loading",
+    "directory loading",
+    "image processing"
+  ]
+}
+```
+
+File: samples/sample-data/example.js
+```js
+
+function greet(name) {
+    return `Hello, ${name}! Welcome to PromptShaper.`;
+}
+
+const message = greet("Developer");
+console.log(message);
+```
+
+File: samples/sample-data/hello.txt
+```txt
+Hello from an external file!
+This content is loaded using the load() function.
+```
+
+File: samples/sample-data/styles.css
+```css
+
+.prompt-shaper {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.template {
+    font-family: monospace;
+    white-space: pre-wrap;
+}
+```
+
+File: samples/sample-data/sub-template.ps.md
+```md
+{subTitle = "Sub-template Content"}
+
+## {{subTitle}}
+
+This is content from a sub-template that demonstrates nested template loading.
+```
 
 ## Using CLI Extensions Filter
 

@@ -46,13 +46,16 @@ Run `npx prompt-shaper --help` to see a complete list of CLI options.
 - `-r, --raw` - Raw mode (don't parse any PromptShaper tags)
 - `-i, --interactive` - Enable interactive mode with OpenAI
 - `-g, --generate` - Send parsed template to OpenAI and return single response
-- `--no-llm` - Disable all LLM calls and interactive mode (template processing only)
+- `--disable-llm` - Disable all LLM calls and interactive mode (template processing only)
 
 ### LLM Configuration
 - `-m, --model <modelType>` - OpenAI model to use (default: "gpt-4o")
 - `-sp, --system-prompt <promptString>` - System prompt for LLM conversation (automatically uses developer role for o1/o3 models)
 - `-rf, --response-format <format>` - Response format: "text" or "json_object" (default: "text")
 - `-re, --reasoning-effort <effort>` - Reasoning effort for o1/o3 models: "low", "medium", or "high" (default: "high")
+
+### Profile Configuration
+- `-p, --profile <filePath>` - Load CLI options from JSON profile file
 
 ### Variable Input
 - `-js, --json <jsonString>` - Input JSON variables as string
@@ -90,8 +93,9 @@ All CLI options can be set using environment variables. Command-line options tak
 | `PROMPT_SHAPER_LOAD_JSON` | `-lj, --load-json` | Load conversation from JSON |
 | `PROMPT_SHAPER_LOAD_TEXT` | `-lt, --load-text` | Load conversation from text |
 | `PROMPT_SHAPER_MODEL` | `-m, --model` | OpenAI model name |
-| `PROMPT_SHAPER_NO_LLM` | `--no-llm` | Disable all LLM calls ("true"/"false") |
+| `PROMPT_SHAPER_NO_LLM` | `--disable-llm` | Disable all LLM calls ("true"/"false") |
 | `PROMPT_SHAPER_OUTPUT_ASSISTANT` | `-oa, --output-assistant` | Output only assistant responses ("true"/"false") |
+| `PROMPT_SHAPER_PROFILE` | `-p, --profile` | Profile file path |
 | `PROMPT_SHAPER_SYSTEM_PROMPT` | `-sp, --system-prompt` | System prompt text |
 | `PROMPT_SHAPER_RAW` | `-r, --raw` | Raw mode ("true"/"false") |
 | `PROMPT_SHAPER_SAVE` | `-s, --save` | Output file path |
@@ -137,20 +141,20 @@ npx prompt-shaper -r -i my_code.py
 ### Template-Only Mode (No LLM)
 ```bash
 # Process templates without any LLM integration
-npx prompt-shaper my_template.ps.md --no-llm
+npx prompt-shaper my_template.ps.md --disable-llm
 
 # Save processed template to file
-npx prompt-shaper my_template.ps.md --no-llm -s output.md
+npx prompt-shaper my_template.ps.md --disable-llm -s output.md
 
 # Use with template strings
-npx prompt-shaper -is "{name=\"World\"}Hello {{name}}!" --no-llm
+npx prompt-shaper -is "{name=\"World\"}Hello {{name}}!" --disable-llm
 
 # Using environment variable
 export PROMPT_SHAPER_NO_LLM=true
 npx prompt-shaper my_template.ps.md
 
 # Template processing with directory loading
-npx prompt-shaper -is "{{loadDir(\"src\")}}" --no-llm -e "js,ts"
+npx prompt-shaper -is "{{loadDir(\"src\")}}" --disable-llm -e "js,ts"
 ```
 
 ### Directory Loading with Ignore Patterns
@@ -179,6 +183,36 @@ npx prompt-shaper my_template.ps.md -g -rf json_object
 # Load variables from file and hide initial prompt
 npx prompt-shaper my_template.ps.md -jf variables.json -h
 ```
+
+### Profile Configuration
+```bash
+# Create a profile JSON file
+cat > my-profile.json << 'EOF'
+{
+  "model": "gpt-4",
+  "systemPrompt": "You are a helpful coding assistant",
+  "debug": true,
+  "hidePrompt": false,
+  "extensions": "js,ts,py,md"
+}
+EOF
+w
+# Use profile via CLI option
+npx prompt-shaper my_template.ps.md --profile my-profile.json
+
+# Use profile via environment variable
+export PROMPT_SHAPER_PROFILE=my-profile.json
+npx prompt-shaper my_template.ps.md
+
+# CLI options override profile settings
+npx prompt-shaper my_template.ps.md --profile my-profile.json --model gpt-3.5-turbo
+```
+
+Profiles use the following priority order (highest to lowest):
+1. **CLI options** - Explicitly specified command-line arguments
+2. **Profile settings** - Options loaded from JSON profile file  
+3. **Environment variables** - `PROMPT_SHAPER_*` environment variables
+4. **Built-in defaults** - Fallback values when nothing else is specified
 
 ## Templates, Slots, Variables
 
@@ -330,26 +364,6 @@ Both fenced code blocks (triple backticks) and inline code (`single backticks`) 
 
 The `samples` directory contains comprehensive examples demonstrating all PromptShaper features. These samples provide practical learning materials and reference implementations for every major capability.
 
-### Quick Start with Samples
-
-```bash
-# Run the overview sample for a complete feature demonstration
-npx prompt-shaper samples/00-overview.ps.md --no-llm
-
-# Try basic variable examples
-npx prompt-shaper samples/01-basic-variables.ps.md --no-llm
-
-# Explore file loading capabilities
-npx prompt-shaper samples/07-load-files.ps.md --no-llm
-
-# Test directory loading with file filtering
-npx prompt-shaper samples/08-load-directories.ps.md --no-llm -e "js,json,md"
-```
-
-### Testing All Samples
-
-A comprehensive regression testing system verifies that all samples work correctly and detects any changes in behavior:
-
 ```bash
 # Run the automated sample test suite with regression detection
 ./test-samples.sh
@@ -368,6 +382,6 @@ The test system compares current sample outputs against reference outputs stored
 - **Parameters** - One or more arguments passed to a slot or a function. Parameters are strings.
 - **Function** - Does "something" and the result is rendered on page, or assigned to a variable.
 - **Raw Mode** - Processing mode where PromptShaper tags are not parsed, useful for code analysis or preserving exact syntax.
-- **Template-Only Mode** - Processing mode where LLM integration is disabled using `--no-llm`, useful for pure templating without requiring an OpenAI API key.
+- **Template-Only Mode** - Processing mode where LLM integration is disabled using `--disable-llm`, useful for pure templating without requiring an OpenAI API key.
 
-**Note: You must set the OPENAI_API_KEY environment variable for LLM features (`--interactive`, `--generate`) to work. Template processing with `--no-llm` requires no API key.**
+**Note: You must set the OPENAI_API_KEY environment variable for LLM features (`--interactive`, `--generate`) to work. Template processing with `--disable-llm` requires no API key.**

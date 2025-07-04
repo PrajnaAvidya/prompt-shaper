@@ -54,14 +54,14 @@ test_sample() {
 # Test basic samples (no external dependencies)
 for file in samples/0{0,1,2,3,4,5,6}-*.ps.md; do
     if [ -f "$file" ]; then
-        test_sample "$file" "--no-llm"
+        test_sample "$file" "--disable-llm"
     fi
 done
 
 # Test file operation samples
 for file in samples/0{7,8}-*.ps.md; do
     if [ -f "$file" ]; then
-        test_sample "$file" "--no-llm -e \"js,json,md,css,txt\""
+        test_sample "$file" "--disable-llm -e \"js,json,md,css,txt\""
     fi
 done
 
@@ -72,7 +72,7 @@ for file in samples/{09,10}-*.ps.md; do
         reference_file="sample-outputs/$filename"
         
         if [ -f "$reference_file" ]; then
-            test_sample "$file" "--no-llm"
+            test_sample "$file" "--disable-llm"
         else
             total_samples=$((total_samples + 1))
             echo "⚠️  Skipping $filename (no reference - external dependencies)"
@@ -83,7 +83,7 @@ done
 # Test CLI and markdown samples
 for file in samples/{11,12}-*.ps.md; do
     if [ -f "$file" ]; then
-        test_sample "$file" "--no-llm"
+        test_sample "$file" "--disable-llm"
     fi
 done
 
@@ -108,7 +108,7 @@ else
     echo "  ./generate-sample-outputs.sh"
     echo ""
     echo "🔍 To debug specific failures:"
-    echo "  yarn parse samples/filename.ps.md --no-llm"
+    echo "  yarn parse samples/filename.ps.md --disable-llm"
     echo "  diff sample-outputs/filename.ps.md /tmp/current-output"
     exit 1
 fi

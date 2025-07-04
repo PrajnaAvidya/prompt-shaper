@@ -2,66 +2,66 @@ import { expect } from 'chai'
 import { execSync } from 'child_process'
 
 describe('No LLM functionality', function () {
-	describe('CLI option --no-llm', function () {
-		it('should prevent LLM calls when --no-llm is used', function () {
-			const result = execSync('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" --no-llm', { encoding: 'utf8' })
+	describe('CLI option --disable-llm', function () {
+		it('should prevent LLM calls when --disable-llm is used', function () {
+			const result = execSync('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" --disable-llm', { encoding: 'utf8' })
 
 			expect(result).to.include('Hello World')
 			expect(result).to.not.include('assistant')
 		})
 
-		it('should error when --no-llm is used with --interactive', function () {
+		it('should error when --disable-llm is used with --interactive', function () {
 			let error = false
 			try {
-				execSync('ts-node src/cli.ts --no-llm --interactive', { encoding: 'utf8' })
+				execSync('ts-node src/cli.ts --disable-llm --interactive', { encoding: 'utf8' })
 			} catch (e) {
 				error = true
 				const execError = e as { stderr: string }
-				expect(execError.stderr).to.include('Error: --no-llm cannot be used with interactive mode')
+				expect(execError.stderr).to.include('Error: --disable-llm cannot be used with interactive mode')
 			}
 			expect(error).to.be.true
 		})
 
-		it('should error when --no-llm is used with --generate', function () {
+		it('should error when --disable-llm is used with --generate', function () {
 			let error = false
 			try {
-				execSync('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" --no-llm --generate', { encoding: 'utf8' })
+				execSync('ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" --disable-llm --generate', { encoding: 'utf8' })
 			} catch (e) {
 				error = true
 				const execError = e as { stderr: string }
-				expect(execError.stderr).to.include('Error: --no-llm cannot be used with interactive mode')
+				expect(execError.stderr).to.include('Error: --disable-llm cannot be used with interactive mode')
 			}
 			expect(error).to.be.true
 		})
 
-		it('should error when --no-llm is used with --load-json', function () {
+		it('should error when --disable-llm is used with --load-json', function () {
 			let error = false
 			try {
-				execSync('ts-node src/cli.ts --no-llm --load-json test.json', { encoding: 'utf8' })
+				execSync('ts-node src/cli.ts --disable-llm --load-json test.json', { encoding: 'utf8' })
 			} catch (e) {
 				error = true
 				const execError = e as { stderr: string }
-				expect(execError.stderr).to.include('Error: --no-llm cannot be used with interactive mode')
+				expect(execError.stderr).to.include('Error: --disable-llm cannot be used with interactive mode')
 			}
 			expect(error).to.be.true
 		})
 
-		it('should error when --no-llm is used with --load-text', function () {
+		it('should error when --disable-llm is used with --load-text', function () {
 			let error = false
 			try {
-				execSync('ts-node src/cli.ts --no-llm --load-text test.md', { encoding: 'utf8' })
+				execSync('ts-node src/cli.ts --disable-llm --load-text test.md', { encoding: 'utf8' })
 			} catch (e) {
 				error = true
 				const execError = e as { stderr: string }
-				expect(execError.stderr).to.include('Error: --no-llm cannot be used with interactive mode')
+				expect(execError.stderr).to.include('Error: --disable-llm cannot be used with interactive mode')
 			}
 			expect(error).to.be.true
 		})
 
-		it('should work with --save option when --no-llm is used', function () {
+		it('should work with --save option when --disable-llm is used', function () {
 			const tempFile = '/tmp/prompt-shaper-test-output.txt'
 
-			execSync(`ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" --no-llm --save ${tempFile}`, { encoding: 'utf8' })
+			execSync(`ts-node src/cli.ts -is "{greeting=\\"Hello World\\"}{{greeting}}" --disable-llm --save ${tempFile}`, { encoding: 'utf8' })
 
 			const savedContent = execSync(`cat ${tempFile}`, { encoding: 'utf8' })
 			expect(savedContent.trim()).to.equal('Hello World')
@@ -70,9 +70,9 @@ describe('No LLM functionality', function () {
 			execSync(`rm -f ${tempFile}`)
 		})
 
-		it('should still process templates normally when --no-llm is used', function () {
+		it('should still process templates normally when --disable-llm is used', function () {
 			const result = execSync(
-				'ts-node src/cli.ts -is "{name=\\"PromptShaper\\"}{version=\\"5.0\\"}Welcome to {{name}} version {{version}}!" --no-llm',
+				'ts-node src/cli.ts -is "{name=\\"PromptShaper\\"}{version=\\"5.0\\"}Welcome to {{name}} version {{version}}!" --disable-llm',
 				{ encoding: 'utf8' },
 			)
 
@@ -105,7 +105,7 @@ describe('No LLM functionality', function () {
 			} catch (e) {
 				error = true
 				const execError = e as { stderr: string }
-				expect(execError.stderr).to.include('Error: --no-llm cannot be used with interactive mode')
+				expect(execError.stderr).to.include('Error: --disable-llm cannot be used with interactive mode')
 			}
 			expect(error).to.be.true
 		})
@@ -124,25 +124,25 @@ describe('No LLM functionality', function () {
 	})
 
 	describe('Integration with existing functionality', function () {
-		it('should work with loadDir function when --no-llm is used', function () {
-			const result = execSync('ts-node src/cli.ts -is "{{loadDir(\\"test/templates/single-line-variables\\")}}" --no-llm -e md', { encoding: 'utf8' })
+		it('should work with loadDir function when --disable-llm is used', function () {
+			const result = execSync('ts-node src/cli.ts -is "{{loadDir(\\"test/templates/single-line-variables\\")}}" --disable-llm -e md', { encoding: 'utf8' })
 
-			// in test environment, functions may not execute due to PROMPT_SHAPER_TESTS=true
-			// but we verify that --no-llm doesn't break the template processing
-			expect(result).to.include('loadDir')
+			// loadDir function should execute and show file contents
+			expect(result).to.include('File: test/templates/single-line-variables')
+			expect(result).to.include('singleLineNumberVar')
 		})
 
-		it('should work with variables and slots when --no-llm is used', function () {
+		it('should work with variables and slots when --disable-llm is used', function () {
 			const result = execSync(
-				'ts-node src/cli.ts -is "{items=\\"apples,bananas,cherries\\"}{list(items)}- {{items}}{/list}{{list(\\"fruits\\")}}" --no-llm',
+				'ts-node src/cli.ts -is "{items=\\"apples,bananas,cherries\\"}{list(items)}- {{items}}{/list}{{list(\\"fruits\\")}}" --disable-llm',
 				{ encoding: 'utf8' },
 			)
 
 			expect(result).to.include('- fruits')
 		})
 
-		it('should work with load function when --no-llm is used', function () {
-			const result = execSync('ts-node src/cli.ts -is "{{load(\\"test/templates/single-line-variables/string.ps.md\\")}}" --no-llm', {
+		it('should work with load function when --disable-llm is used', function () {
+			const result = execSync('ts-node src/cli.ts -is "{{load(\\"test/templates/single-line-variables/string.ps.md\\")}}" --disable-llm', {
 				encoding: 'utf8',
 			})
 

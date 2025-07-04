@@ -12,6 +12,7 @@ import * as readline from 'readline'
 
 interface CLIOptions {
 	debug?: boolean
+	disableLlm?: boolean
 	extensions?: string
 	ignorePatterns?: string
 	generate?: boolean
@@ -25,6 +26,7 @@ interface CLIOptions {
 	llm?: boolean
 	model: string
 	outputAssistant: boolean
+	profile?: string
 	systemPrompt: string
 	raw?: boolean
 	save?: string
@@ -77,6 +79,31 @@ const defaultFileExtensions = [
 	'.env',
 ]
 
+// load profile options from JSON file
+function loadProfileOptions(profilePath: string): Partial<CLIOptions> {
+	try {
+		const profileContent = fs.readFileSync(path.resolve(profilePath), 'utf8')
+		const profileOptions = JSON.parse(profileContent)
+
+		// validate that the profile doesn't contain keys that shouldn't be in profiles
+		const excludedKeys = new Set(['profile']) // profile option shouldn't reference itself
+
+		const invalidKeys = Object.keys(profileOptions).filter(key => excludedKeys.has(key))
+		if (invalidKeys.length > 0) {
+			console.warn(`Warning: Invalid profile options found: ${invalidKeys.join(', ')}`)
+		}
+
+		return profileOptions
+	} catch (error) {
+		if (error instanceof Error) {
+			console.error(`Error loading profile from ${profilePath}: ${error.message}`)
+		} else {
+			console.error(`Error loading profile from ${profilePath}: ${error}`)
+		}
+		exitApp(1)
+	}
+}
+
 const envVars =
 	process.env.PROMPT_SHAPER_TESTS !== 'true'
 		? {
@@ -94,6 +121,7 @@ const envVars =
 				model: process.env.PROMPT_SHAPER_MODEL,
 				llm: process.env.PROMPT_SHAPER_NO_LLM !== 'true',
 				outputAssistant: process.env.PROMPT_SHAPER_OUTPUT_ASSISTANT === 'true',
+				profile: process.env.PROMPT_SHAPER_PROFILE,
 				systemPrompt: process.env.PROMPT_SHAPER_SYSTEM_PROMPT,
 				raw: process.env.PROMPT_SHAPER_RAW === 'true',
 				save: process.env.PROMPT_SHAPER_SAVE,
@@ -112,19 +140,56 @@ function exitApp(code: number = 0): never {
 	process.exit(code)
 }
 
-async function handler(input: string, options: CLIOptions) {
+async function handler(input: string, cliOptions: CLIOptions) {
+	// implement priority system: CLI > profile > env vars
+	let profileOptions: Partial<CLIOptions> = {}
+
+	// determine which profile to load (CLI takes priority over env var)
+	const profilePath = cliOptions.profile || envVars.profile
+	if (profilePath) {
+		if (cliOptions.profile && envVars.profile && cliOptions.profile !== envVars.profile) {
+			console.warn(`Warning: Ignoring PROMPT_SHAPER_PROFILE environment variable. Using CLI profile: ${cliOptions.profile}`)
+		}
+		profileOptions = loadProfileOptions(profilePath)
+	}
+
+	// merge options in priority order: CLI > profile > env vars > defaults
+	const options: CLIOptions = {
+		debug: cliOptions.debug ?? profileOptions.debug ?? envVars.debug ?? false,
+		extensions: cliOptions.extensions ?? profileOptions.extensions ?? envVars.extensions ?? defaultFileExtensions.join(','),
+		ignorePatterns: cliOptions.ignorePatterns ?? profileOptions.ignorePatterns ?? envVars.ignorePatterns,
+		generate: cliOptions.generate ?? profileOptions.generate ?? envVars.generate ?? false,
+		hidePrompt: cliOptions.hidePrompt ?? profileOptions.hidePrompt ?? envVars.hidePrompt ?? false,
+		interactive: cliOptions.interactive ?? profileOptions.interactive ?? envVars.interactive ?? false,
+		isString: cliOptions.isString ?? profileOptions.isString ?? envVars.isString ?? false,
+		json: cliOptions.json ?? profileOptions.json ?? envVars.json,
+		jsonFile: cliOptions.jsonFile ?? profileOptions.jsonFile ?? envVars.jsonFile,
+		loadJson: cliOptions.loadJson ?? profileOptions.loadJson ?? envVars.loadJson,
+		loadText: cliOptions.loadText ?? profileOptions.loadText ?? envVars.loadText,
+		llm: cliOptions.disableLlm ? false : (profileOptions.llm ?? envVars.llm ?? true),
+		model: cliOptions.model ?? profileOptions.model ?? envVars.model ?? 'gpt-4o',
+		outputAssistant: cliOptions.outputAssistant ?? profileOptions.outputAssistant ?? envVars.outputAssistant ?? false,
+		profile: cliOptions.profile ?? profileOptions.profile ?? envVars.profile,
+		systemPrompt: cliOptions.systemPrompt ?? profileOptions.systemPrompt ?? envVars.systemPrompt ?? 'You are a helpful assistant.',
+		raw: cliOptions.raw ?? profileOptions.raw ?? envVars.raw ?? false,
+		save: cliOptions.save ?? profileOptions.save ?? envVars.save,
+		saveJson: cliOptions.saveJson ?? profileOptions.saveJson ?? envVars.saveJson,
+		responseFormat: (cliOptions.responseFormat ?? profileOptions.responseFormat ?? envVars.responseFormat ?? 'text') as ResponseFormat,
+		reasoningEffort: (cliOptions.reasoningEffort ?? profileOptions.reasoningEffort ?? envVars.reasoningEffort ?? 'high') as ReasoningEffort,
+	}
+
 	// convert llm flag to nollm for easier logic
 	const noLlm = options.llm === false
 
-	// check for conflicting options with no-llm
+	// check for conflicting options with disable-llm
 	if (noLlm && (options.generate || options.loadJson || options.loadText)) {
-		console.error('Error: --no-llm cannot be used with interactive mode, generate, or conversation loading options')
+		console.error('Error: --disable-llm cannot be used with interactive mode, generate, or conversation loading options')
 		exitApp(1)
 	}
 
 	// check for --interactive flag specifically
 	if (noLlm && options.interactive && !input) {
-		console.error('Error: --no-llm cannot be used with interactive mode, generate, or conversation loading options')
+		console.error('Error: --disable-llm cannot be used with interactive mode, generate, or conversation loading options')
 		exitApp(1)
 	}
 
@@ -209,7 +274,7 @@ async function handler(input: string, options: CLIOptions) {
 		const parserContext = { variables, options: parserOptions, attachments: [] }
 		const parsed = options.raw ? template : await parseTemplate(template, parserContext)
 
-		// check if user wants to send results to LLM (but not in raw mode or no-llm mode)
+		// check if user wants to send results to LLM (but not in raw mode or disable-llm mode)
 		if (!options.raw && !noLlm && (options.generate || options.interactive)) {
 			// show conversational formatting when using llm features
 			if (!options.hidePrompt) {
@@ -332,34 +397,30 @@ function saveConversationAsText(conversation: GenericMessage[], options: CLIOpti
 program
 	.description('Run the PromptShaper parser. Docs: https://github.com/PrajnaAvidya/prompt-shaper')
 	.argument('[input]', 'Input template file path or string')
-	.option('-d, --debug', 'Show debug messages', envVars.debug)
+	.option('-d, --debug', 'Show debug messages')
 	.option(
-		'-e, --extensions',
+		'-e, --extensions <extensions>',
 		'What file extensions to include when loading a directory, list separated by commas (see cli.ts for default file extensions)',
-		envVars.extensions,
 	)
-	.option(
-		'--ignore-patterns <patterns>',
-		'Comma-separated patterns to ignore when loading directories (supports glob patterns like *.log, temp*)',
-		envVars.ignorePatterns,
-	)
-	.option('-g, --generate', 'Send parsed template result to ChatGPT and return response', envVars.generate)
-	.option('-h, --hide-prompt', 'Hide the initial prompt in the console', envVars.hidePrompt)
-	.option('-is, --is-string', 'Indicate that the input is a string, not a file path', envVars.isString)
-	.option('-i, --interactive', 'Enable interactive mode', envVars.interactive)
-	.option('-js, --json <jsonString>', 'Input JSON variables as string', envVars.json)
-	.option('-jf, --json-file <filePath>', 'Input JSON variables as file path', envVars.jsonFile)
-	.option('-lj, --load-json <filePath>', 'Load conversation from JSON file and continue in interactive mode', envVars.loadJson)
-	.option('-lt, --load-text <filePath>', 'Load conversation from text/markdown file and continue in interactive mode', envVars.loadText)
-	.option('-m, --model <modelType>', 'OpenAI model to use', envVars.model || 'gpt-4o')
-	.option('--no-llm', 'Disable all LLM calls and interactive mode (template processing only)', envVars.llm)
-	.option('-oa --output-assistant', 'Save gpt output only to text/JSON (filters out prompt & user responses)', envVars.outputAssistant)
-	.option('-sp, --system-prompt <promptString>', 'System prompt for LLM conversation', envVars.systemPrompt || 'You are a helpful assistant.')
-	.option('-re, --reasoning-effort', 'Reasoning effort (low/medium/high) for o1/o3 models', envVars.reasoningEffort || 'high')
-	.option('-rf, --response-format', 'Response format (text/json_object)', envVars.responseFormat || 'text')
-	.option('-r, --raw', "Raw mode (don't parse any Prompt Shaper tags)", envVars.raw)
-	.option('-s, --save <filePath>', 'Save output to file path', envVars.save)
-	.option('-sj, --save-json <filePath>', 'Save conversation as JSON file', envVars.saveJson)
+	.option('--ignore-patterns <patterns>', 'Comma-separated patterns to ignore when loading directories (supports glob patterns like *.log, temp*)')
+	.option('-g, --generate', 'Send parsed template result to ChatGPT and return response')
+	.option('-h, --hide-prompt', 'Hide the initial prompt in the console')
+	.option('-is, --is-string', 'Indicate that the input is a string, not a file path')
+	.option('-i, --interactive', 'Enable interactive mode')
+	.option('-js, --json <jsonString>', 'Input JSON variables as string')
+	.option('-jf, --json-file <filePath>', 'Input JSON variables as file path')
+	.option('-lj, --load-json <filePath>', 'Load conversation from JSON file and continue in interactive mode')
+	.option('-lt, --load-text <filePath>', 'Load conversation from text/markdown file and continue in interactive mode')
+	.option('-m, --model <modelType>', 'OpenAI model to use')
+	.option('--disable-llm', 'Disable all LLM calls and interactive mode (template processing only)')
+	.option('-oa --output-assistant', 'Save gpt output only to text/JSON (filters out prompt & user responses)')
+	.option('-p, --profile <filePath>', 'Load CLI options from JSON profile file')
+	.option('-sp, --system-prompt <promptString>', 'System prompt for LLM conversation')
+	.option('-re, --reasoning-effort <effort>', 'Reasoning effort (low/medium/high) for o1/o3 models')
+	.option('-rf, --response-format <format>', 'Response format (text/json_object)')
+	.option('-r, --raw', "Raw mode (don't parse any Prompt Shaper tags)")
+	.option('-s, --save <filePath>', 'Save output to file path')
+	.option('-sj, --save-json <filePath>', 'Save conversation as JSON file')
 	.action(handler)
 
 program.parse()

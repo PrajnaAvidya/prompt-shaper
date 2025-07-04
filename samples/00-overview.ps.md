@@ -57,7 +57,7 @@ Content here
 - Raw text rendering
 
 ### 5. CLI Processing Modes
-- Template-only mode (`--no-llm`)
+- Template-only mode (`--disable-llm`)
 - Interactive chat mode (`--interactive`)
 - Single response generation (`--generate`)
 - Raw template viewing (`--raw`)
@@ -66,7 +66,7 @@ Content here
 
 1. **Install**: `yarn global add prompt-shaper`
 2. **Basic usage**: `prompt-shaper template.ps.md`
-3. **Template-only**: `prompt-shaper template.ps.md --no-llm`
+3. **Template-only**: `prompt-shaper template.ps.md --disable-llm`
 4. **Interactive**: `prompt-shaper template.ps.md --interactive`
 
 ## Sample Files Overview
@@ -88,11 +88,11 @@ Content here
 
 Run this overview:
 ```bash
-prompt-shaper samples/00-overview.ps.md --no-llm
+prompt-shaper samples/00-overview.ps.md --disable-llm
 ```
 
 Explore other samples:
 ```bash
-prompt-shaper samples/01-basic-variables.ps.md --no-llm
-prompt-shaper samples/07-load-files.ps.md --no-llm
+prompt-shaper samples/01-basic-variables.ps.md --disable-llm
+prompt-shaper samples/07-load-files.ps.md --disable-llm
 ```

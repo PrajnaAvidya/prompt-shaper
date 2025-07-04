@@ -115,23 +115,23 @@ function exitApp(code: number = 0): never {
 }
 
 async function handler(input: string, options: CLIOptions) {
-	// Convert llm flag to noLlm for easier logic (--no-llm sets llm to false)
+	// convert llm flag to nollm for easier logic
 	const noLlm = options.llm === false
 
-	// Check for conflicting options with no-llm
+	// check for conflicting options with no-llm
 	if (noLlm && (options.generate || options.loadJson || options.loadText)) {
 		console.error('Error: --no-llm cannot be used with interactive mode, generate, or conversation loading options')
 		exitApp(1)
 	}
 
-	// Check for --interactive flag specifically
+	// check for --interactive flag specifically
 	if (noLlm && options.interactive && !input) {
 		console.error('Error: --no-llm cannot be used with interactive mode, generate, or conversation loading options')
 		exitApp(1)
 	}
 
 	if (options.loadJson) {
-		// load json and continue in interactive
+		// load json and continue interactive
 		const conversation: ChatCompletionMessageParam[] = JSON.parse(fs.readFileSync(options.loadJson, 'utf8'))
 		await startSavedConversation(conversation, options)
 
@@ -139,7 +139,7 @@ async function handler(input: string, options: CLIOptions) {
 	}
 
 	if (options.loadText) {
-		// load text and continue in interactive
+		// load text and continue interactive
 		const conversation = fs
 			.readFileSync(options.loadText, 'utf8')
 			.split('\n\n-----\n\n')
@@ -153,7 +153,7 @@ async function handler(input: string, options: CLIOptions) {
 	}
 
 	if (options.interactive && !input) {
-		// start new conversation in interactive
+		// start new conversation
 		const conversation: ChatCompletionMessageParam[] = startConversation(options.systemPrompt, options.developerPrompt, options.model)
 		await startSavedConversation(conversation, options)
 
@@ -210,10 +210,10 @@ async function handler(input: string, options: CLIOptions) {
 		// parse template if not in raw mode
 		const parserContext = { variables, options: parserOptions, attachments: [] }
 		const parsed = options.raw ? template : await parseTemplate(template, parserContext)
-		
+
 		// check if user wants to send results to LLM (but not in raw mode or no-llm mode)
 		if (!options.raw && !noLlm && (options.generate || options.interactive)) {
-			// Show conversational formatting when using LLM features
+			// show conversational formatting when using llm features
 			if (!options.hidePrompt) {
 				console.log(`user\n${parsed}\n-----`)
 			}
@@ -233,7 +233,7 @@ async function handler(input: string, options: CLIOptions) {
 				await interactiveModeLoop(conversation, options, variables)
 			}
 		} else {
-			// Template-only mode: output parsed template directly
+			// template-only mode: output parsed template directly
 			if (!options.hidePrompt) {
 				console.log(parsed)
 			}
@@ -269,7 +269,7 @@ async function interactiveModeLoop(conversation: ChatCompletionMessageParam[], o
 		userTurn = true
 	}
 
-	// runs forever until user hits control+c
+	// runs until user exits
 	const running = true
 	while (running) {
 		if (!userTurn) {

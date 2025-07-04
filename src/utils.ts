@@ -9,7 +9,7 @@ import sharp from 'sharp'
 
 const fileCache: { [key: string]: string } = {}
 
-// helper function to check if a file/directory should be ignored
+// check if file/directory should be ignored
 function shouldIgnore(name: string, ignorePatterns: string[]): boolean {
 	if (!ignorePatterns.length) return false
 
@@ -37,7 +37,7 @@ export const loadFileContent = (filePath: string): string => {
 	return contents
 }
 
-// load a directory of files by extension, recursively if specified
+// load directory files by extension
 export const loadDirectoryContents = (
 	directoryPath: string,
 	extensions: string[],
@@ -49,7 +49,7 @@ export const loadDirectoryContents = (
 	function readDir(dir: string, recursive: boolean) {
 		const list = readdirSync(dir)
 		list.forEach(file => {
-			// check if this file/directory should be ignored
+			// check if ignored
 			if (shouldIgnore(file, ignorePatterns)) {
 				return
 			}
@@ -86,7 +86,7 @@ export const loadUrlReadableContents = async (url: string): Promise<string> => {
 		}
 		const htmlContent = await response.text()
 
-		// parse html into readable text
+		// parse html to readable text
 		const dom = new JSDOM(htmlContent, { url })
 		const reader = new Readability(dom.window.document)
 		const article = reader.parse()
@@ -107,12 +107,12 @@ export const loadUrlReadableContents = async (url: string): Promise<string> => {
 	}
 }
 
-// used to replace a slot with its rendered contents
+// replace slot with rendered contents
 export const replaceStringAtLocation = (str: string, replacement: string, start: number, end: number): string => {
 	return str.substring(0, start) + replacement + str.substring(end)
 }
 
-// transforms a json key->value array to parser variables
+// transform json to parser variables
 export const transformJsonToVariables = (json: { [key: string]: string | number }): ParserVariables =>
 	Object.entries(json).reduce((variables, [key, value]) => {
 		variables[key] = {
@@ -149,7 +149,7 @@ export const startConversation = (systemPrompt: string, developerPrompt: string,
 export const encodeLocalImageAsBase64 = async (path: string): Promise<{ data: string; format: string }> => {
 	if (!existsSync(path)) throw new Error(`Image not found at path: ${path}`)
 
-	// attempt to convert format if it's not accepted by openai
+	// convert format if not accepted by openai
 	const allowedFormats = ['jpeg', 'png', 'webp', 'gif']
 	let image = sharp(path)
 	const metadata = await image.metadata()

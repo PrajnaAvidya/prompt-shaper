@@ -96,7 +96,7 @@ export const functions: Record<string, PromptShaperFunction> = {
 	},
 }
 
-// allow people to register their own functions
+// allow custom function registration
 export const registerFunction = (name: string, func: PromptShaperFunction): void => {
 	if (functions[name]) {
 		throw new Error(`Function ${name} is already registered.`)

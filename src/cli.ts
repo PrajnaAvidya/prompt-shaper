@@ -210,12 +210,13 @@ async function handler(input: string, options: CLIOptions) {
 		// parse template if not in raw mode
 		const parserContext = { variables, options: parserOptions, attachments: [] }
 		const parsed = options.raw ? template : await parseTemplate(template, parserContext)
-		if (!options.hidePrompt) {
-			console.log(`user\n${parsed}\n-----`)
-		}
-
+		
 		// check if user wants to send results to LLM (but not in raw mode or no-llm mode)
 		if (!options.raw && !noLlm && (options.generate || options.interactive)) {
+			// Show conversational formatting when using LLM features
+			if (!options.hidePrompt) {
+				console.log(`user\n${parsed}\n-----`)
+			}
 			const conversation: ChatCompletionMessageParam[] = [
 				...startConversation(options.systemPrompt, options.developerPrompt, options.model),
 				{
@@ -232,7 +233,10 @@ async function handler(input: string, options: CLIOptions) {
 				await interactiveModeLoop(conversation, options, variables)
 			}
 		} else {
-			// just return the generated text
+			// Template-only mode: output parsed template directly
+			if (!options.hidePrompt) {
+				console.log(parsed)
+			}
 			if (options.save) {
 				fs.writeFileSync(options.save, parsed)
 			}

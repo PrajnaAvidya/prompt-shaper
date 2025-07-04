@@ -125,6 +125,9 @@ npx prompt-shaper my_template.ps.md -i
 npx prompt-shaper -lt previous_conversation.md
 ```
 
+#### Interactive Mode Commands
+- `/rewind` - Remove the last question and response from the conversation history
+
 ### Raw Mode (No Parsing)
 ```bash
 # Process file without parsing PromptShaper tags

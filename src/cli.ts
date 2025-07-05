@@ -373,7 +373,6 @@ export const interactiveCommands: InteractiveCommand[] = [
 
 				// determine role based on model
 				const usesDeveloperRole = options.model.startsWith('o1') || options.model.startsWith('o3')
-				const role = usesDeveloperRole ? 'developer' : 'system'
 
 				const newMessage = usesDeveloperRole
 					? { role: 'developer' as const, content: [{ type: 'text' as const, text: newSystemPrompt }] }
@@ -397,6 +396,82 @@ export const interactiveCommands: InteractiveCommand[] = [
 					saveConversationAsText(conversation, options)
 				}
 			}
+			return true // continue conversation
+		},
+	},
+	{
+		name: 'compact',
+		description: 'Compact conversation history using AI summarization',
+		handler: async (conversation, options, args) => {
+			if (conversation.length <= 1) {
+				console.log('Conversation too short to compact (needs at least one exchange).\n-----')
+				return true
+			}
+
+			try {
+				// load compact instructions
+				const compactInstructionsPath = path.join(__dirname, 'compact-instructions.md')
+				let compactInstructions: string
+				try {
+					compactInstructions = fs.readFileSync(compactInstructionsPath, 'utf8')
+				} catch (error) {
+					console.log('Error: Could not load compact instructions file.\n-----')
+					return true
+				}
+
+				// prepare the compact request
+				let compactPrompt = compactInstructions
+				if (args.length > 0) {
+					const userInstructions = args.join(' ')
+					compactPrompt += `\n\nAdditional instructions from user: ${userInstructions}`
+				}
+
+				// create temporary conversation for compacting
+				const compactConversation: GenericMessage[] = [
+					...conversation,
+					{
+						role: 'user',
+						content: compactPrompt,
+					},
+				]
+
+				console.log('Compacting conversation history...')
+
+				// get the compact summary from the llm
+				const compactResult = await generateWithProvider(
+					compactConversation,
+					options.model,
+					options.responseFormat,
+					options.reasoningEffort,
+					options.debug,
+				)
+
+				// preserve the original system message if it exists
+				const originalSystemMessage = conversation.find(msg => msg.role === 'system' || msg.role === 'developer')
+
+				// replace conversation with compacted version
+				conversation.length = 0 // clear array
+				if (originalSystemMessage) {
+					conversation.push(originalSystemMessage)
+				}
+				conversation.push({
+					role: 'user',
+					content: 'Previous conversation summary:\n\n' + compactResult,
+				})
+
+				// update saved files after compacting
+				if (options.saveJson) {
+					saveConversationAsJson(conversation, options)
+				}
+				if (options.save) {
+					saveConversationAsText(conversation, options)
+				}
+
+				console.log('\nConversation compacted successfully!\n-----')
+			} catch (error) {
+				console.log(`Error during compacting: ${error instanceof Error ? error.message : error}\n-----`)
+			}
+
 			return true // continue conversation
 		},
 	},

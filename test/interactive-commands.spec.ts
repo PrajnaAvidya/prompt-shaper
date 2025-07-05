@@ -388,4 +388,100 @@ describe('Interactive commands', function () {
 			expect(mockConversation[1].role).to.equal('user')
 		})
 	})
+
+	describe('/compact command', () => {
+		it('should exist and have correct description', () => {
+			const compactCommand = interactiveCommands.find(cmd => cmd.name === 'compact')
+			expect(compactCommand).to.exist
+			expect(compactCommand!.description).to.equal('Compact conversation history using AI summarization')
+		})
+
+		it('should reject compacting conversations that are too short', async () => {
+			const compactCommand = interactiveCommands.find(cmd => cmd.name === 'compact')!
+
+			const mockConversation: GenericMessage[] = [{ role: 'system', content: 'You are a helpful assistant.' }]
+			const mockOptions = { model: 'gpt-4' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+			// capture console output
+			const originalLog = console.log
+			let output = ''
+			console.log = (...args) => {
+				output += args.join(' ') + '\n'
+			}
+
+			const result = await compactCommand.handler(mockConversation, mockOptions, [])
+
+			console.log = originalLog
+
+			expect(result).to.be.true
+			expect(output).to.include('Conversation too short to compact')
+			expect(mockConversation.length).to.equal(1) // should not modify conversation
+		})
+
+		it('should handle missing compact instructions file gracefully', async () => {
+			const compactCommand = interactiveCommands.find(cmd => cmd.name === 'compact')!
+
+			const mockConversation: GenericMessage[] = [
+				{ role: 'system', content: 'You are a helpful assistant.' },
+				{ role: 'user', content: 'Hello' },
+				{ role: 'assistant', content: 'Hi there!' },
+			]
+			const mockOptions = { model: 'gpt-4' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+			// temporarily mock fs.readFileSync to simulate missing file
+			const originalReadFileSync = require('fs').readFileSync
+			require('fs').readFileSync = (filePath: string, encoding?: string) => {
+				if (filePath.includes('compact-instructions.md')) {
+					throw new Error('ENOENT: no such file or directory')
+				}
+				return originalReadFileSync(filePath, encoding)
+			}
+
+			// capture console output
+			const originalLog = console.log
+			let output = ''
+			console.log = (...args) => {
+				output += args.join(' ') + '\n'
+			}
+
+			const result = await compactCommand.handler(mockConversation, mockOptions, [])
+
+			// restore original functions
+			console.log = originalLog
+			require('fs').readFileSync = originalReadFileSync
+
+			expect(result).to.be.true
+			expect(output).to.include('Could not load compact instructions file')
+		})
+
+		it('should handle compacting errors gracefully', async () => {
+			const compactCommand = interactiveCommands.find(cmd => cmd.name === 'compact')!
+
+			const mockConversation: GenericMessage[] = [
+				{ role: 'system', content: 'You are a helpful assistant.' },
+				{ role: 'user', content: 'Hello' },
+				{ role: 'assistant', content: 'Hi there!' },
+			]
+			const mockOptions = { model: 'gpt-4' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+			// mock generateWithProvider to throw an error
+			const generateStub = sinon.stub(factoryModule, 'generateWithProvider').rejects(new Error('API Error'))
+
+			// capture console output
+			const originalLog = console.log
+			let output = ''
+			console.log = (...args) => {
+				output += args.join(' ') + '\n'
+			}
+
+			const result = await compactCommand.handler(mockConversation, mockOptions, [])
+
+			// restore original functions
+			console.log = originalLog
+			generateStub.restore()
+
+			expect(result).to.be.true
+			expect(output).to.include('Error during compacting: API Error')
+		})
+	})
 })

@@ -145,6 +145,7 @@ npx prompt-shaper -lt previous_conversation.md
 - `/help` - Show available commands and shortcuts
 - `/model [model_name]` - View current model or switch to a different model (gpt-4, claude-3-5-sonnet-20241022, gemini-pro, etc.)
 - `/system [new_prompt]` - View current system prompt or update it (automatically uses developer role for o1/o3 models)
+- `/compact [optional_instructions]` - Compact conversation history using AI summarization (preserves system prompt, replaces conversation with detailed summary)
 - `/tokens` - Show token count for the current conversation with per-message breakdown
 - `/cost` - Show estimated API cost for the current session (cumulative across all requests)
 - `/retry` - Retry the last request with a new response from the LLM

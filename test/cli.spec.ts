@@ -40,7 +40,7 @@ describe('CLI', () => {
 			if (error) {
 				throw new Error(error.message)
 			}
-			expect(stdout).to.include('DEBUG:')
+			expect(stdout).to.include('[DEBUG]')
 			done()
 		})
 	})

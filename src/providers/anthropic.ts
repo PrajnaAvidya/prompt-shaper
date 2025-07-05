@@ -30,6 +30,9 @@ export class AnthropicProvider implements LLMProvider {
 			// Convert generic messages to anthropic format
 			const anthropicMessages = this.convertMessages(messages)
 
+			if (options.debug) {
+				console.log(`[DEBUG] Anthropic API call with model: ${options.model}`)
+			}
 			const stream = await this.client.messages.create({
 				model: options.model,
 				max_tokens: 4096,

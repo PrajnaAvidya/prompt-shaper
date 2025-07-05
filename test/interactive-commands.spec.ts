@@ -1,6 +1,8 @@
 import { expect } from 'chai'
 import { interactiveCommands } from '../src/cli'
 import { GenericMessage } from '../src/providers/base'
+import * as factoryModule from '../src/providers/factory'
+import sinon from 'sinon'
 
 describe('Interactive commands', function () {
 	describe('/help command', function () {
@@ -98,6 +100,77 @@ describe('Interactive commands', function () {
 
 			// Should be completely empty
 			expect(mockConversation.length).to.equal(0)
+		})
+	})
+
+	describe('/model command', function () {
+		it('should exist and have correct description', () => {
+			const modelCommand = interactiveCommands.find(cmd => cmd.name === 'model')
+			expect(modelCommand).to.exist
+			expect(modelCommand!.description).to.equal('Switch to different model or show current model')
+		})
+
+		it('should show current model when no arguments provided', () => {
+			const modelCommand = interactiveCommands.find(cmd => cmd.name === 'model')!
+
+			const mockConversation: GenericMessage[] = []
+			const mockOptions = { model: 'gpt-4' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+			const result = modelCommand.handler(mockConversation, mockOptions, [])
+			expect(result).to.be.true
+		})
+
+		it('should switch to new model when model name provided', () => {
+			const modelCommand = interactiveCommands.find(cmd => cmd.name === 'model')!
+
+			const mockConversation: GenericMessage[] = []
+			const mockOptions = { model: 'gpt-4' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+			const result = modelCommand.handler(mockConversation, mockOptions, ['claude-3-5-sonnet-20241022'])
+			expect(result).to.be.true
+			expect(mockOptions.model).to.equal('claude-3-5-sonnet-20241022')
+		})
+
+		it('should work with different provider models', () => {
+			const modelCommand = interactiveCommands.find(cmd => cmd.name === 'model')!
+
+			const mockConversation: GenericMessage[] = []
+			const mockOptions = { model: 'gpt-4' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+			// Test switching to Gemini model
+			modelCommand.handler(mockConversation, mockOptions, ['gemini-pro'])
+			expect(mockOptions.model).to.equal('gemini-pro')
+
+			// Test switching to Anthropic model
+			modelCommand.handler(mockConversation, mockOptions, ['claude-3-5-haiku-20241022'])
+			expect(mockOptions.model).to.equal('claude-3-5-haiku-20241022')
+		})
+
+		it('should reject invalid model names', () => {
+			const modelCommand = interactiveCommands.find(cmd => cmd.name === 'model')!
+
+			const mockConversation: GenericMessage[] = []
+			const mockOptions = { model: 'gpt-4' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+			const originalModel = mockOptions.model
+
+			const result = modelCommand.handler(mockConversation, mockOptions, ['invalid-model-name'])
+			expect(result).to.be.true
+			// Model should not have changed
+			expect(mockOptions.model).to.equal(originalModel)
+		})
+
+		it('should clear provider cache when switching models', () => {
+			const modelCommand = interactiveCommands.find(cmd => cmd.name === 'model')!
+			const clearCacheSpy = sinon.spy(factoryModule, 'clearProviderCache')
+
+			const mockConversation: GenericMessage[] = []
+			const mockOptions = { model: 'gpt-4' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+			const result = modelCommand.handler(mockConversation, mockOptions, ['claude-3-5-sonnet-20241022'])
+			expect(result).to.be.true
+			expect(clearCacheSpy.calledOnce).to.be.true
+
+			clearCacheSpy.restore()
 		})
 	})
 })

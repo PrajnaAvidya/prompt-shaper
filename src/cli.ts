@@ -7,7 +7,7 @@ import { program } from 'commander'
 import { loadFileContent, transformJsonToVariables } from './utils'
 import { parseTemplate } from './parser'
 import { ParserVariables, ResponseFormat, ReasoningEffort } from './types'
-import { generateWithProvider, startConversationWithProvider } from './providers/factory'
+import { generateWithProvider, startConversationWithProvider, clearProviderCache, createProvider } from './providers/factory'
 import * as readline from 'readline'
 
 interface InteractiveCommand {
@@ -91,6 +91,39 @@ export const interactiveCommands: InteractiveCommand[] = [
 			// show welcome message again
 			console.log('Conversation cleared. Starting fresh!\n-----')
 			showWelcomeMessage(options)
+			return true // continue conversation
+		},
+	},
+	{
+		name: 'model',
+		description: 'Switch to different model or show current model',
+		handler: (conversation, options, args) => {
+			if (args.length === 0) {
+				// show current model
+				const provider = getProviderFromModel(options.model)
+				console.log(`Current model: ${options.model} (${provider})\n-----`)
+			} else {
+				// switch to new model
+				const newModel = args[0]
+
+				try {
+					validateModelName(newModel)
+					// test if provider can be created successfully
+					createProvider(newModel, options.debug)
+				} catch (error) {
+					console.log(`Error: ${error instanceof Error ? error.message : error}`)
+					console.log('-----')
+					return true
+				}
+
+				const oldModel = options.model
+				options.model = newModel
+
+				// clear provider cache so next llm call uses correct provider
+				clearProviderCache(options.debug)
+
+				console.log(`Switched from ${oldModel} to ${newModel}\n-----`)
+			}
 			return true // continue conversation
 		},
 	},
@@ -235,17 +268,29 @@ const prompt = (query: string) =>
 		}
 	})
 
-function showWelcomeMessage(options: CLIOptions) {
-	// determine provider from model name
-	let provider = 'Unknown'
-	if (options.model.startsWith('gpt') || options.model.startsWith('o1') || options.model.startsWith('o3')) {
-		provider = 'OpenAI'
-	} else if (options.model.startsWith('claude-')) {
-		provider = 'Anthropic'
-	} else if (options.model.startsWith('gemini-')) {
-		provider = 'Google'
+function getProviderFromModel(model: string): string {
+	if (model.startsWith('gpt') || model.startsWith('o1') || model.startsWith('o3')) {
+		return 'OpenAI'
+	} else if (model.startsWith('claude-')) {
+		return 'Anthropic'
+	} else if (model.startsWith('gemini-')) {
+		return 'Google'
 	}
+	return 'Unknown'
+}
 
+function validateModelName(model: string): void {
+	if (getProviderFromModel(model) === 'Unknown') {
+		throw new Error(`"${model}" is not a recognized model name.
+Valid model patterns:
+  OpenAI: gpt-*, o1-*, o3-*
+  Anthropic: claude-*
+  Google: gemini-*`)
+	}
+}
+
+function showWelcomeMessage(options: CLIOptions) {
+	const provider = getProviderFromModel(options.model)
 	const modelDisplay = `${options.model} (${provider})`
 
 	console.log('╭─────────────────────────────────────────────────────────────╮')
@@ -305,6 +350,12 @@ async function handler(input: string, cliOptions: CLIOptions) {
 		reasoningEffort: (cliOptions.reasoningEffort ?? profileOptions.reasoningEffort ?? envVars.reasoningEffort ?? 'high') as ReasoningEffort,
 	}
 
+	// validate model name early
+	if (options.debug) {
+		console.log(`[DEBUG] Validating model name: ${options.model}`)
+	}
+	validateModelName(options.model)
+
 	// convert llm flag to nollm for easier logic
 	const noLlm = options.llm === false
 
@@ -322,6 +373,9 @@ async function handler(input: string, cliOptions: CLIOptions) {
 
 	if (options.loadJson) {
 		// load json and continue interactive
+		if (options.debug) {
+			console.log(`[DEBUG] Loading conversation from JSON: ${options.loadJson}`)
+		}
 		const conversation: GenericMessage[] = JSON.parse(fs.readFileSync(options.loadJson, 'utf8'))
 		await startSavedConversation(conversation, options)
 
@@ -330,6 +384,9 @@ async function handler(input: string, cliOptions: CLIOptions) {
 
 	if (options.loadText) {
 		// load text and continue interactive
+		if (options.debug) {
+			console.log(`[DEBUG] Loading conversation from text: ${options.loadText}`)
+		}
 		const conversation = fs
 			.readFileSync(options.loadText, 'utf8')
 			.split('\n\n-----\n\n')
@@ -344,7 +401,10 @@ async function handler(input: string, cliOptions: CLIOptions) {
 
 	if (options.interactive && !input) {
 		// start new conversation
-		const conversation: GenericMessage[] = startConversationWithProvider(options.systemPrompt, options.model)
+		if (options.debug) {
+			console.log(`[DEBUG] Starting interactive mode with model: ${options.model}`)
+		}
+		const conversation: GenericMessage[] = startConversationWithProvider(options.systemPrompt, options.model, options.debug)
 		await startSavedConversation(conversation, options)
 
 		exitApp(0)
@@ -408,7 +468,7 @@ async function handler(input: string, cliOptions: CLIOptions) {
 				console.log(`user\n${parsed}\n-----`)
 			}
 			const conversation: GenericMessage[] = [
-				...startConversationWithProvider(options.systemPrompt, options.model),
+				...startConversationWithProvider(options.systemPrompt, options.model, options.debug),
 				{
 					role: 'user',
 					content: [{ type: 'text', text: parsed }, ...parserContext.attachments.reverse()],
@@ -481,6 +541,10 @@ async function interactiveModeLoop(conversation: GenericMessage[], options: CLIO
 			const commandName = parts[0].substring(1) // remove the '/' prefix
 			const args = parts.slice(1)
 
+			if (options.debug) {
+				console.log(`[DEBUG] Processing command: ${commandName} with args: ${args.join(' ')}`)
+			}
+
 			// find matching command
 			const command = interactiveCommands.find(cmd => cmd.name === commandName)
 			if (command) {
@@ -519,8 +583,11 @@ async function interactiveModeLoop(conversation: GenericMessage[], options: CLIO
 }
 
 async function makeCompletionRequest(conversation: GenericMessage[], options: CLIOptions) {
+	if (options.debug) {
+		console.log(`[DEBUG] Making completion request with model: ${options.model}`)
+	}
 	console.log('assistant')
-	const result = await generateWithProvider(conversation, options.model, options.responseFormat, options.reasoningEffort)
+	const result = await generateWithProvider(conversation, options.model, options.responseFormat, options.reasoningEffort, options.debug)
 	console.log('\n-----')
 
 	// update/save chat history

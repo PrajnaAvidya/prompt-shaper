@@ -30,6 +30,9 @@ export class GeminiProvider implements LLMProvider {
 			// Convert generic messages to Gemini format
 			const geminiRequest = this.convertMessages(messages, options.model)
 
+			if (options.debug) {
+				console.log(`[DEBUG] Gemini API call with model: ${options.model}`)
+			}
 			const streamResponse = await this.client.models.generateContentStream(geminiRequest)
 
 			for await (const chunk of streamResponse) {

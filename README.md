@@ -12,7 +12,8 @@ I'm a programmer, and like many I've seen productivity gains due to the assistan
 - **CLI**: A variety of command-line options to customize usage, and you can specify various input/output formats.
 - **Directory Loading with Ignore Patterns**: Load entire codebases while intelligently excluding build artifacts, dependencies, and other unwanted files using glob patterns (`node_modules`, `*.log`, `temp*`, etc.).
 - **Inline Images**: Include images directly in your prompts using the `img` function, either by referencing local image files or remote URLs. The images are automatically encoded and attached to the prompt sent to the LLM.
-- **Interactive Mode** (OpenAI key required): After constructing your prompt you can continue your conversation in the command line, or load a previous conversation from JSON or text and continue in interactive mode. You can even use PromptShaper tags in interactive mode!
+- **Multiple LLM Providers**: Support for OpenAI (GPT, o1, o3 models), Anthropic (Claude models), and Google Gemini models with automatic provider detection based on model name
+- **Interactive Mode**: After constructing your prompt you can continue your conversation in the command line, or load a previous conversation from JSON or text and continue in interactive mode. You can even use PromptShaper tags in interactive mode!
 
 ## Requirements
 
@@ -44,15 +45,18 @@ Run `npx prompt-shaper --help` to see a complete list of CLI options.
 
 ### Mode Options
 - `-r, --raw` - Raw mode (don't parse any PromptShaper tags)
-- `-i, --interactive` - Enable interactive mode with OpenAI
-- `-g, --generate` - Send parsed template to OpenAI and return single response
+- `-i, --interactive` - Enable interactive mode with LLM
+- `-g, --generate` - Send parsed template to LLM and return single response
 - `--disable-llm` - Disable all LLM calls and interactive mode (template processing only)
 
 ### LLM Configuration
-- `-m, --model <modelType>` - OpenAI model to use (default: "gpt-4o")
+- `-m, --model <modelType>` - LLM model to use (default: "gpt-4o")
+  - **OpenAI model examples**: `gpt-4o`, `gpt-4o-mini`, `o1`, `o1-mini`, `o3`, `o3-mini`
+  - **Anthropic model examples**: `claude-opus-4-0`, `claude-sonnet-4-0`, `claude-3-5-haiku-latest`
+  - **Google Gemini model examples**: `gemini-2.5-pro`, `gemini-2.5-flash`
 - `-sp, --system-prompt <promptString>` - System prompt for LLM conversation (automatically uses developer role for o1/o3 models)
-- `-rf, --response-format <format>` - Response format: "text" or "json_object" (default: "text")
-- `-re, --reasoning-effort <effort>` - Reasoning effort for o1/o3 models: "low", "medium", or "high" (default: "high")
+- `-rf, --response-format <format>` - Response format: "text" or "json_object" (default: "text", OpenAI only)
+- `-re, --reasoning-effort <effort>` - Reasoning effort for o1/o3 models: "low", "medium", or "high" (default: "high", OpenAI only)
 
 ### Profile Configuration
 - `-p, --profile <filePath>` - Load CLI options from JSON profile file
@@ -78,30 +82,32 @@ Run `npx prompt-shaper --help` to see a complete list of CLI options.
 
 All CLI options can be set using environment variables. Command-line options take precedence over environment variables.
 
-| Environment Variable | CLI Option | Description |
-|---------------------|------------|-------------|
-| `OPENAI_API_KEY` | N/A | **Required** for OpenAI integration |
-| `PROMPT_SHAPER_DEBUG` | `-d, --debug` | Show debug messages ("true"/"false") |
-| `PROMPT_SHAPER_FILE_EXTENSIONS` | `-e, --extensions` | Comma-separated file extensions |
-| `PROMPT_SHAPER_IGNORE_PATTERNS` | `--ignore-patterns` | Comma-separated ignore patterns |
-| `PROMPT_SHAPER_GENERATE` | `-g, --generate` | Send to OpenAI for single response ("true"/"false") |
-| `PROMPT_SHAPER_HIDE_PROMPT` | `-h, --hide-prompt` | Hide initial prompt ("true"/"false") |
-| `PROMPT_SHAPER_IS_STRING` | `-is, --is-string` | Treat input as string ("true"/"false") |
-| `PROMPT_SHAPER_INTERACTIVE` | `-i, --interactive` | Enable interactive mode ("true"/"false") |
-| `PROMPT_SHAPER_JSON` | `-js, --json` | JSON variables string |
-| `PROMPT_SHAPER_JSON_FILE` | `-jf, --json-file` | JSON variables file path |
-| `PROMPT_SHAPER_LOAD_JSON` | `-lj, --load-json` | Load conversation from JSON |
-| `PROMPT_SHAPER_LOAD_TEXT` | `-lt, --load-text` | Load conversation from text |
-| `PROMPT_SHAPER_MODEL` | `-m, --model` | OpenAI model name |
-| `PROMPT_SHAPER_NO_LLM` | `--disable-llm` | Disable all LLM calls ("true"/"false") |
-| `PROMPT_SHAPER_OUTPUT_ASSISTANT` | `-oa, --output-assistant` | Output only assistant responses ("true"/"false") |
-| `PROMPT_SHAPER_PROFILE` | `-p, --profile` | Profile file path |
-| `PROMPT_SHAPER_SYSTEM_PROMPT` | `-sp, --system-prompt` | System prompt text |
-| `PROMPT_SHAPER_RAW` | `-r, --raw` | Raw mode ("true"/"false") |
-| `PROMPT_SHAPER_SAVE` | `-s, --save` | Output file path |
-| `PROMPT_SHAPER_SAVE_JSON` | `-sj, --save-json` | JSON output file path |
-| `PROMPT_SHAPER_RESPONSE_FORMAT` | `-rf, --response-format` | Response format ("text"/"json_object") |
-| `PROMPT_SHAPER_REASONING_EFFORT` | `-re, --reasoning-effort` | Reasoning effort ("low"/"medium"/"high") |
+| Environment Variable | CLI Option | Description                                        |
+|---------------------|------------|----------------------------------------------------|
+| `OPENAI_API_KEY` | N/A | **Required** for OpenAI models (gpt-4, o1, etc.)   |
+| `ANTHROPIC_API_KEY` | N/A | **Required** for Anthropic models (claude-4, etc.) |
+| `GEMINI_API_KEY` | N/A | **Required** for Google Gemini models (gemini-*, etc.) |
+| `PROMPT_SHAPER_DEBUG` | `-d, --debug` | Show debug messages ("true"/"false")               |
+| `PROMPT_SHAPER_FILE_EXTENSIONS` | `-e, --extensions` | Comma-separated file extensions                    |
+| `PROMPT_SHAPER_IGNORE_PATTERNS` | `--ignore-patterns` | Comma-separated ignore patterns                    |
+| `PROMPT_SHAPER_GENERATE` | `-g, --generate` | Send to LLM for single response ("true"/"false")   |
+| `PROMPT_SHAPER_HIDE_PROMPT` | `-h, --hide-prompt` | Hide initial prompt ("true"/"false")               |
+| `PROMPT_SHAPER_IS_STRING` | `-is, --is-string` | Treat input as string ("true"/"false")             |
+| `PROMPT_SHAPER_INTERACTIVE` | `-i, --interactive` | Enable interactive mode ("true"/"false")           |
+| `PROMPT_SHAPER_JSON` | `-js, --json` | JSON variables string                              |
+| `PROMPT_SHAPER_JSON_FILE` | `-jf, --json-file` | JSON variables file path                           |
+| `PROMPT_SHAPER_LOAD_JSON` | `-lj, --load-json` | Load conversation from JSON                        |
+| `PROMPT_SHAPER_LOAD_TEXT` | `-lt, --load-text` | Load conversation from text                        |
+| `PROMPT_SHAPER_MODEL` | `-m, --model` | LLM model name (OpenAI or Anthropic)               |
+| `PROMPT_SHAPER_NO_LLM` | `--disable-llm` | Disable all LLM calls ("true"/"false")             |
+| `PROMPT_SHAPER_OUTPUT_ASSISTANT` | `-oa, --output-assistant` | Output only assistant responses ("true"/"false")   |
+| `PROMPT_SHAPER_PROFILE` | `-p, --profile` | Profile file path                                  |
+| `PROMPT_SHAPER_SYSTEM_PROMPT` | `-sp, --system-prompt` | System prompt text                                 |
+| `PROMPT_SHAPER_RAW` | `-r, --raw` | Raw mode ("true"/"false")                          |
+| `PROMPT_SHAPER_SAVE` | `-s, --save` | Output file path                                   |
+| `PROMPT_SHAPER_SAVE_JSON` | `-sj, --save-json` | JSON output file path                              |
+| `PROMPT_SHAPER_RESPONSE_FORMAT` | `-rf, --response-format` | Response format ("text"/"json_object")             |
+| `PROMPT_SHAPER_REASONING_EFFORT` | `-re, --reasoning-effort` | Reasoning effort ("low"/"medium"/"high")           |
 
 ## Usage Examples
 
@@ -117,13 +123,19 @@ npx prompt-shaper -is "Hello, {{name}}!" -js '{"name": "World"}'
 npx prompt-shaper my_template.ps.md -s output.md
 ```
 
-### Interactive Mode with OpenAI
+### Interactive Mode with LLM
 ```bash
 # Start new conversation in interactive mode
 npx prompt-shaper -i
 
-# Process template and continue conversation
-npx prompt-shaper my_template.ps.md -i
+# Process template and continue conversation with OpenAI
+npx prompt-shaper my_template.ps.md -i -m gpt-4o
+
+# Use Claude models for conversation
+npx prompt-shaper my_template.ps.md -i -m claude-sonnet-4-0
+
+# Use Gemini models for conversation
+npx prompt-shaper my_template.ps.md -i -m gemini-2.5-flash
 
 # Load previous conversation and continue
 npx prompt-shaper -lt previous_conversation.md
@@ -131,6 +143,7 @@ npx prompt-shaper -lt previous_conversation.md
 
 #### Interactive Mode Commands
 - `/rewind` - Remove the last question and response from the conversation history
+- `/exit` - Exit interactive mode
 
 ### Raw Mode (No Parsing)
 ```bash
@@ -177,11 +190,20 @@ npx prompt-shaper load_project.ps.md -e "js,ts,md"
 
 ### Advanced Usage
 ```bash
-# Use specific model with custom prompts
+# Use specific OpenAI model with custom prompts
 npx prompt-shaper my_template.ps.md -m gpt-4 -sp "You are a code reviewer"
 
-# Generate single response with JSON output
-npx prompt-shaper my_template.ps.md -g -rf json_object
+# Use Claude for code analysis
+npx prompt-shaper my_template.ps.md -m claude-sonnet-4-0 -sp "You are an expert code analyst"
+
+# Use Gemini for code analysis
+npx prompt-shaper my_template.ps.md -m gemini-2.5-pro -sp "You are an expert code analyst"
+
+# Generate single response with JSON output (OpenAI only)
+npx prompt-shaper my_template.ps.md -g -rf json_object -m gpt-4o
+
+# Use reasoning models for complex tasks
+npx prompt-shaper my_template.ps.md -m o3 -re high
 
 # Load variables from file and hide initial prompt
 npx prompt-shaper my_template.ps.md -jf variables.json -h
@@ -192,14 +214,13 @@ npx prompt-shaper my_template.ps.md -jf variables.json -h
 # Create a profile JSON file
 cat > my-profile.json << 'EOF'
 {
-  "model": "gpt-4",
+  "model": "gemini-2.5-flash",
   "systemPrompt": "You are a helpful coding assistant",
   "debug": true,
   "hidePrompt": false,
   "extensions": "js,ts,py,md"
 }
 EOF
-w
 # Use profile via CLI option
 npx prompt-shaper my_template.ps.md --profile my-profile.json
 
@@ -297,7 +318,7 @@ By default, the `parser.ts` uses the contents of `functions.ts` as built-in func
 ```
 
 ### Image Processing
-- **img(source)**: Loads an image from a local file path or a URL, encodes it, and attaches it as image content in your LLM prompt. Images are automatically converted to JPEG format for OpenAI compatibility.
+- **img(source)**: Loads an image from a local file path or a URL, encodes it, and attaches it as image content in your LLM prompt. Images are automatically converted to the appropriate format for your chosen provider.
 ```
 {{img("path/to/image.png")}}
 {{img("https://example.com/image.jpg")}}
@@ -385,6 +406,41 @@ The test system compares current sample outputs against reference outputs stored
 - **Parameters** - One or more arguments passed to a slot or a function. Parameters are strings.
 - **Function** - Does "something" and the result is rendered on page, or assigned to a variable.
 - **Raw Mode** - Processing mode where PromptShaper tags are not parsed, useful for code analysis or preserving exact syntax.
-- **Template-Only Mode** - Processing mode where LLM integration is disabled using `--disable-llm`, useful for pure templating without requiring an OpenAI API key.
+- **Template-Only Mode** - Processing mode where LLM integration is disabled using `--disable-llm`, useful for pure templating without requiring any API keys.
 
-**Note: You must set the OPENAI_API_KEY environment variable for LLM features (`--interactive`, `--generate`) to work. Template processing with `--disable-llm` requires no API key.**
+## LLM Provider Setup
+
+PromptShaper supports multiple LLM providers with automatic detection based on model name:
+
+### OpenAI Provider
+**Required for GPT models**
+
+```bash
+export OPENAI_API_KEY="your-openai-api-key"
+npx prompt-shaper -i -m gpt-4o
+```
+
+### Anthropic Provider  
+**Required for Claude models**
+
+```bash
+export ANTHROPIC_API_KEY="your-anthropic-api-key"
+npx prompt-shaper -i -m claude-sonnet-4-0
+```
+
+### Google Gemini Provider
+**Required for Gemini models**
+
+```bash
+export GEMINI_API_KEY="your-google-api-key"
+npx prompt-shaper -i -m gemini-2.5-flash
+```
+
+### No API Key Required
+Template processing with `--disable-llm` works without any API keys:
+
+```bash
+npx prompt-shaper my_template.ps.md --disable-llm
+```
+
+**Note**: The appropriate API key must be set for LLM features (`--interactive`, `--generate`) to work. Provider selection is automatic based on the model name you specify.

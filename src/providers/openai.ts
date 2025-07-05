@@ -1,18 +1,23 @@
-import OpenAI from 'openai'
-import {
-	ChatCompletionMessageParam,
-	ChatCompletionReasoningEffort,
-	ChatCompletionUserMessageParam,
-	ChatCompletionSystemMessageParam,
-	ChatCompletionAssistantMessageParam,
-	ChatCompletionDeveloperMessageParam,
-} from 'openai/resources/chat/completions/completions'
 import { LLMProvider, GenericMessage, ProviderOptions } from './base'
 
+// Dynamic import for optional dependency
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let OpenAI: any = null
+try {
+	OpenAI = require('openai')
+} catch (e) {
+	// OpenAI SDK not installed
+}
+
 export class OpenAIProvider implements LLMProvider {
-	private client: OpenAI
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private client: any
 
 	constructor() {
+		if (!OpenAI) {
+			throw new Error('OpenAI SDK not found. Install with: yarn add openai')
+		}
+
 		this.client = new OpenAI({
 			apiKey: process.env[this.getApiKeyEnvVar()] || 'abc123',
 		})
@@ -23,18 +28,19 @@ export class OpenAIProvider implements LLMProvider {
 
 		try {
 			// convert generic messages to openai format
-			const openaiMessages: ChatCompletionMessageParam[] = messages.map(msg => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const openaiMessages: any[] = messages.map(msg => {
 				if (msg.role === 'developer') {
 					const content = Array.isArray(msg.content) ? msg.content.map(c => ({ type: 'text' as const, text: c.text || '' })) : msg.content
 					return {
 						role: 'developer',
 						content,
-					} as ChatCompletionDeveloperMessageParam
+					}
 				} else if (msg.role === 'system') {
 					return {
 						role: 'system',
 						content: typeof msg.content === 'string' ? msg.content : msg.content[0]?.text || '',
-					} as ChatCompletionSystemMessageParam
+					}
 				} else if (msg.role === 'user') {
 					const content = Array.isArray(msg.content)
 						? msg.content.map(c => {
@@ -48,12 +54,12 @@ export class OpenAIProvider implements LLMProvider {
 					return {
 						role: 'user',
 						content,
-					} as ChatCompletionUserMessageParam
+					}
 				} else {
 					return {
 						role: 'assistant',
 						content: typeof msg.content === 'string' ? msg.content : msg.content[0]?.text || '',
-					} as ChatCompletionAssistantMessageParam
+					}
 				}
 			})
 
@@ -63,7 +69,7 @@ export class OpenAIProvider implements LLMProvider {
 				stream: true,
 				reasoning_effort:
 					this.supportsFeature('reasoning_effort') && options.reasoningEffort && (options.model.startsWith('o1') || options.model.startsWith('o3'))
-						? (options.reasoningEffort as ChatCompletionReasoningEffort)
+						? options.reasoningEffort
 						: undefined,
 				response_format: { type: options.responseFormat },
 			})

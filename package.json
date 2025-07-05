@@ -49,13 +49,15 @@
   },
   "dependencies": {
     "commander": "^11.0.0",
-    "openai": "^4.85.3",
     "peggy": "^3.0.2",
     "sharp": "^0.34.1"
   },
   "optionalDependencies": {
+    "@anthropic-ai/sdk": "^0.56.0",
+    "@google/genai": "^1.8.0",
     "@mozilla/readability": "^0.5.0",
-    "jsdom": "^25.0.1"
+    "jsdom": "^25.0.1",
+    "openai": "^5.8.2"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",

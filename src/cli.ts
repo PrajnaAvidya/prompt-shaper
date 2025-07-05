@@ -371,6 +371,12 @@ async function interactiveModeLoop(conversation: GenericMessage[], options: CLIO
 			}
 		}
 
+		// handle /exit command
+		if (response.trim() === '/exit') {
+			console.log('Goodbye!')
+			exitApp(0)
+		}
+
 		const parserContext = {
 			variables: variables || {},
 			options: { showDebugMessages: options.debug, fileExtensions: options.extensions },

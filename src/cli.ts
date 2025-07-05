@@ -351,6 +351,55 @@ export const interactiveCommands: InteractiveCommand[] = [
 			return true // continue conversation
 		},
 	},
+	{
+		name: 'system',
+		description: 'Update the system prompt for the conversation',
+		handler: (conversation, options, args) => {
+			if (args.length === 0) {
+				// show current system prompt
+				const systemMessage = conversation.find(msg => msg.role === 'system' || msg.role === 'developer')
+				if (systemMessage) {
+					const content = typeof systemMessage.content === 'string' ? systemMessage.content : systemMessage.content[0]?.text || ''
+					console.log(`Current system prompt:\n"${content}"\n-----`)
+				} else {
+					console.log('No system prompt set in conversation.\n-----')
+				}
+			} else {
+				// update system prompt
+				const newSystemPrompt = args.join(' ')
+				
+				// find existing system/developer message
+				const systemIndex = conversation.findIndex(msg => msg.role === 'system' || msg.role === 'developer')
+				
+				// determine role based on model
+				const usesDeveloperRole = options.model.startsWith('o1') || options.model.startsWith('o3')
+				const role = usesDeveloperRole ? 'developer' : 'system'
+				
+				const newMessage = usesDeveloperRole 
+					? { role: 'developer' as const, content: [{ type: 'text' as const, text: newSystemPrompt }] }
+					: { role: 'system' as const, content: newSystemPrompt }
+				
+				if (systemIndex >= 0) {
+					// update existing system message
+					conversation[systemIndex] = newMessage
+					console.log(`System prompt updated to:\n"${newSystemPrompt}"\n-----`)
+				} else {
+					// add new system message at beginning
+					conversation.unshift(newMessage)
+					console.log(`System prompt added:\n"${newSystemPrompt}"\n-----`)
+				}
+				
+				// update saved files after system prompt change
+				if (options.saveJson) {
+					saveConversationAsJson(conversation, options)
+				}
+				if (options.save) {
+					saveConversationAsText(conversation, options)
+				}
+			}
+			return true // continue conversation
+		},
+	},
 ]
 
 interface CostTracker {

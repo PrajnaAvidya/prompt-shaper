@@ -309,4 +309,87 @@ describe('Interactive commands', function () {
 			expect(output).to.include('No API calls made in this session yet')
 		})
 	})
+
+	describe('/system command', () => {
+		it('should exist and have correct description', () => {
+			const systemCommand = interactiveCommands.find(cmd => cmd.name === 'system')
+			expect(systemCommand).to.exist
+			expect(systemCommand!.description).to.equal('Update the system prompt for the conversation')
+		})
+
+		it('should show current system prompt when no arguments provided', () => {
+			const systemCommand = interactiveCommands.find(cmd => cmd.name === 'system')!
+
+			const mockConversation: GenericMessage[] = [
+				{ role: 'system', content: 'You are a helpful assistant.' },
+				{ role: 'user', content: 'Hello' },
+			]
+			const mockOptions = { model: 'gpt-4' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+			// capture console output
+			const originalLog = console.log
+			let output = ''
+			console.log = (...args) => {
+				output += args.join(' ') + '\n'
+			}
+
+			const result = systemCommand.handler(mockConversation, mockOptions, [])
+
+			console.log = originalLog
+
+			expect(result).to.be.true
+			expect(output).to.include('Current system prompt:')
+			expect(output).to.include('You are a helpful assistant.')
+		})
+
+		it('should update system prompt when arguments provided', () => {
+			const systemCommand = interactiveCommands.find(cmd => cmd.name === 'system')!
+
+			const mockConversation: GenericMessage[] = [
+				{ role: 'system', content: 'You are a helpful assistant.' },
+				{ role: 'user', content: 'Hello' },
+			]
+			const mockOptions = { model: 'gpt-4' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+			const result = systemCommand.handler(mockConversation, mockOptions, ['You', 'are', 'a', 'code', 'reviewer.'])
+
+			expect(result).to.be.true
+			expect(mockConversation[0].role).to.equal('system')
+			expect(mockConversation[0].content).to.equal('You are a code reviewer.')
+		})
+
+		it('should use developer role for o1/o3 models', () => {
+			const systemCommand = interactiveCommands.find(cmd => cmd.name === 'system')!
+
+			const mockConversation: GenericMessage[] = [
+				{ role: 'user', content: 'Hello' },
+			]
+			const mockOptions = { model: 'o1-mini' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+			const result = systemCommand.handler(mockConversation, mockOptions, ['You', 'are', 'helpful.'])
+
+			expect(result).to.be.true
+			expect(mockConversation[0].role).to.equal('developer')
+			expect(Array.isArray(mockConversation[0].content)).to.be.true
+			const content = mockConversation[0].content as Array<{ type: string; text: string }>
+			expect(content[0].text).to.equal('You are helpful.')
+		})
+
+		it('should add system prompt when none exists', () => {
+			const systemCommand = interactiveCommands.find(cmd => cmd.name === 'system')!
+
+			const mockConversation: GenericMessage[] = [
+				{ role: 'user', content: 'Hello' },
+			]
+			const mockOptions = { model: 'gpt-4' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+			const result = systemCommand.handler(mockConversation, mockOptions, ['You', 'are', 'helpful.'])
+
+			expect(result).to.be.true
+			expect(mockConversation.length).to.equal(2)
+			expect(mockConversation[0].role).to.equal('system')
+			expect(mockConversation[0].content).to.equal('You are helpful.')
+			expect(mockConversation[1].role).to.equal('user')
+		})
+	})
 })

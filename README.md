@@ -12,7 +12,7 @@ I'm a programmer, and like many I've seen productivity gains due to the assistan
 - **CLI**: A variety of command-line options to customize usage, and you can specify various input/output formats.
 - **Directory Loading with Ignore Patterns**: Load entire codebases while intelligently excluding build artifacts, dependencies, and other unwanted files using glob patterns (`node_modules`, `*.log`, `temp*`, etc.).
 - **Inline Images**: Include images directly in your prompts using the `img` function, either by referencing local image files or remote URLs. The images are automatically encoded and attached to the prompt sent to the LLM.
-- **Multiple LLM Providers**: Support for both OpenAI (GPT, o1, o3 models) and Anthropic (Claude models) with automatic provider detection based on model name
+- **Multiple LLM Providers**: Support for OpenAI (GPT, o1, o3 models), Anthropic (Claude models), and Google Gemini models with automatic provider detection based on model name
 - **Interactive Mode**: After constructing your prompt you can continue your conversation in the command line, or load a previous conversation from JSON or text and continue in interactive mode. You can even use PromptShaper tags in interactive mode!
 
 ## Requirements
@@ -53,6 +53,7 @@ Run `npx prompt-shaper --help` to see a complete list of CLI options.
 - `-m, --model <modelType>` - LLM model to use (default: "gpt-4o")
   - **OpenAI model examples**: `gpt-4o`, `gpt-4o-mini`, `o1`, `o1-mini`, `o3`, `o3-mini`
   - **Anthropic model examples**: `claude-opus-4-0`, `claude-sonnet-4-0`, `claude-3-5-haiku-latest`
+  - **Google Gemini model examples**: `gemini-2.5-pro`, `gemini-2.5-flash`
 - `-sp, --system-prompt <promptString>` - System prompt for LLM conversation (automatically uses developer role for o1/o3 models)
 - `-rf, --response-format <format>` - Response format: "text" or "json_object" (default: "text", OpenAI only)
 - `-re, --reasoning-effort <effort>` - Reasoning effort for o1/o3 models: "low", "medium", or "high" (default: "high", OpenAI only)
@@ -85,6 +86,7 @@ All CLI options can be set using environment variables. Command-line options tak
 |---------------------|------------|----------------------------------------------------|
 | `OPENAI_API_KEY` | N/A | **Required** for OpenAI models (gpt-4, o1, etc.)   |
 | `ANTHROPIC_API_KEY` | N/A | **Required** for Anthropic models (claude-4, etc.) |
+| `GEMINI_API_KEY` | N/A | **Required** for Google Gemini models (gemini-*, etc.) |
 | `PROMPT_SHAPER_DEBUG` | `-d, --debug` | Show debug messages ("true"/"false")               |
 | `PROMPT_SHAPER_FILE_EXTENSIONS` | `-e, --extensions` | Comma-separated file extensions                    |
 | `PROMPT_SHAPER_IGNORE_PATTERNS` | `--ignore-patterns` | Comma-separated ignore patterns                    |
@@ -131,6 +133,9 @@ npx prompt-shaper my_template.ps.md -i -m gpt-4o
 
 # Use Claude models for conversation
 npx prompt-shaper my_template.ps.md -i -m claude-sonnet-4-0
+
+# Use Gemini models for conversation
+npx prompt-shaper my_template.ps.md -i -m gemini-2.5-flash
 
 # Load previous conversation and continue
 npx prompt-shaper -lt previous_conversation.md
@@ -190,6 +195,9 @@ npx prompt-shaper my_template.ps.md -m gpt-4 -sp "You are a code reviewer"
 # Use Claude for code analysis
 npx prompt-shaper my_template.ps.md -m claude-sonnet-4-0 -sp "You are an expert code analyst"
 
+# Use Gemini for code analysis
+npx prompt-shaper my_template.ps.md -m gemini-2.5-pro -sp "You are an expert code analyst"
+
 # Generate single response with JSON output (OpenAI only)
 npx prompt-shaper my_template.ps.md -g -rf json_object -m gpt-4o
 
@@ -205,7 +213,7 @@ npx prompt-shaper my_template.ps.md -jf variables.json -h
 # Create a profile JSON file
 cat > my-profile.json << 'EOF'
 {
-  "model": "claude-sonnet-4-0",
+  "model": "gemini-2.5-flash",
   "systemPrompt": "You are a helpful coding assistant",
   "debug": true,
   "hidePrompt": false,
@@ -417,6 +425,14 @@ npx prompt-shaper -i -m gpt-4o
 ```bash
 export ANTHROPIC_API_KEY="your-anthropic-api-key"
 npx prompt-shaper -i -m claude-sonnet-4-0
+```
+
+### Google Gemini Provider
+**Required for Gemini models**
+
+```bash
+export GEMINI_API_KEY="your-google-api-key"
+npx prompt-shaper -i -m gemini-2.5-flash
 ```
 
 ### No API Key Required

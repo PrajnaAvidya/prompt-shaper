@@ -1,14 +1,17 @@
 import { LLMProvider, GenericMessage } from './base'
 import { OpenAIProvider } from './openai'
 import { AnthropicProvider } from './anthropic'
+import { GeminiProvider } from './gemini'
 
 // provider cache for efficiency
 const providerCache = new Map<string, LLMProvider>()
 
 // detect which provider to use based on model name
-function detectProviderType(model: string): 'openai' | 'anthropic' {
+function detectProviderType(model: string): 'openai' | 'anthropic' | 'gemini' {
 	if (model.startsWith('claude-')) {
 		return 'anthropic'
+	} else if (model.startsWith('gemini-')) {
+		return 'gemini'
 	} else if (model.startsWith('gpt') || model.startsWith('o1') || model.startsWith('o3')) {
 		return 'openai'
 	}
@@ -33,6 +36,9 @@ export function createProvider(model?: string): LLMProvider {
 			case 'anthropic':
 				provider = new AnthropicProvider()
 				break
+			case 'gemini':
+				provider = new GeminiProvider()
+				break
 			case 'openai':
 			default:
 				provider = new OpenAIProvider()
@@ -47,23 +53,40 @@ export function createProvider(model?: string): LLMProvider {
 		const errorMessage = error instanceof Error ? error.message : String(error)
 		console.warn(`Failed to create ${providerType} provider: ${errorMessage}`)
 
-		// Try the other provider as fallback
-		const fallbackType = providerType === 'openai' ? 'anthropic' : 'openai'
+		// Try fallback providers in order
+		const fallbackTypes = (['openai', 'anthropic', 'gemini'] as const).filter(type => type !== providerType)
 
-		if (providerCache.has(fallbackType)) {
-			console.warn(`Falling back to ${fallbackType} provider`)
-			return providerCache.get(fallbackType)!
+		for (const fallbackType of fallbackTypes) {
+			if (providerCache.has(fallbackType)) {
+				console.warn(`Falling back to ${fallbackType} provider`)
+				return providerCache.get(fallbackType)!
+			}
+
+			// Try to create fallback provider
+			try {
+				let fallbackProvider: LLMProvider
+				switch (fallbackType) {
+					case 'anthropic':
+						fallbackProvider = new AnthropicProvider()
+						break
+					case 'gemini':
+						fallbackProvider = new GeminiProvider()
+						break
+					case 'openai':
+					default:
+						fallbackProvider = new OpenAIProvider()
+						break
+				}
+				providerCache.set(fallbackType, fallbackProvider)
+				console.warn(`Falling back to ${fallbackType} provider`)
+				return fallbackProvider
+			} catch (fallbackError) {
+				// Continue to next fallback option
+				continue
+			}
 		}
 
-		// Try to create fallback provider
-		try {
-			const fallbackProvider = fallbackType === 'anthropic' ? new AnthropicProvider() : new OpenAIProvider()
-			providerCache.set(fallbackType, fallbackProvider)
-			console.warn(`Falling back to ${fallbackType} provider`)
-			return fallbackProvider
-		} catch (fallbackError) {
-			throw new Error(`No LLM providers available. Install either @anthropic-ai/sdk or openai: ${errorMessage}`)
-		}
+		throw new Error(`No LLM providers available. Install one of: @anthropic-ai/sdk, @google/genai, or openai: ${errorMessage}`)
 	}
 }
 

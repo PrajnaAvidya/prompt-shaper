@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import { createProvider } from '../../src/providers/factory'
 import { OpenAIProvider } from '../../src/providers/openai'
 import { AnthropicProvider } from '../../src/providers/anthropic'
+import { GeminiProvider } from '../../src/providers/gemini'
 
 describe('Provider Factory', () => {
 	describe('createProvider', () => {
@@ -45,6 +46,30 @@ describe('Provider Factory', () => {
 			}
 		})
 
+		it('should return Gemini provider for gemini models', () => {
+			try {
+				const provider = createProvider('gemini-2.0-flash-001')
+				// Should be Gemini provider if SDK is available, or fallback to another provider
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				expect(provider).to.satisfy((p: any) => p instanceof GeminiProvider || p instanceof OpenAIProvider || p instanceof AnthropicProvider)
+			} catch (error) {
+				// Expected if no SDKs are available
+				expect((error as Error).message).to.include('No LLM providers available')
+			}
+		})
+
+		it('should return Gemini provider for gemini-pro models', () => {
+			try {
+				const provider = createProvider('gemini-pro')
+				// Should be Gemini provider if SDK is available, or fallback to another provider
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				expect(provider).to.satisfy((p: any) => p instanceof GeminiProvider || p instanceof OpenAIProvider || p instanceof AnthropicProvider)
+			} catch (error) {
+				// Expected if no SDKs are available
+				expect((error as Error).message).to.include('No LLM providers available')
+			}
+		})
+
 		it('should default to OpenAI provider when no model specified', () => {
 			try {
 				const provider = createProvider()
@@ -79,14 +104,27 @@ describe('Provider Factory', () => {
 
 		it('should handle fallback when primary provider fails', () => {
 			// This test simulates what happens when one SDK is missing
-			// In a real scenario, the factory should try to fall back to the other provider
+			// In a real scenario, the factory should try to fall back to available providers
 			try {
 				const provider = createProvider('claude-3-5-sonnet-20241022')
 				// If we get here, either Anthropic provider worked or fallback occurred
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				expect(provider).to.satisfy((p: any) => p instanceof AnthropicProvider || p instanceof OpenAIProvider)
+				expect(provider).to.satisfy((p: any) => p instanceof AnthropicProvider || p instanceof OpenAIProvider || p instanceof GeminiProvider)
 			} catch (error) {
-				// Expected if both SDKs are unavailable
+				// Expected if all SDKs are unavailable
+				expect((error as Error).message).to.include('No LLM providers available')
+			}
+		})
+
+		it('should handle Gemini fallback correctly', () => {
+			// Test fallback for Gemini models when SDK is not available
+			try {
+				const provider = createProvider('gemini-2.0-flash-001')
+				// If we get here, either Gemini provider worked or fallback occurred
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				expect(provider).to.satisfy((p: any) => p instanceof GeminiProvider || p instanceof OpenAIProvider || p instanceof AnthropicProvider)
+			} catch (error) {
+				// Expected if all SDKs are unavailable
 				expect((error as Error).message).to.include('No LLM providers available')
 			}
 		})

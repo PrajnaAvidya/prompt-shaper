@@ -144,6 +144,7 @@ npx prompt-shaper -lt previous_conversation.md
 #### Interactive Mode Commands
 - `/help` - Show available commands and shortcuts
 - `/model [model_name]` - View current model or switch to a different model (gpt-4, claude-3-5-sonnet-20241022, gemini-pro, etc.)
+- `/tokens` - Show token count for the current conversation with per-message breakdown
 - `/retry` - Retry the last request with a new response from the LLM
 - `/rewind` - Remove the last question and response from the conversation history
 - `/clear` - Clear the entire conversation and start fresh

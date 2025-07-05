@@ -221,4 +221,63 @@ describe('Interactive commands', function () {
 			expect(mockConversation.length).to.equal(1) // should not modify conversation
 		})
 	})
+
+	describe('/tokens command', () => {
+		it('should exist and have correct description', () => {
+			const tokensCommand = interactiveCommands.find(cmd => cmd.name === 'tokens')
+			expect(tokensCommand).to.exist
+			expect(tokensCommand!.description).to.equal('Show token count for the current conversation')
+		})
+
+		it('should show token counts for conversation messages', () => {
+			const tokensCommand = interactiveCommands.find(cmd => cmd.name === 'tokens')!
+
+			const mockConversation: GenericMessage[] = [
+				{ role: 'system', content: 'You are a helpful assistant' },
+				{ role: 'user', content: 'Hello world' },
+				{ role: 'assistant', content: 'Hello! How can I help you today?' },
+			]
+
+			const mockOptions = { model: 'gpt-4' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+			// capture console output
+			const originalLog = console.log
+			let output = ''
+			console.log = (...args) => {
+				output += args.join(' ') + '\n'
+			}
+
+			const result = tokensCommand.handler(mockConversation, mockOptions, [])
+
+			console.log = originalLog
+
+			expect(result).to.be.true
+			expect(output).to.include('Token count for current conversation')
+			expect(output).to.include('Total tokens:')
+			expect(output).to.include('system:')
+			expect(output).to.include('user:')
+			expect(output).to.include('assistant:')
+		})
+
+		it('should handle empty conversation', () => {
+			const tokensCommand = interactiveCommands.find(cmd => cmd.name === 'tokens')!
+
+			const mockConversation: GenericMessage[] = []
+			const mockOptions = { model: 'gpt-4' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+			// capture console output
+			const originalLog = console.log
+			let output = ''
+			console.log = (...args) => {
+				output += args.join(' ') + '\n'
+			}
+
+			const result = tokensCommand.handler(mockConversation, mockOptions, [])
+
+			console.log = originalLog
+
+			expect(result).to.be.true
+			expect(output).to.include('No messages in conversation to count')
+		})
+	})
 })

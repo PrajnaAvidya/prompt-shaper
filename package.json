@@ -50,7 +50,8 @@
   "dependencies": {
     "commander": "^11.0.0",
     "peggy": "^3.0.2",
-    "sharp": "^0.34.1"
+    "sharp": "^0.34.1",
+    "tiktoken": "^1.0.21"
   },
   "optionalDependencies": {
     "@anthropic-ai/sdk": "^0.56.0",

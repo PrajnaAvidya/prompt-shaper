@@ -10,6 +10,79 @@ import { ParserVariables, ResponseFormat, ReasoningEffort } from './types'
 import { generateWithProvider, startConversationWithProvider, clearProviderCache, createProvider } from './providers/factory'
 import * as readline from 'readline'
 
+// helper function to check if model is OpenAI
+function isOpenAIModel(model: string): boolean {
+	return model.startsWith('gpt') || model.startsWith('o1') || model.startsWith('o3')
+}
+
+// check if tiktoken is available
+let tiktokenAvailable: boolean | null = null
+function isTiktokenAvailable(): boolean {
+	if (tiktokenAvailable === null) {
+		try {
+			require('tiktoken')
+			tiktokenAvailable = true
+		} catch (error) {
+			tiktokenAvailable = false
+		}
+	}
+	return tiktokenAvailable
+}
+
+// get encoding for model
+function getEncodingForModel(model: string): string {
+	if (model.startsWith('gpt-4') || model.startsWith('gpt-3.5')) {
+		return 'cl100k_base'
+	} else if (model.startsWith('o1') || model.startsWith('o3')) {
+		return 'o200k_base'
+	} else {
+		return 'cl100k_base' // default fallback
+	}
+}
+
+// helper function for token counting
+function countTokens(text: string, model: string): number {
+	if (isTiktokenAvailable()) {
+		const tiktoken = require('tiktoken')
+		const encoding = getEncodingForModel(model)
+		const enc = tiktoken.get_encoding(encoding)
+		const tokens = enc.encode(text)
+		enc.free()
+		return tokens.length
+	} else {
+		// fallback to heuristic if tiktoken is not available
+		// roughly 4 characters per token for English text
+		return Math.ceil(text.length / 4)
+	}
+}
+
+// helper function to estimate conversation tokens
+function estimateConversationTokens(
+	conversation: GenericMessage[],
+	model: string,
+): { totalTokens: number; breakdown: Array<{ role: string; tokens: number; preview: string }> } {
+	let totalTokens = 0
+	const breakdown: Array<{ role: string; tokens: number; preview: string }> = []
+
+	for (const message of conversation) {
+		const content = typeof message.content === 'string' ? message.content : JSON.stringify(message.content)
+
+		const tokens = countTokens(content, model)
+		totalTokens += tokens
+
+		// create preview (first 50 chars)
+		const preview = content.length > 50 ? content.substring(0, 50) + '...' : content
+
+		breakdown.push({
+			role: message.role,
+			tokens,
+			preview,
+		})
+	}
+
+	return { totalTokens, breakdown }
+}
+
 // helper function to clear previous assistant response from terminal
 function clearPreviousResponse(responseText: string): void {
 	if (process.env.PROMPT_SHAPER_TESTS) {
@@ -201,6 +274,44 @@ export const interactiveCommands: InteractiveCommand[] = [
 			return true // continue conversation
 		},
 	},
+	{
+		name: 'tokens',
+		description: 'Show token count for the current conversation',
+		handler: (conversation, options) => {
+			if (conversation.length === 0) {
+				console.log('No messages in conversation to count.\n-----')
+				return true
+			}
+
+			const { totalTokens, breakdown } = estimateConversationTokens(conversation, options.model)
+
+			console.log(`Token count for current conversation (${options.model}):`)
+			console.log(`Total tokens: ${totalTokens}`)
+			console.log('')
+			console.log('Breakdown by message:')
+
+			breakdown.forEach((item, index) => {
+				console.log(`${index + 1}. ${item.role}: ${item.tokens} tokens`)
+				console.log(`   "${item.preview}"`)
+			})
+
+			// show encoding info
+			if (isTiktokenAvailable()) {
+				const encoding = getEncodingForModel(options.model)
+				if (isOpenAIModel(options.model)) {
+					console.log(`\nUsing ${encoding} encoding (tiktoken)`)
+				} else {
+					console.log(`\nUsing ${encoding} encoding (tiktoken) - approximate for ${options.model}`)
+				}
+			} else {
+				console.log('\nUsing heuristic estimation (4 chars/token)')
+				console.log('Install tiktoken for accurate counts: yarn add tiktoken')
+			}
+
+			console.log('-----')
+			return true // continue conversation
+		},
+	},
 ]
 
 interface CLIOptions {
@@ -345,7 +456,7 @@ const prompt = (query: string) =>
 	})
 
 function getProviderFromModel(model: string): string {
-	if (model.startsWith('gpt') || model.startsWith('o1') || model.startsWith('o3')) {
+	if (isOpenAIModel(model)) {
 		return 'OpenAI'
 	} else if (model.startsWith('claude-')) {
 		return 'Anthropic'

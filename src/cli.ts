@@ -346,7 +346,7 @@ export const interactiveCommands: InteractiveCommand[] = [
 			})
 
 			console.log('')
-			console.log('Note: Pricing based on mid 2025 rates. Actual costs may vary.')
+			console.log('Note: Pricing based on July 2025 rates. Actual costs may vary.')
 			console.log('-----')
 			return true // continue conversation
 		},
@@ -369,21 +369,37 @@ interface ModelPricing {
 	outputTokensPerDollar: number // how many output tokens you get for $1
 }
 
-// current pricing data based on provider websites (updated mid 2025)
+// current pricing data based on provider websites (updated July 2025)
 const MODEL_PRICING: Record<string, ModelPricing> = {
-	// openai models
-	'gpt-4o': { inputTokensPerDollar: 200000, outputTokensPerDollar: 50000 }, // $5/$20 per 1M tokens
+	// openai models - exact pricing from platform.openai.com/docs/pricing
+	'gpt-4.1': { inputTokensPerDollar: 500000, outputTokensPerDollar: 125000 }, // $2.00/$8.00 per 1M tokens
+	'gpt-4.1-mini': { inputTokensPerDollar: 2500000, outputTokensPerDollar: 625000 }, // $0.40/$1.60 per 1M tokens
+	'gpt-4.1-nano': { inputTokensPerDollar: 10000000, outputTokensPerDollar: 2500000 }, // $0.10/$0.40 per 1M tokens
+	'gpt-4.5-preview': { inputTokensPerDollar: 13333, outputTokensPerDollar: 6667 }, // $75.00/$150.00 per 1M tokens
+	'gpt-4o': { inputTokensPerDollar: 400000, outputTokensPerDollar: 100000 }, // $2.50/$10.00 per 1M tokens
+	'gpt-4o-audio-preview': { inputTokensPerDollar: 400000, outputTokensPerDollar: 100000 }, // $2.50/$10.00 per 1M tokens
+	'gpt-4o-realtime-preview': { inputTokensPerDollar: 200000, outputTokensPerDollar: 50000 }, // $5.00/$20.00 per 1M tokens
 	'gpt-4o-mini': { inputTokensPerDollar: 6666667, outputTokensPerDollar: 1666667 }, // $0.15/$0.60 per 1M tokens
-	'gpt-4.1': { inputTokensPerDollar: 66667, outputTokensPerDollar: 16667 },
-	'gpt-4.1-mini': { inputTokensPerDollar: 66667 * 5, outputTokensPerDollar: 16667 * 5 },
-	'gpt-4.1-nano': { inputTokensPerDollar: 66667 * 20, outputTokensPerDollar: 16667 * 20 },
-	'gpt-4': { inputTokensPerDollar: 33333, outputTokensPerDollar: 16667 }, // $30/$60 per 1M tokens
-	'gpt-3.5-turbo': { inputTokensPerDollar: 2000000, outputTokensPerDollar: 666667 }, // $0.50/$1.50 per 1M tokens
-	o1: { inputTokensPerDollar: 66667, outputTokensPerDollar: 16667 }, // $15/$60 per 1M tokens
-	'o1-mini': { inputTokensPerDollar: 333333, outputTokensPerDollar: 83333 }, // $3/$12 per 1M tokens
-	o3: { inputTokensPerDollar: 66667, outputTokensPerDollar: 16667 }, // estimated similar to o1
+	'gpt-4o-mini-audio-preview': { inputTokensPerDollar: 6666667, outputTokensPerDollar: 1666667 }, // $0.15/$0.60 per 1M tokens
+	'gpt-4o-mini-realtime-preview': { inputTokensPerDollar: 1666667, outputTokensPerDollar: 416667 }, // $0.60/$2.40 per 1M tokens
+	'gpt-4o-search-preview': { inputTokensPerDollar: 400000, outputTokensPerDollar: 100000 }, // $2.50/$10.00 per 1M tokens
+	'gpt-4o-mini-search-preview': { inputTokensPerDollar: 6666667, outputTokensPerDollar: 1666667 }, // $0.15/$0.60 per 1M tokens
+	o1: { inputTokensPerDollar: 66667, outputTokensPerDollar: 16667 }, // $15.00/$60.00 per 1M tokens
+	'o1-pro': { inputTokensPerDollar: 6667, outputTokensPerDollar: 1667 }, // $150.00/$600.00 per 1M tokens
+	'o1-mini': { inputTokensPerDollar: 909091, outputTokensPerDollar: 227273 }, // $1.10/$4.40 per 1M tokens
+	o3: { inputTokensPerDollar: 500000, outputTokensPerDollar: 125000 }, // $2.00/$8.00 per 1M tokens
+	'o3-pro': { inputTokensPerDollar: 50000, outputTokensPerDollar: 12500 }, // $20.00/$80.00 per 1M tokens
+	'o3-deep-research': { inputTokensPerDollar: 100000, outputTokensPerDollar: 25000 }, // $10.00/$40.00 per 1M tokens
 	'o3-mini': { inputTokensPerDollar: 909091, outputTokensPerDollar: 227273 }, // $1.10/$4.40 per 1M tokens
-	'o4-mini': { inputTokensPerDollar: 50000, outputTokensPerDollar: 15000 },
+	'o4-mini': { inputTokensPerDollar: 909091, outputTokensPerDollar: 227273 }, // $1.10/$4.40 per 1M tokens
+	'o4-mini-deep-research': { inputTokensPerDollar: 500000, outputTokensPerDollar: 125000 }, // $2.00/$8.00 per 1M tokens
+	'codex-mini-latest': { inputTokensPerDollar: 666667, outputTokensPerDollar: 166667 }, // $1.50/$6.00 per 1M tokens
+	'computer-use-preview': { inputTokensPerDollar: 333333, outputTokensPerDollar: 83333 }, // $3.00/$12.00 per 1M tokens
+	'gpt-image-1': { inputTokensPerDollar: 200000, outputTokensPerDollar: 0 }, // $5.00/- per 1M tokens (image generation)
+
+	// legacy models for compatibility
+	'gpt-4': { inputTokensPerDollar: 33333, outputTokensPerDollar: 16667 }, // estimated legacy pricing
+	'gpt-3.5-turbo': { inputTokensPerDollar: 2000000, outputTokensPerDollar: 666667 }, // estimated legacy pricing
 
 	// anthropic models
 	'claude-opus-4-0': { inputTokensPerDollar: 66667, outputTokensPerDollar: 13333 }, // $15/$75 per 1M tokens
@@ -392,11 +408,17 @@ const MODEL_PRICING: Record<string, ModelPricing> = {
 	'claude-3-5-sonnet-latest': { inputTokensPerDollar: 333333, outputTokensPerDollar: 66667 }, // $3/$15 per 1M tokens
 	'claude-3-5-haiku-latest': { inputTokensPerDollar: 1250000, outputTokensPerDollar: 250000 }, // $0.80/$4.00 per 1M tokens
 
-	// gemini models
-	'gemini-2.5-pro': { inputTokensPerDollar: 800000, outputTokensPerDollar: 100000 }, // $1.25/$10 per 1M tokens (up to 200k context)
-	'gemini-2.5-flash': { inputTokensPerDollar: 10000000, outputTokensPerDollar: 2500000 }, // $0.10/$0.40 per 1M tokens
+	// gemini models - exact pricing from ai.google.dev/pricing
+	'gemini-2.5-pro': { inputTokensPerDollar: 800000, outputTokensPerDollar: 100000 }, // $1.25/$10 per 1M tokens (≤200k context)
+	'gemini-2.5-flash': { inputTokensPerDollar: 3333333, outputTokensPerDollar: 400000 }, // $0.30/$2.50 per 1M tokens
+	'gemini-2.5-flash-lite-preview': { inputTokensPerDollar: 10000000, outputTokensPerDollar: 2500000 }, // $0.10/$0.40 per 1M tokens
 	'gemini-2.0-flash': { inputTokensPerDollar: 10000000, outputTokensPerDollar: 2500000 }, // $0.10/$0.40 per 1M tokens
-	'gemini-1.5-pro': { inputTokensPerDollar: 800000, outputTokensPerDollar: 200000 }, // $1.25/$5.00 per 1M tokens
+	'gemini-2.0-flash-lite': { inputTokensPerDollar: 13333333, outputTokensPerDollar: 3333333 }, // $0.075/$0.30 per 1M tokens
+	'gemini-1.5-flash': { inputTokensPerDollar: 13333333, outputTokensPerDollar: 3333333 }, // $0.075/$0.30 per 1M tokens (≤128k context)
+	'gemini-1.5-flash-8b': { inputTokensPerDollar: 26666667, outputTokensPerDollar: 6666667 }, // $0.0375/$0.15 per 1M tokens (≤128k context)
+	'gemini-1.5-pro': { inputTokensPerDollar: 800000, outputTokensPerDollar: 200000 }, // $1.25/$5.00 per 1M tokens (≤128k context)
+	
+	// legacy/compatibility
 	'gemini-pro': { inputTokensPerDollar: 800000, outputTokensPerDollar: 200000 }, // using 1.5 pro pricing
 }
 
@@ -408,16 +430,58 @@ function getModelPricing(model: string): ModelPricing {
 	}
 
 	// fallback to pattern matching
-	if (model.startsWith('gpt-4o')) {
+	if (model.startsWith('gpt-4.5-preview')) {
+		return MODEL_PRICING['gpt-4.5-preview']
+	} else if (model.startsWith('gpt-4.1-nano')) {
+		return MODEL_PRICING['gpt-4.1-nano']
+	} else if (model.startsWith('gpt-4.1-mini')) {
+		return MODEL_PRICING['gpt-4.1-mini']
+	} else if (model.startsWith('gpt-4.1')) {
+		return MODEL_PRICING['gpt-4.1']
+	} else if (model.startsWith('gpt-4o-mini-search-preview')) {
+		return MODEL_PRICING['gpt-4o-mini-search-preview']
+	} else if (model.startsWith('gpt-4o-search-preview')) {
+		return MODEL_PRICING['gpt-4o-search-preview']
+	} else if (model.startsWith('gpt-4o-mini-realtime-preview')) {
+		return MODEL_PRICING['gpt-4o-mini-realtime-preview']
+	} else if (model.startsWith('gpt-4o-mini-audio-preview')) {
+		return MODEL_PRICING['gpt-4o-mini-audio-preview']
+	} else if (model.startsWith('gpt-4o-mini')) {
+		return MODEL_PRICING['gpt-4o-mini']
+	} else if (model.startsWith('gpt-4o-realtime-preview')) {
+		return MODEL_PRICING['gpt-4o-realtime-preview']
+	} else if (model.startsWith('gpt-4o-audio-preview')) {
+		return MODEL_PRICING['gpt-4o-audio-preview']
+	} else if (model.startsWith('gpt-4o')) {
 		return MODEL_PRICING['gpt-4o']
 	} else if (model.startsWith('gpt-4')) {
 		return MODEL_PRICING['gpt-4']
 	} else if (model.startsWith('gpt-3.5')) {
 		return MODEL_PRICING['gpt-3.5-turbo']
+	} else if (model.startsWith('o1-pro')) {
+		return MODEL_PRICING['o1-pro']
+	} else if (model.startsWith('o1-mini')) {
+		return MODEL_PRICING['o1-mini']
 	} else if (model.startsWith('o1')) {
 		return MODEL_PRICING['o1']
+	} else if (model.startsWith('o3-pro')) {
+		return MODEL_PRICING['o3-pro']
+	} else if (model.startsWith('o3-deep-research')) {
+		return MODEL_PRICING['o3-deep-research']
+	} else if (model.startsWith('o3-mini')) {
+		return MODEL_PRICING['o3-mini']
 	} else if (model.startsWith('o3')) {
 		return MODEL_PRICING['o3']
+	} else if (model.startsWith('o4-mini-deep-research')) {
+		return MODEL_PRICING['o4-mini-deep-research']
+	} else if (model.startsWith('o4-mini')) {
+		return MODEL_PRICING['o4-mini']
+	} else if (model.startsWith('codex-mini-latest')) {
+		return MODEL_PRICING['codex-mini-latest']
+	} else if (model.startsWith('computer-use-preview')) {
+		return MODEL_PRICING['computer-use-preview']
+	} else if (model.startsWith('gpt-image-1')) {
+		return MODEL_PRICING['gpt-image-1']
 	} else if (model.startsWith('claude-opus')) {
 		return MODEL_PRICING['claude-opus-4-0']
 	} else if (model.startsWith('claude-sonnet-3-7')) {
@@ -430,10 +494,18 @@ function getModelPricing(model: string): ModelPricing {
 		return MODEL_PRICING['claude-3-5-haiku-latest']
 	} else if (model.startsWith('gemini-2.5-pro')) {
 		return MODEL_PRICING['gemini-2.5-pro']
+	} else if (model.startsWith('gemini-2.5-flash-lite-preview')) {
+		return MODEL_PRICING['gemini-2.5-flash-lite-preview']
 	} else if (model.startsWith('gemini-2.5-flash')) {
 		return MODEL_PRICING['gemini-2.5-flash']
+	} else if (model.startsWith('gemini-2.0-flash-lite')) {
+		return MODEL_PRICING['gemini-2.0-flash-lite']
 	} else if (model.startsWith('gemini-2.0-flash')) {
 		return MODEL_PRICING['gemini-2.0-flash']
+	} else if (model.startsWith('gemini-1.5-flash-8b')) {
+		return MODEL_PRICING['gemini-1.5-flash-8b']
+	} else if (model.startsWith('gemini-1.5-flash')) {
+		return MODEL_PRICING['gemini-1.5-flash']
 	} else if (model.startsWith('gemini-1.5-pro')) {
 		return MODEL_PRICING['gemini-1.5-pro']
 	} else if (model.startsWith('gemini')) {

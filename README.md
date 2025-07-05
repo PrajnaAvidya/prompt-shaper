@@ -143,6 +143,7 @@ npx prompt-shaper -lt previous_conversation.md
 
 #### Interactive Mode Commands
 - `/rewind` - Remove the last question and response from the conversation history
+- `/exit` - Exit interactive mode
 
 ### Raw Mode (No Parsing)
 ```bash

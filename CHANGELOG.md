@@ -1,3 +1,12 @@
+# [6.3.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v6.2.0...v6.3.0) (2025-07-05)
+
+
+### Features
+
+* 🎸 add support for /exit command ([473d67e](https://github.com/PrajnaAvidya/prompt-shaper/commit/473d67e6e9dfc1ca3fdc7c6f4a3f5977d16819cb)), closes [#63](https://github.com/PrajnaAvidya/prompt-shaper/issues/63)
+* 🎸 add support for anthropic api ([6351ab0](https://github.com/PrajnaAvidya/prompt-shaper/commit/6351ab0df65a900a79549756f98716362db5f8fd)), closes [#54](https://github.com/PrajnaAvidya/prompt-shaper/issues/54)
+* 🎸 add support for gemini ([ad17c9e](https://github.com/PrajnaAvidya/prompt-shaper/commit/ad17c9e4b530da8ed6fe8bf6bb6a9b5066ccceb9)), closes [#55](https://github.com/PrajnaAvidya/prompt-shaper/issues/55)
+
 # [6.2.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v6.1.0...v6.2.0) (2025-07-04)
 
 

@@ -1,3 +1,18 @@
+# [6.4.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v6.3.0...v6.4.0) (2025-07-05)
+
+
+### Features
+
+* 🎸 add /clear to interactive ([221973d](https://github.com/PrajnaAvidya/prompt-shaper/commit/221973ddd406ddad57dc89589587934ce4f7faed))
+* 🎸 add /compact command ([c71756e](https://github.com/PrajnaAvidya/prompt-shaper/commit/c71756e554e189cd5573567af9a2ec51570b53ab))
+* 🎸 add /cost function ([2828365](https://github.com/PrajnaAvidya/prompt-shaper/commit/282836587fb93f3d7336e5d43bb6083051767ab6))
+* 🎸 add /help command to interactive ([81c46b3](https://github.com/PrajnaAvidya/prompt-shaper/commit/81c46b3818cc2b9bb50f57c71f72df126c436dee))
+* 🎸 add /model command ([4408f00](https://github.com/PrajnaAvidya/prompt-shaper/commit/4408f002dd93c5531ace663ce25e063555a86b9c))
+* 🎸 add /retry command ([24338e5](https://github.com/PrajnaAvidya/prompt-shaper/commit/24338e593a0cf199385ac1d55ef0c6d1b2d3b2b7))
+* 🎸 add /system command to update system prompt ([cdbfac8](https://github.com/PrajnaAvidya/prompt-shaper/commit/cdbfac8c0beb044555b943ffa3c6be0da604d75a))
+* 🎸 add /tokens command ([c5e87f6](https://github.com/PrajnaAvidya/prompt-shaper/commit/c5e87f6f276735449b774a3d755b1f5bdb618eea))
+* 🎸 better pricing data for llm apis ([4c90e51](https://github.com/PrajnaAvidya/prompt-shaper/commit/4c90e513e2aaf5cc712a700bec02ecb12cabf457))
+
 # [6.3.0](https://github.com/PrajnaAvidya/prompt-shaper/compare/v6.2.0...v6.3.0) (2025-07-05)
 
 

@@ -35,27 +35,27 @@ Start here: [`00-overview.ps.md`](00-overview.ps.md) - Complete feature overview
 ### Template-Only Mode (No LLM Required)
 ```bash
 # Process templates without LLM integration
-yarn parse -- samples/01-basic-variables.ps.md --disable-llm
-yarn parse -- samples/07-load-files.ps.md --disable-llm
+yarn parse samples/01-basic-variables.ps.md --disable-llm
+yarn parse samples/07-load-files.ps.md --disable-llm
 ```
 
 ### With File Extensions
 ```bash
 # Specify file extensions for loadDir examples
-yarn parse -- samples/08-load-directories.ps.md --disable-llm -e "js,json,md,css"
+yarn parse samples/08-load-directories.ps.md --disable-llm -e "js,json,md,css"
 ```
 
 ### Raw Mode
 ```bash
 # View templates without processing
-yarn parse -- samples/05-escaping.ps.md --raw
+yarn parse samples/05-escaping.ps.md --raw
 ```
 
 ### Interactive Mode (Requires OpenAI API Key)
 ```bash
 # Start interactive chat with processed template
 export OPENAI_API_KEY="your-key-here"
-yarn parse -- samples/00-overview.ps.md --interactive
+yarn parse samples/00-overview.ps.md --interactive
 ```
 
 ## Sample Data
@@ -82,19 +82,19 @@ echo "Testing all PromptShaper samples..."
 # Basic samples (no external dependencies)
 for file in samples/0{0,1,2,3,4,5,6}-*.ps.md; do
     echo "Testing $file..."
-    yarn parse -- "$file" --disable-llm > /dev/null || echo "❌ $file failed"
+    yarn parse "$file" --disable-llm > /dev/null || echo "❌ $file failed"
 done
 
 # File operation samples
 for file in samples/0{7,8}-*.ps.md; do
     echo "Testing $file..."
-    yarn parse -- "$file" --disable-llm -e "js,json,md,css,txt" > /dev/null || echo "❌ $file failed"
+    yarn parse "$file" --disable-llm -e "js,json,md,css,txt" > /dev/null || echo "❌ $file failed"
 done
 
 # CLI and markdown samples
 for file in samples/{11,12}-*.ps.md; do
     echo "Testing $file..."
-    yarn parse -- "$file" --disable-llm > /dev/null || echo "❌ $file failed"
+    yarn parse "$file" --disable-llm > /dev/null || echo "❌ $file failed"
 done
 
 echo "✅ Sample testing complete!"

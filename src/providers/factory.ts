@@ -6,8 +6,15 @@ import { GeminiProvider } from './gemini'
 // provider cache for efficiency
 const providerCache = new Map<string, LLMProvider>()
 
+export function clearProviderCache(debug: boolean = false): void {
+	if (debug) {
+		console.log(`[DEBUG] Clearing provider cache. Current cache size: ${providerCache.size}`)
+	}
+	providerCache.clear()
+}
+
 // detect which provider to use based on model name
-function detectProviderType(model: string): 'openai' | 'anthropic' | 'gemini' {
+export function detectProviderType(model: string): 'openai' | 'anthropic' | 'gemini' {
 	if (model.startsWith('claude-')) {
 		return 'anthropic'
 	} else if (model.startsWith('gemini-')) {
@@ -20,12 +27,16 @@ function detectProviderType(model: string): 'openai' | 'anthropic' | 'gemini' {
 	return 'openai'
 }
 
-export function createProvider(model?: string): LLMProvider {
+export function createProvider(model?: string, debug: boolean = false): LLMProvider {
 	const providerType = model ? detectProviderType(model) : 'openai'
 
 	// Return cached provider if available
 	if (providerCache.has(providerType)) {
 		return providerCache.get(providerType)!
+	}
+
+	if (debug) {
+		console.log(`[DEBUG] Creating provider for model: ${model}, detected type: ${providerType}`)
 	}
 
 	// Create new provider
@@ -96,17 +107,19 @@ export async function generateWithProvider(
 	model: string,
 	responseFormat: 'text' | 'json_object',
 	reasoningEffort: 'low' | 'medium' | 'high',
+	debug: boolean = false,
 ): Promise<string> {
-	const provider = createProvider(model)
+	const provider = createProvider(model, debug)
 	return provider.generate(messages, {
 		model,
 		responseFormat,
 		reasoningEffort,
+		debug,
 	})
 }
 
 // wrapper function for starting conversations with system prompts
-export function startConversationWithProvider(systemPrompt: string, model: string): GenericMessage[] {
-	const provider = createProvider(model)
+export function startConversationWithProvider(systemPrompt: string, model: string, debug: boolean = false): GenericMessage[] {
+	const provider = createProvider(model, debug)
 	return provider.startConversation(systemPrompt, model)
 }

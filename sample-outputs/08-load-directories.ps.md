@@ -158,7 +158,7 @@ This is content from a sub-template that demonstrates nested template loading.
 
 When using the CLI, you can specify file extensions:
 ```bash
-yarn parse -- samples/08-load-directories.ps.md -e "js,json,md"
+yarn parse samples/08-load-directories.ps.md -e "js,json,md"
 ```
 
 ## Loading with Multiple Ignore Patterns

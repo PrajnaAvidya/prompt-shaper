@@ -73,18 +73,8 @@ describe('parser edge cases', () => {
 				attachments: [],
 			}
 
-			// capture console.log to avoid cluttering test output
-			const originalLog = console.log
-			const logs: string[] = []
-			console.log = (...args) => logs.push(args.join(' '))
-
 			const result = await parseTemplate(template, context)
-
-			console.log = originalLog
-
 			expect(result).to.equal('hello')
-			expect(logs.length).to.be.greaterThan(0)
-			expect(logs.some(log => log.includes('DEBUG:'))).to.be.true
 		})
 	})
 

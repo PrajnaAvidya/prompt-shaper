@@ -1,12 +1,12 @@
 import { LLMProvider, GenericMessage, ProviderOptions } from './base'
 
-// Dynamic import for optional dependency
+// dynamic import for optional dependency
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let GoogleGenAI: any = null
 try {
 	GoogleGenAI = require('@google/genai')
 } catch (e) {
-	// Google GenAI SDK not installed
+	// google genai sdk not installed
 }
 
 export class GeminiProvider implements LLMProvider {
@@ -30,6 +30,9 @@ export class GeminiProvider implements LLMProvider {
 			// Convert generic messages to Gemini format
 			const geminiRequest = this.convertMessages(messages, options.model)
 
+			if (options.debug) {
+				console.log(`[DEBUG] Gemini API call with model: ${options.model}`)
+			}
 			const streamResponse = await this.client.models.generateContentStream(geminiRequest)
 
 			for await (const chunk of streamResponse) {

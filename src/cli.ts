@@ -7,8 +7,127 @@ import { program } from 'commander'
 import { loadFileContent, transformJsonToVariables } from './utils'
 import { parseTemplate } from './parser'
 import { ParserVariables, ResponseFormat, ReasoningEffort } from './types'
-import { generateWithProvider, startConversationWithProvider } from './providers/factory'
+import { generateWithProvider, startConversationWithProvider, clearProviderCache, createProvider } from './providers/factory'
 import * as readline from 'readline'
+
+interface InteractiveCommand {
+	name: string
+	description: string
+	handler: (conversation: GenericMessage[], options: CLIOptions, args: string[]) => Promise<boolean> | boolean
+}
+
+export const interactiveCommands: InteractiveCommand[] = [
+	{
+		name: 'help',
+		description: 'Show this help message',
+		handler: () => {
+			console.log('Available commands:')
+			interactiveCommands.forEach(cmd => {
+				console.log(`  /${cmd.name.padEnd(10)} - ${cmd.description}`)
+			})
+			console.log('-----')
+			return true // continue conversation
+		},
+	},
+	{
+		name: 'exit',
+		description: 'Exit interactive mode',
+		handler: () => {
+			console.log('Goodbye!')
+			exitApp(0)
+		},
+	},
+	{
+		name: 'rewind',
+		description: 'Remove last user-assistant exchange',
+		handler: (conversation, options) => {
+			if (
+				conversation.length >= 2 &&
+				conversation[conversation.length - 1].role === 'assistant' &&
+				conversation[conversation.length - 2].role === 'user'
+			) {
+				// remove the last user-assistant exchange
+				conversation.pop() // remove assistant response
+				conversation.pop() // remove user question
+				console.log('Rewound last exchange. Conversation has been reverted.\n-----')
+
+				// update saved files after rewind
+				if (options.saveJson) {
+					saveConversationAsJson(conversation, options)
+				}
+				if (options.save) {
+					saveConversationAsText(conversation, options)
+				}
+			} else {
+				console.log('Cannot rewind: no previous exchange to remove.\n-----')
+			}
+			return true // continue conversation
+		},
+	},
+	{
+		name: 'clear',
+		description: 'Clear conversation history and start fresh',
+		handler: (conversation, options) => {
+			// clear screen (skip during tests)
+			if (!process.env.PROMPT_SHAPER_TESTS) {
+				console.clear()
+			}
+
+			// reset conversation to just system prompt if exists
+			const systemMessage = conversation.find(msg => msg.role === 'system')
+			conversation.length = 0 // clear array
+			if (systemMessage) {
+				conversation.push(systemMessage)
+			}
+
+			// update saved files with cleared conversation
+			if (options.saveJson) {
+				saveConversationAsJson(conversation, options)
+			}
+			if (options.save) {
+				saveConversationAsText(conversation, options)
+			}
+
+			// show welcome message again
+			console.log('Conversation cleared. Starting fresh!\n-----')
+			showWelcomeMessage(options)
+			return true // continue conversation
+		},
+	},
+	{
+		name: 'model',
+		description: 'Switch to different model or show current model',
+		handler: (conversation, options, args) => {
+			if (args.length === 0) {
+				// show current model
+				const provider = getProviderFromModel(options.model)
+				console.log(`Current model: ${options.model} (${provider})\n-----`)
+			} else {
+				// switch to new model
+				const newModel = args[0]
+
+				try {
+					validateModelName(newModel)
+					// test if provider can be created successfully
+					createProvider(newModel, options.debug)
+				} catch (error) {
+					console.log(`Error: ${error instanceof Error ? error.message : error}`)
+					console.log('-----')
+					return true
+				}
+
+				const oldModel = options.model
+				options.model = newModel
+
+				// clear provider cache so next llm call uses correct provider
+				clearProviderCache(options.debug)
+
+				console.log(`Switched from ${oldModel} to ${newModel}\n-----`)
+			}
+			return true // continue conversation
+		},
+	},
+]
 
 interface CLIOptions {
 	debug?: boolean
@@ -131,12 +250,65 @@ const envVars =
 		  }
 		: {}
 
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
-const prompt = (query: string) => new Promise(resolve => rl.question(query, resolve))
+// create readline interface when not in test mode
+let rl: readline.Interface | null = null
+const getReadlineInterface = () => {
+	if (!rl && !process.env.PROMPT_SHAPER_TESTS) {
+		rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+	}
+	return rl
+}
+const prompt = (query: string) =>
+	new Promise(resolve => {
+		const readline = getReadlineInterface()
+		if (readline) {
+			readline.question(query, resolve)
+		} else {
+			resolve('') // return empty string during tests
+		}
+	})
+
+function getProviderFromModel(model: string): string {
+	if (model.startsWith('gpt') || model.startsWith('o1') || model.startsWith('o3')) {
+		return 'OpenAI'
+	} else if (model.startsWith('claude-')) {
+		return 'Anthropic'
+	} else if (model.startsWith('gemini-')) {
+		return 'Google'
+	}
+	return 'Unknown'
+}
+
+function validateModelName(model: string): void {
+	if (getProviderFromModel(model) === 'Unknown') {
+		throw new Error(`"${model}" is not a recognized model name.
+Valid model patterns:
+  OpenAI: gpt-*, o1-*, o3-*
+  Anthropic: claude-*
+  Google: gemini-*`)
+	}
+}
+
+function showWelcomeMessage(options: CLIOptions) {
+	const provider = getProviderFromModel(options.model)
+	const modelDisplay = `${options.model} (${provider})`
+
+	console.log('╭─────────────────────────────────────────────────────────────╮')
+	console.log('│ PromptShaper Interactive Mode                               │')
+	console.log('├─────────────────────────────────────────────────────────────┤')
+	console.log(`│ Model: ${modelDisplay.substring(0, 50).padEnd(53)}│`)
+	console.log('│                                                             │')
+	console.log('│ Type /help to see available commands                        │')
+	console.log('│ Type /exit to quit                                          │')
+	console.log('╰─────────────────────────────────────────────────────────────╯')
+	console.log()
+}
 
 // centralized exit handler
 function exitApp(code: number = 0): never {
-	rl.close()
+	if (rl) {
+		rl.close()
+	}
 	process.exit(code)
 }
 
@@ -144,7 +316,7 @@ async function handler(input: string, cliOptions: CLIOptions) {
 	// implement priority system: CLI > profile > env vars
 	let profileOptions: Partial<CLIOptions> = {}
 
-	// determine which profile to load (CLI takes priority over env var)
+	// determine profile to load (cli takes priority over env var)
 	const profilePath = cliOptions.profile || envVars.profile
 	if (profilePath) {
 		if (cliOptions.profile && envVars.profile && cliOptions.profile !== envVars.profile) {
@@ -153,7 +325,7 @@ async function handler(input: string, cliOptions: CLIOptions) {
 		profileOptions = loadProfileOptions(profilePath)
 	}
 
-	// merge options in priority order: CLI > profile > env vars > defaults
+	// merge options in priority order: cli > profile > env vars > defaults
 	const options: CLIOptions = {
 		debug: cliOptions.debug ?? profileOptions.debug ?? envVars.debug ?? false,
 		extensions: cliOptions.extensions ?? profileOptions.extensions ?? envVars.extensions ?? defaultFileExtensions.join(','),
@@ -178,6 +350,12 @@ async function handler(input: string, cliOptions: CLIOptions) {
 		reasoningEffort: (cliOptions.reasoningEffort ?? profileOptions.reasoningEffort ?? envVars.reasoningEffort ?? 'high') as ReasoningEffort,
 	}
 
+	// validate model name early
+	if (options.debug) {
+		console.log(`[DEBUG] Validating model name: ${options.model}`)
+	}
+	validateModelName(options.model)
+
 	// convert llm flag to nollm for easier logic
 	const noLlm = options.llm === false
 
@@ -195,6 +373,9 @@ async function handler(input: string, cliOptions: CLIOptions) {
 
 	if (options.loadJson) {
 		// load json and continue interactive
+		if (options.debug) {
+			console.log(`[DEBUG] Loading conversation from JSON: ${options.loadJson}`)
+		}
 		const conversation: GenericMessage[] = JSON.parse(fs.readFileSync(options.loadJson, 'utf8'))
 		await startSavedConversation(conversation, options)
 
@@ -203,6 +384,9 @@ async function handler(input: string, cliOptions: CLIOptions) {
 
 	if (options.loadText) {
 		// load text and continue interactive
+		if (options.debug) {
+			console.log(`[DEBUG] Loading conversation from text: ${options.loadText}`)
+		}
 		const conversation = fs
 			.readFileSync(options.loadText, 'utf8')
 			.split('\n\n-----\n\n')
@@ -217,7 +401,10 @@ async function handler(input: string, cliOptions: CLIOptions) {
 
 	if (options.interactive && !input) {
 		// start new conversation
-		const conversation: GenericMessage[] = startConversationWithProvider(options.systemPrompt, options.model)
+		if (options.debug) {
+			console.log(`[DEBUG] Starting interactive mode with model: ${options.model}`)
+		}
+		const conversation: GenericMessage[] = startConversationWithProvider(options.systemPrompt, options.model, options.debug)
 		await startSavedConversation(conversation, options)
 
 		exitApp(0)
@@ -274,14 +461,14 @@ async function handler(input: string, cliOptions: CLIOptions) {
 		const parserContext = { variables, options: parserOptions, attachments: [] }
 		const parsed = options.raw ? template : await parseTemplate(template, parserContext)
 
-		// check if user wants to send results to LLM (but not in raw mode or disable-llm mode)
+		// check if user wants to send results to llm (but not in raw mode or disable-llm mode)
 		if (!options.raw && !noLlm && (options.generate || options.interactive)) {
 			// show conversational formatting when using llm features
 			if (!options.hidePrompt) {
 				console.log(`user\n${parsed}\n-----`)
 			}
 			const conversation: GenericMessage[] = [
-				...startConversationWithProvider(options.systemPrompt, options.model),
+				...startConversationWithProvider(options.systemPrompt, options.model, options.debug),
 				{
 					role: 'user',
 					content: [{ type: 'text', text: parsed }, ...parserContext.attachments.reverse()],
@@ -332,6 +519,11 @@ async function interactiveModeLoop(conversation: GenericMessage[], options: CLIO
 		userTurn = true
 	}
 
+	// show welcome message for new conversations
+	if (conversation.length === 0 || (conversation.length === 1 && conversation[0].role === 'system')) {
+		showWelcomeMessage(options)
+	}
+
 	// runs until user exits
 	const running = true
 	while (running) {
@@ -341,40 +533,29 @@ async function interactiveModeLoop(conversation: GenericMessage[], options: CLIO
 		}
 
 		// collect user response and then parse response if not in raw mode
-		const response = (await prompt('Your response: ')) as string
+		const response = (await prompt('\n> ')) as string
 
-		// handle /rewind command
-		if (response.trim() === '/rewind') {
-			if (
-				conversation.length >= 2 &&
-				conversation[conversation.length - 1].role === 'assistant' &&
-				conversation[conversation.length - 2].role === 'user'
-			) {
-				// remove the last user-assistant exchange
-				conversation.pop() // remove assistant response
-				conversation.pop() // remove user question
-				console.log('Rewound last exchange. Conversation has been reverted.\n-----')
+		// check if response is a command
+		if (response.trim().startsWith('/')) {
+			const parts = response.trim().split(/\s+/)
+			const commandName = parts[0].substring(1) // remove the '/' prefix
+			const args = parts.slice(1)
 
-				// update saved files after rewind
-				if (options.saveJson) {
-					saveConversationAsJson(conversation, options)
+			if (options.debug) {
+				console.log(`[DEBUG] Processing command: ${commandName} with args: ${args.join(' ')}`)
+			}
+
+			// find matching command
+			const command = interactiveCommands.find(cmd => cmd.name === commandName)
+			if (command) {
+				const shouldContinue = await command.handler(conversation, options, args)
+				if (shouldContinue) {
+					continue
 				}
-				if (options.save) {
-					saveConversationAsText(conversation, options)
-				}
-
-				// stay on user's turn since we just removed a complete exchange
-				continue
 			} else {
-				console.log('Cannot rewind: no previous exchange to remove.\n-----')
+				console.log(`Unknown command: /${commandName}. Type /help for available commands.\n-----`)
 				continue
 			}
-		}
-
-		// handle /exit command
-		if (response.trim() === '/exit') {
-			console.log('Goodbye!')
-			exitApp(0)
 		}
 
 		const parserContext = {
@@ -402,8 +583,11 @@ async function interactiveModeLoop(conversation: GenericMessage[], options: CLIO
 }
 
 async function makeCompletionRequest(conversation: GenericMessage[], options: CLIOptions) {
+	if (options.debug) {
+		console.log(`[DEBUG] Making completion request with model: ${options.model}`)
+	}
 	console.log('assistant')
-	const result = await generateWithProvider(conversation, options.model, options.responseFormat, options.reasoningEffort)
+	const result = await generateWithProvider(conversation, options.model, options.responseFormat, options.reasoningEffort, options.debug)
 	console.log('\n-----')
 
 	// update/save chat history
@@ -458,4 +642,7 @@ program
 	.option('-sj, --save-json <filePath>', 'Save conversation as JSON file')
 	.action(handler)
 
-program.parse()
+// only parse if this is the main module
+if (require.main === module) {
+	program.parse()
+}

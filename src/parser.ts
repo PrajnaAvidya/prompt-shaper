@@ -64,31 +64,21 @@ export const parseTemplate = async (template: string, parserContext?: ParserCont
 		}
 	}
 
-	const showDebug = parserContext.options.showDebugMessages || false
-
-	showDebug && console.log(`DEBUG: Parsing template:\n${template}`)
-
 	// preserve markdown blocks
 	const { maskedTemplate, codeBlocks } = maskCodeBlocks(template)
-	showDebug && console.log(`DEBUG: Masked template:\n${maskedTemplate}`)
 
 	// preprocess problematic variables
 	const { processedTemplate: preprocessedTemplate, problematicVars } = preprocessProblematicMultilineVars(maskedTemplate)
-	showDebug && console.log(`DEBUG: Preprocessed template:\n${preprocessedTemplate}`)
-	showDebug && console.log(`DEBUG: Problematic vars:`, problematicVars)
 
 	// match all outer tags
-	showDebug && console.log('DEBUG: Matching all outer tags')
 	const parsedVariables = templateParser.parse(preprocessedTemplate)
 	if (parserContext.options.returnParserMatches === true) {
 		return parsedVariables.parsed
 	}
 	if (parsedVariables.parsed.length === 1 && parsedVariables.parsed[0].type === 'text') {
-		showDebug && console.log('DEBUG: No tags to parse, returning original template')
 		return restoreCodeBlocks(template, codeBlocks)
 	}
 	for (const value of parsedVariables.parsed as ParserSection[]) {
-		showDebug && console.log('DEBUG: Match: ', value)
 		switch (value.type) {
 			case ParserType.variable: {
 				// check for conflicts
@@ -117,19 +107,14 @@ export const parseTemplate = async (template: string, parserContext?: ParserCont
 				throw new Error(`Unknown type:\n${value}`)
 		}
 	}
-	showDebug && console.log('DEBUG: Found single-line-variables:', parserContext.variables)
 
 	// parser returns template without variable definitions
 	const withoutVariables = parsedVariables.text
-	showDebug && console.log(`DEBUG: Final template to render:\n${withoutVariables}`)
 
 	// render slots bottom-up
-	showDebug && console.log('DEBUG: Rendering slots')
 	const slots = parsedVariables.parsed.filter((p: ParserSection) => p.type === ParserType.slot).reverse()
 	let currentTemplate = withoutVariables
 	for (const slot of slots as ParserSection[]) {
-		showDebug && console.log('DEBUG: Rendering slot:', slot)
-
 		// replace slot with variable
 		const slotValue = await renderSlot(slot, parserContext, recursionDepth || 0)
 		if (slotValue) {

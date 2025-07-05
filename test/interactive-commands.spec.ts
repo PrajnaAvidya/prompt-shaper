@@ -173,4 +173,52 @@ describe('Interactive commands', function () {
 			clearCacheSpy.restore()
 		})
 	})
+
+	describe('/retry command', () => {
+		it('should exist and have correct description', () => {
+			const retryCommand = interactiveCommands.find(cmd => cmd.name === 'retry')
+			expect(retryCommand).to.exist
+			expect(retryCommand!.description).to.equal('Retry the last request with a new response')
+		})
+
+		it('should remove assistant response and prepare for retry', () => {
+			const mockConversation: GenericMessage[] = [
+				{ role: 'system', content: 'System prompt' },
+				{ role: 'user', content: 'Hello' },
+				{ role: 'assistant', content: 'Hi there!' },
+			]
+
+			// test just the conversation manipulation logic by extracting it
+			// find the last user message
+			let lastUserIndex = -1
+			for (let i = mockConversation.length - 1; i >= 0; i--) {
+				if (mockConversation[i].role === 'user') {
+					lastUserIndex = i
+					break
+				}
+			}
+
+			// remove any assistant messages after the last user message
+			while (mockConversation.length > lastUserIndex + 1) {
+				mockConversation.pop()
+			}
+
+			// verify the assistant response was removed
+			expect(mockConversation.length).to.equal(2)
+			expect(mockConversation[mockConversation.length - 1].role).to.equal('user')
+			expect(lastUserIndex).to.equal(1)
+		})
+
+		it('should handle case when no user message exists', async () => {
+			const retryCommand = interactiveCommands.find(cmd => cmd.name === 'retry')!
+
+			const mockConversation: GenericMessage[] = [{ role: 'system', content: 'System prompt' }]
+
+			const mockOptions = {} as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+			const result = await retryCommand.handler(mockConversation, mockOptions, [])
+			expect(result).to.be.true
+			expect(mockConversation.length).to.equal(1) // should not modify conversation
+		})
+	})
 })

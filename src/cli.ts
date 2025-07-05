@@ -10,6 +10,36 @@ import { ParserVariables, ResponseFormat, ReasoningEffort } from './types'
 import { generateWithProvider, startConversationWithProvider, clearProviderCache, createProvider } from './providers/factory'
 import * as readline from 'readline'
 
+// helper function to clear previous assistant response from terminal
+function clearPreviousResponse(responseText: string): void {
+	if (process.env.PROMPT_SHAPER_TESTS) {
+		return // skip during tests
+	}
+
+	// count lines in the response - need to account for terminal wrapping
+	const terminalWidth = process.stdout.columns || 80
+	const responseLines = responseText.split('\n')
+
+	let totalLines = 1 // start with 1 for "assistant" header
+
+	// count actual lines including wrapped lines
+	for (const line of responseLines) {
+		if (line.length === 0) {
+			totalLines += 1 // empty line
+		} else {
+			totalLines += Math.ceil(line.length / terminalWidth)
+		}
+	}
+
+	totalLines += 3 // +1 for empty line from "\n-----", +1 for "-----" footer itself, +1 adjustment
+
+	// move cursor up and clear each line
+	for (let i = 0; i < totalLines; i++) {
+		process.stdout.write('\x1b[A') // move cursor up one line
+		process.stdout.write('\x1b[K') // clear from cursor to end of line
+	}
+}
+
 interface InteractiveCommand {
 	name: string
 	description: string
@@ -124,6 +154,50 @@ export const interactiveCommands: InteractiveCommand[] = [
 
 				console.log(`Switched from ${oldModel} to ${newModel}\n-----`)
 			}
+			return true // continue conversation
+		},
+	},
+	{
+		name: 'retry',
+		description: 'Retry the last request with a new response',
+		handler: async (conversation, options) => {
+			// find the last user message
+			let lastUserIndex = -1
+			for (let i = conversation.length - 1; i >= 0; i--) {
+				if (conversation[i].role === 'user') {
+					lastUserIndex = i
+					break
+				}
+			}
+
+			if (lastUserIndex === -1) {
+				console.log('Cannot retry: no user message found in conversation.\n-----')
+				return true
+			}
+
+			// find and clear the last assistant response from terminal
+			let lastAssistantResponse = ''
+			for (let i = conversation.length - 1; i > lastUserIndex; i--) {
+				if (conversation[i].role === 'assistant') {
+					lastAssistantResponse =
+						typeof conversation[i].content === 'string' ? (conversation[i].content as string) : JSON.stringify(conversation[i].content)
+					break
+				}
+			}
+
+			// clear the previous response from terminal if it exists
+			if (lastAssistantResponse) {
+				clearPreviousResponse(lastAssistantResponse)
+			}
+
+			// remove any assistant messages after the last user message
+			while (conversation.length > lastUserIndex + 1) {
+				conversation.pop()
+			}
+
+			// get new response for the last user message
+			await makeCompletionRequest(conversation, options)
+
 			return true // continue conversation
 		},
 	},
@@ -252,12 +326,14 @@ const envVars =
 
 // create readline interface when not in test mode
 let rl: readline.Interface | null = null
+
 const getReadlineInterface = () => {
 	if (!rl && !process.env.PROMPT_SHAPER_TESTS) {
 		rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 	}
 	return rl
 }
+
 const prompt = (query: string) =>
 	new Promise(resolve => {
 		const readline = getReadlineInterface()

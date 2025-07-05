@@ -38,7 +38,7 @@ describe('Profiles functionality', function () {
 
 			const result = execSync(`ts-node src/cli.ts --profile ${testProfilePath} -is "test template" --disable-llm`, { encoding: 'utf8' })
 
-			expect(result).to.include('DEBUG:') // debug from profile should be active
+			expect(result).to.include('[DEBUG]') // debug from profile should be active
 			expect(result).to.include('test template')
 		})
 
@@ -84,7 +84,7 @@ describe('Profiles functionality', function () {
 				{ encoding: 'utf8' },
 			)
 
-			expect(result).to.include('DEBUG:') // debug from profile should be active
+			expect(result).to.include('[DEBUG]') // debug from profile should be active
 			expect(result).to.include('test template')
 		})
 	})
@@ -101,7 +101,7 @@ describe('Profiles functionality', function () {
 			const result = execSync(`ts-node src/cli.ts --profile ${testProfilePath} -is "test template" --disable-llm`, { encoding: 'utf8' })
 
 			// Debug should be active from profile since no CLI debug option provided
-			expect(result).to.include('DEBUG:')
+			expect(result).to.include('[DEBUG]')
 		})
 
 		it('should prioritize profile options over environment variables', function () {
@@ -118,7 +118,7 @@ describe('Profiles functionality', function () {
 			)
 
 			// Debug should be false from profile, not true from env var
-			expect(result).to.not.include('DEBUG:')
+			expect(result).to.not.include('[DEBUG]')
 		})
 
 		it('should use environment variables when no profile provided', function () {
@@ -126,7 +126,7 @@ describe('Profiles functionality', function () {
 				encoding: 'utf8',
 			})
 
-			expect(result).to.include('DEBUG:') // debug from env var should be active
+			expect(result).to.include('[DEBUG]') // debug from env var should be active
 		})
 
 		it('should prioritize CLI profile over environment profile with warning', function () {
@@ -146,7 +146,7 @@ describe('Profiles functionality', function () {
 				)
 
 				// Should use profile2 (debug=false), not profile1 (debug=true)
-				expect(result).to.not.include('DEBUG:')
+				expect(result).to.not.include('[DEBUG]')
 				expect(result).to.include('test template')
 			} catch (e) {
 				// If there's an error, still check the output
@@ -171,7 +171,7 @@ describe('Profiles functionality', function () {
 					stdio: ['pipe', 'pipe', 'inherit'], // let stderr go to console
 				})
 
-				expect(result).to.include('DEBUG:') // valid options should still work
+				expect(result).to.include('[DEBUG]') // valid options should still work
 				expect(result).to.include('test template')
 			} catch (e) {
 				// If command fails, check the output anyway
@@ -186,7 +186,6 @@ describe('Profiles functionality', function () {
 				debug: true,
 				extensions: 'js,ts,md',
 				generate: false,
-				hidePrompt: true,
 				model: 'gpt-4',
 				systemPrompt: 'Test assistant',
 				raw: false,
@@ -197,7 +196,7 @@ describe('Profiles functionality', function () {
 
 			const result = execSync(`ts-node src/cli.ts --profile ${testProfilePath} -is "test template" --disable-llm`, { encoding: 'utf8' })
 
-			expect(result).to.include('DEBUG:') // debug should work
+			expect(result).to.include('[DEBUG]') // debug should work
 			expect(result).to.include('test template')
 			expect(result).to.not.include('Warning') // no warnings for valid options
 		})
@@ -216,7 +215,7 @@ describe('Profiles functionality', function () {
 			})
 
 			expect(result).to.include('Hello World')
-			expect(result).to.not.include('DEBUG:') // debug should be false from profile
+			expect(result).to.not.include('[DEBUG]') // debug should be false from profile
 		})
 
 		it('should work with loadDir function and extensions from profile', function () {
@@ -288,7 +287,7 @@ describe('Profiles functionality', function () {
 			const result = execSync(`ts-node src/cli.ts --profile ${testProfilePath} -is "test template" --disable-llm`, { encoding: 'utf8' })
 
 			expect(result).to.include('test template')
-			expect(result).to.include('DEBUG:') // known options should work
+			expect(result).to.include('[DEBUG]') // known options should work
 			// Unknown options should be silently ignored (no warnings unless they're specifically excluded)
 		})
 	})

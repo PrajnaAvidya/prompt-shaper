@@ -361,9 +361,7 @@ describe('Interactive commands', function () {
 		it('should use developer role for o1/o3 models', () => {
 			const systemCommand = interactiveCommands.find(cmd => cmd.name === 'system')!
 
-			const mockConversation: GenericMessage[] = [
-				{ role: 'user', content: 'Hello' },
-			]
+			const mockConversation: GenericMessage[] = [{ role: 'user', content: 'Hello' }]
 			const mockOptions = { model: 'o1-mini' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
 
 			const result = systemCommand.handler(mockConversation, mockOptions, ['You', 'are', 'helpful.'])
@@ -378,9 +376,7 @@ describe('Interactive commands', function () {
 		it('should add system prompt when none exists', () => {
 			const systemCommand = interactiveCommands.find(cmd => cmd.name === 'system')!
 
-			const mockConversation: GenericMessage[] = [
-				{ role: 'user', content: 'Hello' },
-			]
+			const mockConversation: GenericMessage[] = [{ role: 'user', content: 'Hello' }]
 			const mockOptions = { model: 'gpt-4' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
 
 			const result = systemCommand.handler(mockConversation, mockOptions, ['You', 'are', 'helpful.'])

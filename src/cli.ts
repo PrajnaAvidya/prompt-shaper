@@ -367,18 +367,18 @@ export const interactiveCommands: InteractiveCommand[] = [
 			} else {
 				// update system prompt
 				const newSystemPrompt = args.join(' ')
-				
+
 				// find existing system/developer message
 				const systemIndex = conversation.findIndex(msg => msg.role === 'system' || msg.role === 'developer')
-				
+
 				// determine role based on model
 				const usesDeveloperRole = options.model.startsWith('o1') || options.model.startsWith('o3')
 				const role = usesDeveloperRole ? 'developer' : 'system'
-				
-				const newMessage = usesDeveloperRole 
+
+				const newMessage = usesDeveloperRole
 					? { role: 'developer' as const, content: [{ type: 'text' as const, text: newSystemPrompt }] }
 					: { role: 'system' as const, content: newSystemPrompt }
-				
+
 				if (systemIndex >= 0) {
 					// update existing system message
 					conversation[systemIndex] = newMessage
@@ -388,7 +388,7 @@ export const interactiveCommands: InteractiveCommand[] = [
 					conversation.unshift(newMessage)
 					console.log(`System prompt added:\n"${newSystemPrompt}"\n-----`)
 				}
-				
+
 				// update saved files after system prompt change
 				if (options.saveJson) {
 					saveConversationAsJson(conversation, options)

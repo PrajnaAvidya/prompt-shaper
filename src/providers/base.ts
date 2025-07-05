@@ -15,6 +15,7 @@ export interface ProviderOptions {
 	model: string
 	responseFormat: 'text' | 'json_object'
 	reasoningEffort?: 'low' | 'medium' | 'high'
+	debug?: boolean
 }
 
 export interface LLMProvider {

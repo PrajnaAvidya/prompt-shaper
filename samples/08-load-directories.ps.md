@@ -16,7 +16,7 @@ Loading files but ignoring specific patterns:
 
 When using the CLI, you can specify file extensions:
 ```bash
-yarn parse -- samples/08-load-directories.ps.md -e "js,json,md"
+yarn parse samples/08-load-directories.ps.md -e "js,json,md"
 ```
 
 ## Loading with Multiple Ignore Patterns

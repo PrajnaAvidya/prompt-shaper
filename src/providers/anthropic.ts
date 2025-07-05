@@ -1,12 +1,12 @@
 import { LLMProvider, GenericMessage, ProviderOptions } from './base'
 
-// Dynamic import for optional dependency
+// dynamic import for optional dependency
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let Anthropic: any = null
 try {
 	Anthropic = require('@anthropic-ai/sdk')
 } catch (e) {
-	// Anthropic SDK not installed
+	// anthropic sdk not installed
 }
 
 export class AnthropicProvider implements LLMProvider {
@@ -30,6 +30,9 @@ export class AnthropicProvider implements LLMProvider {
 			// Convert generic messages to anthropic format
 			const anthropicMessages = this.convertMessages(messages)
 
+			if (options.debug) {
+				console.log(`[DEBUG] Anthropic API call with model: ${options.model}`)
+			}
 			const stream = await this.client.messages.create({
 				model: options.model,
 				max_tokens: 4096,

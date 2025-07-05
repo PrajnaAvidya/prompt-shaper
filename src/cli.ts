@@ -7,8 +7,646 @@ import { program } from 'commander'
 import { loadFileContent, transformJsonToVariables } from './utils'
 import { parseTemplate } from './parser'
 import { ParserVariables, ResponseFormat, ReasoningEffort } from './types'
-import { generateWithProvider, startConversationWithProvider } from './providers/factory'
+import { generateWithProvider, startConversationWithProvider, clearProviderCache, createProvider } from './providers/factory'
 import * as readline from 'readline'
+
+// helper function to check if model is OpenAI
+function isOpenAIModel(model: string): boolean {
+	return model.startsWith('gpt') || model.startsWith('o1') || model.startsWith('o3')
+}
+
+// check if tiktoken is available
+let tiktokenAvailable: boolean | null = null
+function isTiktokenAvailable(): boolean {
+	if (tiktokenAvailable === null) {
+		try {
+			require('tiktoken')
+			tiktokenAvailable = true
+		} catch (error) {
+			tiktokenAvailable = false
+		}
+	}
+	return tiktokenAvailable
+}
+
+// get encoding for model
+function getEncodingForModel(model: string): string {
+	if (model.startsWith('gpt-4') || model.startsWith('gpt-3.5')) {
+		return 'cl100k_base'
+	} else if (model.startsWith('o1') || model.startsWith('o3')) {
+		return 'o200k_base'
+	} else {
+		return 'cl100k_base' // default fallback
+	}
+}
+
+// helper function for token counting
+function countTokens(text: string, model: string): number {
+	if (isTiktokenAvailable()) {
+		const tiktoken = require('tiktoken')
+		const encoding = getEncodingForModel(model)
+		const enc = tiktoken.get_encoding(encoding)
+		const tokens = enc.encode(text)
+		enc.free()
+		return tokens.length
+	} else {
+		// fallback to heuristic if tiktoken is not available
+		// roughly 4 characters per token for English text
+		return Math.ceil(text.length / 4)
+	}
+}
+
+// helper function to estimate conversation tokens
+function estimateConversationTokens(
+	conversation: GenericMessage[],
+	model: string,
+): { totalTokens: number; breakdown: Array<{ role: string; tokens: number; preview: string }> } {
+	let totalTokens = 0
+	const breakdown: Array<{ role: string; tokens: number; preview: string }> = []
+
+	for (const message of conversation) {
+		const content = typeof message.content === 'string' ? message.content : JSON.stringify(message.content)
+
+		const tokens = countTokens(content, model)
+		totalTokens += tokens
+
+		// create preview (first 50 chars)
+		const preview = content.length > 50 ? content.substring(0, 50) + '...' : content
+
+		breakdown.push({
+			role: message.role,
+			tokens,
+			preview,
+		})
+	}
+
+	return { totalTokens, breakdown }
+}
+
+// helper function to clear previous assistant response from terminal
+function clearPreviousResponse(responseText: string): void {
+	if (process.env.PROMPT_SHAPER_TESTS) {
+		return // skip during tests
+	}
+
+	// count lines in the response - need to account for terminal wrapping
+	const terminalWidth = process.stdout.columns || 80
+	const responseLines = responseText.split('\n')
+
+	let totalLines = 1 // start with 1 for "assistant" header
+
+	// count actual lines including wrapped lines
+	for (const line of responseLines) {
+		if (line.length === 0) {
+			totalLines += 1 // empty line
+		} else {
+			totalLines += Math.ceil(line.length / terminalWidth)
+		}
+	}
+
+	totalLines += 3 // +1 for empty line from "\n-----", +1 for "-----" footer itself, +1 adjustment
+
+	// move cursor up and clear each line
+	for (let i = 0; i < totalLines; i++) {
+		process.stdout.write('\x1b[A') // move cursor up one line
+		process.stdout.write('\x1b[K') // clear from cursor to end of line
+	}
+}
+
+interface InteractiveCommand {
+	name: string
+	description: string
+	handler: (conversation: GenericMessage[], options: CLIOptions, args: string[]) => Promise<boolean> | boolean
+}
+
+export const interactiveCommands: InteractiveCommand[] = [
+	{
+		name: 'help',
+		description: 'Show this help message',
+		handler: () => {
+			console.log('Available commands:')
+			interactiveCommands.forEach(cmd => {
+				console.log(`  /${cmd.name.padEnd(10)} - ${cmd.description}`)
+			})
+			console.log('-----')
+			return true // continue conversation
+		},
+	},
+	{
+		name: 'exit',
+		description: 'Exit interactive mode',
+		handler: () => {
+			console.log('Goodbye!')
+			exitApp(0)
+		},
+	},
+	{
+		name: 'rewind',
+		description: 'Remove last user-assistant exchange',
+		handler: (conversation, options) => {
+			if (
+				conversation.length >= 2 &&
+				conversation[conversation.length - 1].role === 'assistant' &&
+				conversation[conversation.length - 2].role === 'user'
+			) {
+				// remove the last user-assistant exchange
+				conversation.pop() // remove assistant response
+				conversation.pop() // remove user question
+				console.log('Rewound last exchange. Conversation has been reverted.\n-----')
+
+				// update saved files after rewind
+				if (options.saveJson) {
+					saveConversationAsJson(conversation, options)
+				}
+				if (options.save) {
+					saveConversationAsText(conversation, options)
+				}
+			} else {
+				console.log('Cannot rewind: no previous exchange to remove.\n-----')
+			}
+			return true // continue conversation
+		},
+	},
+	{
+		name: 'clear',
+		description: 'Clear conversation history and start fresh',
+		handler: (conversation, options) => {
+			// clear screen (skip during tests)
+			if (!process.env.PROMPT_SHAPER_TESTS) {
+				console.clear()
+			}
+
+			// show previous session cost
+			if (sessionCostTracker.apiCalls.length > 0) {
+				console.log(`Previous session estimated cost: $${sessionCostTracker.totalCost.toFixed(6)}`)
+				console.log(`(${sessionCostTracker.apiCalls.length} API calls made)`)
+				console.log('')
+			}
+
+			// reset conversation to just system prompt if exists
+			const systemMessage = conversation.find(msg => msg.role === 'system')
+			conversation.length = 0 // clear array
+			if (systemMessage) {
+				conversation.push(systemMessage)
+			}
+
+			// reset cost tracker for new session
+			sessionCostTracker = {
+				totalCost: 0,
+				apiCalls: [],
+			}
+
+			// update saved files with cleared conversation
+			if (options.saveJson) {
+				saveConversationAsJson(conversation, options)
+			}
+			if (options.save) {
+				saveConversationAsText(conversation, options)
+			}
+
+			// show welcome message again
+			console.log('Conversation cleared. Starting fresh!\n-----')
+			showWelcomeMessage(options)
+			return true // continue conversation
+		},
+	},
+	{
+		name: 'model',
+		description: 'Switch to different model or show current model',
+		handler: (conversation, options, args) => {
+			if (args.length === 0) {
+				// show current model
+				const provider = getProviderFromModel(options.model)
+				console.log(`Current model: ${options.model} (${provider})\n-----`)
+			} else {
+				// switch to new model
+				const newModel = args[0]
+
+				try {
+					validateModelName(newModel)
+					// test if provider can be created successfully
+					createProvider(newModel, options.debug)
+				} catch (error) {
+					console.log(`Error: ${error instanceof Error ? error.message : error}`)
+					console.log('-----')
+					return true
+				}
+
+				const oldModel = options.model
+				options.model = newModel
+
+				// clear provider cache so next llm call uses correct provider
+				clearProviderCache(options.debug)
+
+				console.log(`Switched from ${oldModel} to ${newModel}\n-----`)
+			}
+			return true // continue conversation
+		},
+	},
+	{
+		name: 'retry',
+		description: 'Retry the last request with a new response',
+		handler: async (conversation, options) => {
+			// find the last user message
+			let lastUserIndex = -1
+			for (let i = conversation.length - 1; i >= 0; i--) {
+				if (conversation[i].role === 'user') {
+					lastUserIndex = i
+					break
+				}
+			}
+
+			if (lastUserIndex === -1) {
+				console.log('Cannot retry: no user message found in conversation.\n-----')
+				return true
+			}
+
+			// find and clear the last assistant response from terminal
+			let lastAssistantResponse = ''
+			for (let i = conversation.length - 1; i > lastUserIndex; i--) {
+				if (conversation[i].role === 'assistant') {
+					lastAssistantResponse =
+						typeof conversation[i].content === 'string' ? (conversation[i].content as string) : JSON.stringify(conversation[i].content)
+					break
+				}
+			}
+
+			// clear the previous response from terminal if it exists
+			if (lastAssistantResponse) {
+				clearPreviousResponse(lastAssistantResponse)
+			}
+
+			// remove any assistant messages after the last user message
+			while (conversation.length > lastUserIndex + 1) {
+				conversation.pop()
+			}
+
+			// get new response for the last user message
+			await makeCompletionRequest(conversation, options)
+
+			return true // continue conversation
+		},
+	},
+	{
+		name: 'tokens',
+		description: 'Show token count for the current conversation',
+		handler: (conversation, options) => {
+			if (conversation.length === 0) {
+				console.log('No messages in conversation to count.\n-----')
+				return true
+			}
+
+			const { totalTokens, breakdown } = estimateConversationTokens(conversation, options.model)
+
+			console.log(`Token count for current conversation (${options.model}):`)
+			console.log(`Total tokens: ${totalTokens}`)
+			console.log('')
+			console.log('Breakdown by message:')
+
+			breakdown.forEach((item, index) => {
+				console.log(`${index + 1}. ${item.role}: ${item.tokens} tokens`)
+				console.log(`   "${item.preview}"`)
+			})
+
+			// show encoding info
+			if (isTiktokenAvailable()) {
+				const encoding = getEncodingForModel(options.model)
+				if (isOpenAIModel(options.model)) {
+					console.log(`\nUsing ${encoding} encoding (tiktoken)`)
+				} else {
+					console.log(`\nUsing ${encoding} encoding (tiktoken) - approximate for ${options.model}`)
+				}
+			} else {
+				console.log('\nUsing heuristic estimation (4 chars/token)')
+				console.log('Install tiktoken for accurate counts: yarn add tiktoken')
+			}
+
+			console.log('-----')
+			return true // continue conversation
+		},
+	},
+	{
+		name: 'cost',
+		description: 'Show estimated cost for the current session',
+		handler: () => {
+			if (sessionCostTracker.apiCalls.length === 0) {
+				console.log('No API calls made in this session yet.\n-----')
+				return true
+			}
+
+			console.log('Estimated session cost breakdown:')
+			console.log(`Total estimated cost: $${sessionCostTracker.totalCost.toFixed(6)}`)
+			console.log('')
+			console.log('API calls in this session:')
+
+			sessionCostTracker.apiCalls.forEach((call, index) => {
+				console.log(`${index + 1}. ${call.model}: $${call.cost.toFixed(6)}`)
+				console.log(`   Input: ${call.inputTokens.toLocaleString()} tokens, Output: ${call.outputTokens.toLocaleString()} tokens`)
+				console.log(`   Time: ${call.timestamp.toLocaleTimeString()}`)
+			})
+
+			console.log('')
+			console.log('Note: Pricing based on July 2025 rates. Actual costs may vary.')
+			console.log('-----')
+			return true // continue conversation
+		},
+	},
+	{
+		name: 'system',
+		description: 'Update the system prompt for the conversation',
+		handler: (conversation, options, args) => {
+			if (args.length === 0) {
+				// show current system prompt
+				const systemMessage = conversation.find(msg => msg.role === 'system' || msg.role === 'developer')
+				if (systemMessage) {
+					const content = typeof systemMessage.content === 'string' ? systemMessage.content : systemMessage.content[0]?.text || ''
+					console.log(`Current system prompt:\n"${content}"\n-----`)
+				} else {
+					console.log('No system prompt set in conversation.\n-----')
+				}
+			} else {
+				// update system prompt
+				const newSystemPrompt = args.join(' ')
+
+				// find existing system/developer message
+				const systemIndex = conversation.findIndex(msg => msg.role === 'system' || msg.role === 'developer')
+
+				// determine role based on model
+				const usesDeveloperRole = options.model.startsWith('o1') || options.model.startsWith('o3')
+
+				const newMessage = usesDeveloperRole
+					? { role: 'developer' as const, content: [{ type: 'text' as const, text: newSystemPrompt }] }
+					: { role: 'system' as const, content: newSystemPrompt }
+
+				if (systemIndex >= 0) {
+					// update existing system message
+					conversation[systemIndex] = newMessage
+					console.log(`System prompt updated to:\n"${newSystemPrompt}"\n-----`)
+				} else {
+					// add new system message at beginning
+					conversation.unshift(newMessage)
+					console.log(`System prompt added:\n"${newSystemPrompt}"\n-----`)
+				}
+
+				// update saved files after system prompt change
+				if (options.saveJson) {
+					saveConversationAsJson(conversation, options)
+				}
+				if (options.save) {
+					saveConversationAsText(conversation, options)
+				}
+			}
+			return true // continue conversation
+		},
+	},
+	{
+		name: 'compact',
+		description: 'Compact conversation history using AI summarization',
+		handler: async (conversation, options, args) => {
+			if (conversation.length <= 1) {
+				console.log('Conversation too short to compact (needs at least one exchange).\n-----')
+				return true
+			}
+
+			try {
+				// load compact instructions
+				const compactInstructionsPath = path.join(__dirname, 'compact-instructions.md')
+				let compactInstructions: string
+				try {
+					compactInstructions = fs.readFileSync(compactInstructionsPath, 'utf8')
+				} catch (error) {
+					console.log('Error: Could not load compact instructions file.\n-----')
+					return true
+				}
+
+				// prepare the compact request
+				let compactPrompt = compactInstructions
+				if (args.length > 0) {
+					const userInstructions = args.join(' ')
+					compactPrompt += `\n\nAdditional instructions from user: ${userInstructions}`
+				}
+
+				// create temporary conversation for compacting
+				const compactConversation: GenericMessage[] = [
+					...conversation,
+					{
+						role: 'user',
+						content: compactPrompt,
+					},
+				]
+
+				console.log('Compacting conversation history...')
+
+				// get the compact summary from the llm
+				const compactResult = await generateWithProvider(
+					compactConversation,
+					options.model,
+					options.responseFormat,
+					options.reasoningEffort,
+					options.debug,
+				)
+
+				// preserve the original system message if it exists
+				const originalSystemMessage = conversation.find(msg => msg.role === 'system' || msg.role === 'developer')
+
+				// replace conversation with compacted version
+				conversation.length = 0 // clear array
+				if (originalSystemMessage) {
+					conversation.push(originalSystemMessage)
+				}
+				conversation.push({
+					role: 'user',
+					content: 'Previous conversation summary:\n\n' + compactResult,
+				})
+
+				// update saved files after compacting
+				if (options.saveJson) {
+					saveConversationAsJson(conversation, options)
+				}
+				if (options.save) {
+					saveConversationAsText(conversation, options)
+				}
+
+				console.log('\nConversation compacted successfully!\n-----')
+			} catch (error) {
+				console.log(`Error during compacting: ${error instanceof Error ? error.message : error}\n-----`)
+			}
+
+			return true // continue conversation
+		},
+	},
+]
+
+interface CostTracker {
+	totalCost: number
+	apiCalls: Array<{
+		model: string
+		inputTokens: number
+		outputTokens: number
+		cost: number
+		timestamp: Date
+	}>
+}
+
+interface ModelPricing {
+	inputTokensPerDollar: number // how many input tokens you get for $1
+	outputTokensPerDollar: number // how many output tokens you get for $1
+}
+
+// current pricing data based on provider websites (updated July 2025)
+const MODEL_PRICING: Record<string, ModelPricing> = {
+	// openai models - exact pricing from platform.openai.com/docs/pricing
+	'gpt-4.1': { inputTokensPerDollar: 500000, outputTokensPerDollar: 125000 }, // $2.00/$8.00 per 1M tokens
+	'gpt-4.1-mini': { inputTokensPerDollar: 2500000, outputTokensPerDollar: 625000 }, // $0.40/$1.60 per 1M tokens
+	'gpt-4.1-nano': { inputTokensPerDollar: 10000000, outputTokensPerDollar: 2500000 }, // $0.10/$0.40 per 1M tokens
+	'gpt-4.5-preview': { inputTokensPerDollar: 13333, outputTokensPerDollar: 6667 }, // $75.00/$150.00 per 1M tokens
+	'gpt-4o': { inputTokensPerDollar: 400000, outputTokensPerDollar: 100000 }, // $2.50/$10.00 per 1M tokens
+	'gpt-4o-audio-preview': { inputTokensPerDollar: 400000, outputTokensPerDollar: 100000 }, // $2.50/$10.00 per 1M tokens
+	'gpt-4o-realtime-preview': { inputTokensPerDollar: 200000, outputTokensPerDollar: 50000 }, // $5.00/$20.00 per 1M tokens
+	'gpt-4o-mini': { inputTokensPerDollar: 6666667, outputTokensPerDollar: 1666667 }, // $0.15/$0.60 per 1M tokens
+	'gpt-4o-mini-audio-preview': { inputTokensPerDollar: 6666667, outputTokensPerDollar: 1666667 }, // $0.15/$0.60 per 1M tokens
+	'gpt-4o-mini-realtime-preview': { inputTokensPerDollar: 1666667, outputTokensPerDollar: 416667 }, // $0.60/$2.40 per 1M tokens
+	'gpt-4o-search-preview': { inputTokensPerDollar: 400000, outputTokensPerDollar: 100000 }, // $2.50/$10.00 per 1M tokens
+	'gpt-4o-mini-search-preview': { inputTokensPerDollar: 6666667, outputTokensPerDollar: 1666667 }, // $0.15/$0.60 per 1M tokens
+	o1: { inputTokensPerDollar: 66667, outputTokensPerDollar: 16667 }, // $15.00/$60.00 per 1M tokens
+	'o1-pro': { inputTokensPerDollar: 6667, outputTokensPerDollar: 1667 }, // $150.00/$600.00 per 1M tokens
+	'o1-mini': { inputTokensPerDollar: 909091, outputTokensPerDollar: 227273 }, // $1.10/$4.40 per 1M tokens
+	o3: { inputTokensPerDollar: 500000, outputTokensPerDollar: 125000 }, // $2.00/$8.00 per 1M tokens
+	'o3-pro': { inputTokensPerDollar: 50000, outputTokensPerDollar: 12500 }, // $20.00/$80.00 per 1M tokens
+	'o3-deep-research': { inputTokensPerDollar: 100000, outputTokensPerDollar: 25000 }, // $10.00/$40.00 per 1M tokens
+	'o3-mini': { inputTokensPerDollar: 909091, outputTokensPerDollar: 227273 }, // $1.10/$4.40 per 1M tokens
+	'o4-mini': { inputTokensPerDollar: 909091, outputTokensPerDollar: 227273 }, // $1.10/$4.40 per 1M tokens
+	'o4-mini-deep-research': { inputTokensPerDollar: 500000, outputTokensPerDollar: 125000 }, // $2.00/$8.00 per 1M tokens
+	'codex-mini-latest': { inputTokensPerDollar: 666667, outputTokensPerDollar: 166667 }, // $1.50/$6.00 per 1M tokens
+	'computer-use-preview': { inputTokensPerDollar: 333333, outputTokensPerDollar: 83333 }, // $3.00/$12.00 per 1M tokens
+	'gpt-image-1': { inputTokensPerDollar: 200000, outputTokensPerDollar: 0 }, // $5.00/- per 1M tokens (image generation)
+
+	// legacy models for compatibility
+	'gpt-4': { inputTokensPerDollar: 33333, outputTokensPerDollar: 16667 }, // estimated legacy pricing
+	'gpt-3.5-turbo': { inputTokensPerDollar: 2000000, outputTokensPerDollar: 666667 }, // estimated legacy pricing
+
+	// anthropic models
+	'claude-opus-4-0': { inputTokensPerDollar: 66667, outputTokensPerDollar: 13333 }, // $15/$75 per 1M tokens
+	'claude-sonnet-4-0': { inputTokensPerDollar: 333333, outputTokensPerDollar: 66667 }, // $3/$15 per 1M tokens
+	'claude-3-7-sonnet-latest': { inputTokensPerDollar: 333333, outputTokensPerDollar: 66667 }, // $3/$15 per 1M tokens
+	'claude-3-5-sonnet-latest': { inputTokensPerDollar: 333333, outputTokensPerDollar: 66667 }, // $3/$15 per 1M tokens
+	'claude-3-5-haiku-latest': { inputTokensPerDollar: 1250000, outputTokensPerDollar: 250000 }, // $0.80/$4.00 per 1M tokens
+
+	// gemini models - exact pricing from ai.google.dev/pricing
+	'gemini-2.5-pro': { inputTokensPerDollar: 800000, outputTokensPerDollar: 100000 }, // $1.25/$10 per 1M tokens (≤200k context)
+	'gemini-2.5-flash': { inputTokensPerDollar: 3333333, outputTokensPerDollar: 400000 }, // $0.30/$2.50 per 1M tokens
+	'gemini-2.5-flash-lite-preview': { inputTokensPerDollar: 10000000, outputTokensPerDollar: 2500000 }, // $0.10/$0.40 per 1M tokens
+	'gemini-2.0-flash': { inputTokensPerDollar: 10000000, outputTokensPerDollar: 2500000 }, // $0.10/$0.40 per 1M tokens
+	'gemini-2.0-flash-lite': { inputTokensPerDollar: 13333333, outputTokensPerDollar: 3333333 }, // $0.075/$0.30 per 1M tokens
+	'gemini-1.5-flash': { inputTokensPerDollar: 13333333, outputTokensPerDollar: 3333333 }, // $0.075/$0.30 per 1M tokens (≤128k context)
+	'gemini-1.5-flash-8b': { inputTokensPerDollar: 26666667, outputTokensPerDollar: 6666667 }, // $0.0375/$0.15 per 1M tokens (≤128k context)
+	'gemini-1.5-pro': { inputTokensPerDollar: 800000, outputTokensPerDollar: 200000 }, // $1.25/$5.00 per 1M tokens (≤128k context)
+
+	// legacy/compatibility
+	'gemini-pro': { inputTokensPerDollar: 800000, outputTokensPerDollar: 200000 }, // using 1.5 pro pricing
+}
+
+// helper function to get pricing for a model (with fallback)
+function getModelPricing(model: string): ModelPricing {
+	// try exact match first
+	if (MODEL_PRICING[model]) {
+		return MODEL_PRICING[model]
+	}
+
+	// fallback to pattern matching
+	if (model.startsWith('gpt-4.5-preview')) {
+		return MODEL_PRICING['gpt-4.5-preview']
+	} else if (model.startsWith('gpt-4.1-nano')) {
+		return MODEL_PRICING['gpt-4.1-nano']
+	} else if (model.startsWith('gpt-4.1-mini')) {
+		return MODEL_PRICING['gpt-4.1-mini']
+	} else if (model.startsWith('gpt-4.1')) {
+		return MODEL_PRICING['gpt-4.1']
+	} else if (model.startsWith('gpt-4o-mini-search-preview')) {
+		return MODEL_PRICING['gpt-4o-mini-search-preview']
+	} else if (model.startsWith('gpt-4o-search-preview')) {
+		return MODEL_PRICING['gpt-4o-search-preview']
+	} else if (model.startsWith('gpt-4o-mini-realtime-preview')) {
+		return MODEL_PRICING['gpt-4o-mini-realtime-preview']
+	} else if (model.startsWith('gpt-4o-mini-audio-preview')) {
+		return MODEL_PRICING['gpt-4o-mini-audio-preview']
+	} else if (model.startsWith('gpt-4o-mini')) {
+		return MODEL_PRICING['gpt-4o-mini']
+	} else if (model.startsWith('gpt-4o-realtime-preview')) {
+		return MODEL_PRICING['gpt-4o-realtime-preview']
+	} else if (model.startsWith('gpt-4o-audio-preview')) {
+		return MODEL_PRICING['gpt-4o-audio-preview']
+	} else if (model.startsWith('gpt-4o')) {
+		return MODEL_PRICING['gpt-4o']
+	} else if (model.startsWith('gpt-4')) {
+		return MODEL_PRICING['gpt-4']
+	} else if (model.startsWith('gpt-3.5')) {
+		return MODEL_PRICING['gpt-3.5-turbo']
+	} else if (model.startsWith('o1-pro')) {
+		return MODEL_PRICING['o1-pro']
+	} else if (model.startsWith('o1-mini')) {
+		return MODEL_PRICING['o1-mini']
+	} else if (model.startsWith('o1')) {
+		return MODEL_PRICING['o1']
+	} else if (model.startsWith('o3-pro')) {
+		return MODEL_PRICING['o3-pro']
+	} else if (model.startsWith('o3-deep-research')) {
+		return MODEL_PRICING['o3-deep-research']
+	} else if (model.startsWith('o3-mini')) {
+		return MODEL_PRICING['o3-mini']
+	} else if (model.startsWith('o3')) {
+		return MODEL_PRICING['o3']
+	} else if (model.startsWith('o4-mini-deep-research')) {
+		return MODEL_PRICING['o4-mini-deep-research']
+	} else if (model.startsWith('o4-mini')) {
+		return MODEL_PRICING['o4-mini']
+	} else if (model.startsWith('codex-mini-latest')) {
+		return MODEL_PRICING['codex-mini-latest']
+	} else if (model.startsWith('computer-use-preview')) {
+		return MODEL_PRICING['computer-use-preview']
+	} else if (model.startsWith('gpt-image-1')) {
+		return MODEL_PRICING['gpt-image-1']
+	} else if (model.startsWith('claude-opus')) {
+		return MODEL_PRICING['claude-opus-4-0']
+	} else if (model.startsWith('claude-sonnet-3-7')) {
+		return MODEL_PRICING['claude-3-7-sonnet-latest']
+	} else if (model.startsWith('claude-sonnet-3-5')) {
+		return MODEL_PRICING['claude-3-5-sonnet-latest']
+	} else if (model.startsWith('claude-sonnet')) {
+		return MODEL_PRICING['claude-sonnet-4-0']
+	} else if (model.startsWith('claude-haiku') || model.startsWith('claude-3-5-haiku')) {
+		return MODEL_PRICING['claude-3-5-haiku-latest']
+	} else if (model.startsWith('gemini-2.5-pro')) {
+		return MODEL_PRICING['gemini-2.5-pro']
+	} else if (model.startsWith('gemini-2.5-flash-lite-preview')) {
+		return MODEL_PRICING['gemini-2.5-flash-lite-preview']
+	} else if (model.startsWith('gemini-2.5-flash')) {
+		return MODEL_PRICING['gemini-2.5-flash']
+	} else if (model.startsWith('gemini-2.0-flash-lite')) {
+		return MODEL_PRICING['gemini-2.0-flash-lite']
+	} else if (model.startsWith('gemini-2.0-flash')) {
+		return MODEL_PRICING['gemini-2.0-flash']
+	} else if (model.startsWith('gemini-1.5-flash-8b')) {
+		return MODEL_PRICING['gemini-1.5-flash-8b']
+	} else if (model.startsWith('gemini-1.5-flash')) {
+		return MODEL_PRICING['gemini-1.5-flash']
+	} else if (model.startsWith('gemini-1.5-pro')) {
+		return MODEL_PRICING['gemini-1.5-pro']
+	} else if (model.startsWith('gemini')) {
+		return MODEL_PRICING['gemini-pro']
+	}
+
+	// default fallback pricing
+	return { inputTokensPerDollar: 100000, outputTokensPerDollar: 50000 }
+}
+
+// helper function to calculate cost for api call
+function calculateApiCallCost(inputTokens: number, outputTokens: number, model: string): number {
+	const pricing = getModelPricing(model)
+	const inputCost = inputTokens / pricing.inputTokensPerDollar
+	const outputCost = outputTokens / pricing.outputTokensPerDollar
+	return inputCost + outputCost
+}
 
 interface CLIOptions {
 	debug?: boolean
@@ -131,12 +769,73 @@ const envVars =
 		  }
 		: {}
 
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
-const prompt = (query: string) => new Promise(resolve => rl.question(query, resolve))
+// global cost tracker for the session
+let sessionCostTracker: CostTracker = {
+	totalCost: 0,
+	apiCalls: [],
+}
+
+// create readline interface when not in test mode
+let rl: readline.Interface | null = null
+
+const getReadlineInterface = () => {
+	if (!rl && !process.env.PROMPT_SHAPER_TESTS) {
+		rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+	}
+	return rl
+}
+
+const prompt = (query: string) =>
+	new Promise(resolve => {
+		const readline = getReadlineInterface()
+		if (readline) {
+			readline.question(query, resolve)
+		} else {
+			resolve('') // return empty string during tests
+		}
+	})
+
+function getProviderFromModel(model: string): string {
+	if (isOpenAIModel(model)) {
+		return 'OpenAI'
+	} else if (model.startsWith('claude-')) {
+		return 'Anthropic'
+	} else if (model.startsWith('gemini-')) {
+		return 'Google'
+	}
+	return 'Unknown'
+}
+
+function validateModelName(model: string): void {
+	if (getProviderFromModel(model) === 'Unknown') {
+		throw new Error(`"${model}" is not a recognized model name.
+Valid model patterns:
+  OpenAI: gpt-*, o1-*, o3-*
+  Anthropic: claude-*
+  Google: gemini-*`)
+	}
+}
+
+function showWelcomeMessage(options: CLIOptions) {
+	const provider = getProviderFromModel(options.model)
+	const modelDisplay = `${options.model} (${provider})`
+
+	console.log('╭─────────────────────────────────────────────────────────────╮')
+	console.log('│ PromptShaper Interactive Mode                               │')
+	console.log('├─────────────────────────────────────────────────────────────┤')
+	console.log(`│ Model: ${modelDisplay.substring(0, 50).padEnd(53)}│`)
+	console.log('│                                                             │')
+	console.log('│ Type /help to see available commands                        │')
+	console.log('│ Type /exit to quit                                          │')
+	console.log('╰─────────────────────────────────────────────────────────────╯')
+	console.log()
+}
 
 // centralized exit handler
 function exitApp(code: number = 0): never {
-	rl.close()
+	if (rl) {
+		rl.close()
+	}
 	process.exit(code)
 }
 
@@ -144,7 +843,7 @@ async function handler(input: string, cliOptions: CLIOptions) {
 	// implement priority system: CLI > profile > env vars
 	let profileOptions: Partial<CLIOptions> = {}
 
-	// determine which profile to load (CLI takes priority over env var)
+	// determine profile to load (cli takes priority over env var)
 	const profilePath = cliOptions.profile || envVars.profile
 	if (profilePath) {
 		if (cliOptions.profile && envVars.profile && cliOptions.profile !== envVars.profile) {
@@ -153,7 +852,7 @@ async function handler(input: string, cliOptions: CLIOptions) {
 		profileOptions = loadProfileOptions(profilePath)
 	}
 
-	// merge options in priority order: CLI > profile > env vars > defaults
+	// merge options in priority order: cli > profile > env vars > defaults
 	const options: CLIOptions = {
 		debug: cliOptions.debug ?? profileOptions.debug ?? envVars.debug ?? false,
 		extensions: cliOptions.extensions ?? profileOptions.extensions ?? envVars.extensions ?? defaultFileExtensions.join(','),
@@ -178,6 +877,12 @@ async function handler(input: string, cliOptions: CLIOptions) {
 		reasoningEffort: (cliOptions.reasoningEffort ?? profileOptions.reasoningEffort ?? envVars.reasoningEffort ?? 'high') as ReasoningEffort,
 	}
 
+	// validate model name early
+	if (options.debug) {
+		console.log(`[DEBUG] Validating model name: ${options.model}`)
+	}
+	validateModelName(options.model)
+
 	// convert llm flag to nollm for easier logic
 	const noLlm = options.llm === false
 
@@ -195,6 +900,9 @@ async function handler(input: string, cliOptions: CLIOptions) {
 
 	if (options.loadJson) {
 		// load json and continue interactive
+		if (options.debug) {
+			console.log(`[DEBUG] Loading conversation from JSON: ${options.loadJson}`)
+		}
 		const conversation: GenericMessage[] = JSON.parse(fs.readFileSync(options.loadJson, 'utf8'))
 		await startSavedConversation(conversation, options)
 
@@ -203,6 +911,9 @@ async function handler(input: string, cliOptions: CLIOptions) {
 
 	if (options.loadText) {
 		// load text and continue interactive
+		if (options.debug) {
+			console.log(`[DEBUG] Loading conversation from text: ${options.loadText}`)
+		}
 		const conversation = fs
 			.readFileSync(options.loadText, 'utf8')
 			.split('\n\n-----\n\n')
@@ -217,7 +928,10 @@ async function handler(input: string, cliOptions: CLIOptions) {
 
 	if (options.interactive && !input) {
 		// start new conversation
-		const conversation: GenericMessage[] = startConversationWithProvider(options.systemPrompt, options.model)
+		if (options.debug) {
+			console.log(`[DEBUG] Starting interactive mode with model: ${options.model}`)
+		}
+		const conversation: GenericMessage[] = startConversationWithProvider(options.systemPrompt, options.model, options.debug)
 		await startSavedConversation(conversation, options)
 
 		exitApp(0)
@@ -274,14 +988,14 @@ async function handler(input: string, cliOptions: CLIOptions) {
 		const parserContext = { variables, options: parserOptions, attachments: [] }
 		const parsed = options.raw ? template : await parseTemplate(template, parserContext)
 
-		// check if user wants to send results to LLM (but not in raw mode or disable-llm mode)
+		// check if user wants to send results to llm (but not in raw mode or disable-llm mode)
 		if (!options.raw && !noLlm && (options.generate || options.interactive)) {
 			// show conversational formatting when using llm features
 			if (!options.hidePrompt) {
 				console.log(`user\n${parsed}\n-----`)
 			}
 			const conversation: GenericMessage[] = [
-				...startConversationWithProvider(options.systemPrompt, options.model),
+				...startConversationWithProvider(options.systemPrompt, options.model, options.debug),
 				{
 					role: 'user',
 					content: [{ type: 'text', text: parsed }, ...parserContext.attachments.reverse()],
@@ -332,6 +1046,11 @@ async function interactiveModeLoop(conversation: GenericMessage[], options: CLIO
 		userTurn = true
 	}
 
+	// show welcome message for new conversations
+	if (conversation.length === 0 || (conversation.length === 1 && conversation[0].role === 'system')) {
+		showWelcomeMessage(options)
+	}
+
 	// runs until user exits
 	const running = true
 	while (running) {
@@ -341,40 +1060,29 @@ async function interactiveModeLoop(conversation: GenericMessage[], options: CLIO
 		}
 
 		// collect user response and then parse response if not in raw mode
-		const response = (await prompt('Your response: ')) as string
+		const response = (await prompt('\n> ')) as string
 
-		// handle /rewind command
-		if (response.trim() === '/rewind') {
-			if (
-				conversation.length >= 2 &&
-				conversation[conversation.length - 1].role === 'assistant' &&
-				conversation[conversation.length - 2].role === 'user'
-			) {
-				// remove the last user-assistant exchange
-				conversation.pop() // remove assistant response
-				conversation.pop() // remove user question
-				console.log('Rewound last exchange. Conversation has been reverted.\n-----')
+		// check if response is a command
+		if (response.trim().startsWith('/')) {
+			const parts = response.trim().split(/\s+/)
+			const commandName = parts[0].substring(1) // remove the '/' prefix
+			const args = parts.slice(1)
 
-				// update saved files after rewind
-				if (options.saveJson) {
-					saveConversationAsJson(conversation, options)
+			if (options.debug) {
+				console.log(`[DEBUG] Processing command: ${commandName} with args: ${args.join(' ')}`)
+			}
+
+			// find matching command
+			const command = interactiveCommands.find(cmd => cmd.name === commandName)
+			if (command) {
+				const shouldContinue = await command.handler(conversation, options, args)
+				if (shouldContinue) {
+					continue
 				}
-				if (options.save) {
-					saveConversationAsText(conversation, options)
-				}
-
-				// stay on user's turn since we just removed a complete exchange
-				continue
 			} else {
-				console.log('Cannot rewind: no previous exchange to remove.\n-----')
+				console.log(`Unknown command: /${commandName}. Type /help for available commands.\n-----`)
 				continue
 			}
-		}
-
-		// handle /exit command
-		if (response.trim() === '/exit') {
-			console.log('Goodbye!')
-			exitApp(0)
 		}
 
 		const parserContext = {
@@ -402,9 +1110,36 @@ async function interactiveModeLoop(conversation: GenericMessage[], options: CLIO
 }
 
 async function makeCompletionRequest(conversation: GenericMessage[], options: CLIOptions) {
+	if (options.debug) {
+		console.log(`[DEBUG] Making completion request with model: ${options.model}`)
+	}
+
+	// calculate input tokens before api call
+	const inputText = conversation.map(msg => (typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content))).join('\n')
+	const inputTokens = countTokens(inputText, options.model)
+
 	console.log('assistant')
-	const result = await generateWithProvider(conversation, options.model, options.responseFormat, options.reasoningEffort)
+	const result = await generateWithProvider(conversation, options.model, options.responseFormat, options.reasoningEffort, options.debug)
 	console.log('\n-----')
+
+	// calculate output tokens after api call
+	const outputTokens = countTokens(result, options.model)
+
+	// calculate and track cost
+	const cost = calculateApiCallCost(inputTokens, outputTokens, options.model)
+	sessionCostTracker.totalCost += cost
+	sessionCostTracker.apiCalls.push({
+		model: options.model,
+		inputTokens,
+		outputTokens,
+		cost,
+		timestamp: new Date(),
+	})
+
+	if (options.debug) {
+		console.log(`[DEBUG] API call cost: $${cost.toFixed(6)} (${inputTokens} input + ${outputTokens} output tokens)`)
+		console.log(`[DEBUG] Session total cost: $${sessionCostTracker.totalCost.toFixed(6)}`)
+	}
 
 	// update/save chat history
 	conversation.push({ role: 'assistant', content: result })
@@ -458,4 +1193,7 @@ program
 	.option('-sj, --save-json <filePath>', 'Save conversation as JSON file')
 	.action(handler)
 
-program.parse()
+// only parse if this is the main module
+if (require.main === module) {
+	program.parse()
+}

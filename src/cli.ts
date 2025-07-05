@@ -10,6 +10,62 @@ import { ParserVariables, ResponseFormat, ReasoningEffort } from './types'
 import { generateWithProvider, startConversationWithProvider } from './providers/factory'
 import * as readline from 'readline'
 
+interface InteractiveCommand {
+	name: string
+	description: string
+	handler: (conversation: GenericMessage[], options: CLIOptions, args: string[]) => Promise<boolean> | boolean
+}
+
+export const interactiveCommands: InteractiveCommand[] = [
+	{
+		name: 'help',
+		description: 'Show this help message',
+		handler: () => {
+			console.log('Available commands:')
+			interactiveCommands.forEach(cmd => {
+				console.log(`  /${cmd.name.padEnd(10)} - ${cmd.description}`)
+			})
+			console.log('-----')
+			return true // continue conversation
+		},
+	},
+	{
+		name: 'exit',
+		description: 'Exit interactive mode',
+		handler: () => {
+			console.log('Goodbye!')
+			exitApp(0)
+		},
+	},
+	{
+		name: 'rewind',
+		description: 'Remove last user-assistant exchange',
+		handler: (conversation, options) => {
+			if (
+				conversation.length >= 2 &&
+				conversation[conversation.length - 1].role === 'assistant' &&
+				conversation[conversation.length - 2].role === 'user'
+			) {
+				// remove the last user-assistant exchange
+				conversation.pop() // remove assistant response
+				conversation.pop() // remove user question
+				console.log('Rewound last exchange. Conversation has been reverted.\n-----')
+
+				// update saved files after rewind
+				if (options.saveJson) {
+					saveConversationAsJson(conversation, options)
+				}
+				if (options.save) {
+					saveConversationAsText(conversation, options)
+				}
+			} else {
+				console.log('Cannot rewind: no previous exchange to remove.\n-----')
+			}
+			return true // continue conversation
+		},
+	},
+]
+
 interface CLIOptions {
 	debug?: boolean
 	disableLlm?: boolean
@@ -332,6 +388,31 @@ async function interactiveModeLoop(conversation: GenericMessage[], options: CLIO
 		userTurn = true
 	}
 
+	// Show welcome message for new conversations
+	if (conversation.length === 0 || (conversation.length === 1 && conversation[0].role === 'system')) {
+		// Determine provider from model name
+		let provider = 'Unknown'
+		if (options.model.startsWith('gpt') || options.model.startsWith('o1') || options.model.startsWith('o3')) {
+			provider = 'OpenAI'
+		} else if (options.model.startsWith('claude-')) {
+			provider = 'Anthropic'
+		} else if (options.model.startsWith('gemini-')) {
+			provider = 'Google'
+		}
+
+		const modelDisplay = `${options.model} (${provider})`
+
+		console.log('╭─────────────────────────────────────────────────────────────╮')
+		console.log('│ PromptShaper Interactive Mode                               │')
+		console.log('├─────────────────────────────────────────────────────────────┤')
+		console.log(`│ Model: ${modelDisplay.substring(0, 50).padEnd(53)}│`)
+		console.log('│                                                             │')
+		console.log('│ Type /help to see available commands                        │')
+		console.log('│ Type /exit to quit                                          │')
+		console.log('╰─────────────────────────────────────────────────────────────╯')
+		console.log()
+	}
+
 	// runs until user exits
 	const running = true
 	while (running) {
@@ -341,40 +422,25 @@ async function interactiveModeLoop(conversation: GenericMessage[], options: CLIO
 		}
 
 		// collect user response and then parse response if not in raw mode
-		const response = (await prompt('Your response: ')) as string
+		const response = (await prompt('\n> ')) as string
 
-		// handle /rewind command
-		if (response.trim() === '/rewind') {
-			if (
-				conversation.length >= 2 &&
-				conversation[conversation.length - 1].role === 'assistant' &&
-				conversation[conversation.length - 2].role === 'user'
-			) {
-				// remove the last user-assistant exchange
-				conversation.pop() // remove assistant response
-				conversation.pop() // remove user question
-				console.log('Rewound last exchange. Conversation has been reverted.\n-----')
+		// check if response is a command
+		if (response.trim().startsWith('/')) {
+			const parts = response.trim().split(/\s+/)
+			const commandName = parts[0].substring(1) // remove the '/' prefix
+			const args = parts.slice(1)
 
-				// update saved files after rewind
-				if (options.saveJson) {
-					saveConversationAsJson(conversation, options)
+			// find matching command
+			const command = interactiveCommands.find(cmd => cmd.name === commandName)
+			if (command) {
+				const shouldContinue = await command.handler(conversation, options, args)
+				if (shouldContinue) {
+					continue
 				}
-				if (options.save) {
-					saveConversationAsText(conversation, options)
-				}
-
-				// stay on user's turn since we just removed a complete exchange
-				continue
 			} else {
-				console.log('Cannot rewind: no previous exchange to remove.\n-----')
+				console.log(`Unknown command: /${commandName}. Type /help for available commands.\n-----`)
 				continue
 			}
-		}
-
-		// handle /exit command
-		if (response.trim() === '/exit') {
-			console.log('Goodbye!')
-			exitApp(0)
 		}
 
 		const parserContext = {
@@ -458,4 +524,7 @@ program
 	.option('-sj, --save-json <filePath>', 'Save conversation as JSON file')
 	.action(handler)
 
-program.parse()
+// only parse if this is the main module
+if (require.main === module) {
+	program.parse()
+}

@@ -145,9 +145,10 @@ npx prompt-shaper -lt previous_conversation.md
 - `/help` - Show available commands and shortcuts
 - `/model [model_name]` - View current model or switch to a different model (gpt-4, claude-3-5-sonnet-20241022, gemini-pro, etc.)
 - `/tokens` - Show token count for the current conversation with per-message breakdown
+- `/cost` - Show estimated API cost for the current session (cumulative across all requests)
 - `/retry` - Retry the last request with a new response from the LLM
 - `/rewind` - Remove the last question and response from the conversation history
-- `/clear` - Clear the entire conversation and start fresh
+- `/clear` - Clear the entire conversation and start fresh (shows previous session cost)
 - `/exit` - Exit interactive mode
 
 ### Raw Mode (No Parsing)

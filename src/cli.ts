@@ -176,11 +176,24 @@ export const interactiveCommands: InteractiveCommand[] = [
 				console.clear()
 			}
 
+			// show previous session cost
+			if (sessionCostTracker.apiCalls.length > 0) {
+				console.log(`Previous session estimated cost: $${sessionCostTracker.totalCost.toFixed(6)}`)
+				console.log(`(${sessionCostTracker.apiCalls.length} API calls made)`)
+				console.log('')
+			}
+
 			// reset conversation to just system prompt if exists
 			const systemMessage = conversation.find(msg => msg.role === 'system')
 			conversation.length = 0 // clear array
 			if (systemMessage) {
 				conversation.push(systemMessage)
+			}
+
+			// reset cost tracker for new session
+			sessionCostTracker = {
+				totalCost: 0,
+				apiCalls: [],
 			}
 
 			// update saved files with cleared conversation
@@ -312,7 +325,132 @@ export const interactiveCommands: InteractiveCommand[] = [
 			return true // continue conversation
 		},
 	},
+	{
+		name: 'cost',
+		description: 'Show estimated cost for the current session',
+		handler: () => {
+			if (sessionCostTracker.apiCalls.length === 0) {
+				console.log('No API calls made in this session yet.\n-----')
+				return true
+			}
+
+			console.log('Estimated session cost breakdown:')
+			console.log(`Total estimated cost: $${sessionCostTracker.totalCost.toFixed(6)}`)
+			console.log('')
+			console.log('API calls in this session:')
+
+			sessionCostTracker.apiCalls.forEach((call, index) => {
+				console.log(`${index + 1}. ${call.model}: $${call.cost.toFixed(6)}`)
+				console.log(`   Input: ${call.inputTokens.toLocaleString()} tokens, Output: ${call.outputTokens.toLocaleString()} tokens`)
+				console.log(`   Time: ${call.timestamp.toLocaleTimeString()}`)
+			})
+
+			console.log('')
+			console.log('Note: Pricing based on mid 2025 rates. Actual costs may vary.')
+			console.log('-----')
+			return true // continue conversation
+		},
+	},
 ]
+
+interface CostTracker {
+	totalCost: number
+	apiCalls: Array<{
+		model: string
+		inputTokens: number
+		outputTokens: number
+		cost: number
+		timestamp: Date
+	}>
+}
+
+interface ModelPricing {
+	inputTokensPerDollar: number // how many input tokens you get for $1
+	outputTokensPerDollar: number // how many output tokens you get for $1
+}
+
+// current pricing data based on provider websites (updated mid 2025)
+const MODEL_PRICING: Record<string, ModelPricing> = {
+	// openai models
+	'gpt-4o': { inputTokensPerDollar: 200000, outputTokensPerDollar: 50000 }, // $5/$20 per 1M tokens
+	'gpt-4o-mini': { inputTokensPerDollar: 6666667, outputTokensPerDollar: 1666667 }, // $0.15/$0.60 per 1M tokens
+	'gpt-4.1': { inputTokensPerDollar: 66667, outputTokensPerDollar: 16667 },
+	'gpt-4.1-mini': { inputTokensPerDollar: 66667 * 5, outputTokensPerDollar: 16667 * 5 },
+	'gpt-4.1-nano': { inputTokensPerDollar: 66667 * 20, outputTokensPerDollar: 16667 * 20 },
+	'gpt-4': { inputTokensPerDollar: 33333, outputTokensPerDollar: 16667 }, // $30/$60 per 1M tokens
+	'gpt-3.5-turbo': { inputTokensPerDollar: 2000000, outputTokensPerDollar: 666667 }, // $0.50/$1.50 per 1M tokens
+	o1: { inputTokensPerDollar: 66667, outputTokensPerDollar: 16667 }, // $15/$60 per 1M tokens
+	'o1-mini': { inputTokensPerDollar: 333333, outputTokensPerDollar: 83333 }, // $3/$12 per 1M tokens
+	o3: { inputTokensPerDollar: 66667, outputTokensPerDollar: 16667 }, // estimated similar to o1
+	'o3-mini': { inputTokensPerDollar: 909091, outputTokensPerDollar: 227273 }, // $1.10/$4.40 per 1M tokens
+	'o4-mini': { inputTokensPerDollar: 50000, outputTokensPerDollar: 15000 },
+
+	// anthropic models
+	'claude-opus-4-0': { inputTokensPerDollar: 66667, outputTokensPerDollar: 13333 }, // $15/$75 per 1M tokens
+	'claude-sonnet-4-0': { inputTokensPerDollar: 333333, outputTokensPerDollar: 66667 }, // $3/$15 per 1M tokens
+	'claude-3-7-sonnet-latest': { inputTokensPerDollar: 333333, outputTokensPerDollar: 66667 }, // $3/$15 per 1M tokens
+	'claude-3-5-sonnet-latest': { inputTokensPerDollar: 333333, outputTokensPerDollar: 66667 }, // $3/$15 per 1M tokens
+	'claude-3-5-haiku-latest': { inputTokensPerDollar: 1250000, outputTokensPerDollar: 250000 }, // $0.80/$4.00 per 1M tokens
+
+	// gemini models
+	'gemini-2.5-pro': { inputTokensPerDollar: 800000, outputTokensPerDollar: 100000 }, // $1.25/$10 per 1M tokens (up to 200k context)
+	'gemini-2.5-flash': { inputTokensPerDollar: 10000000, outputTokensPerDollar: 2500000 }, // $0.10/$0.40 per 1M tokens
+	'gemini-2.0-flash': { inputTokensPerDollar: 10000000, outputTokensPerDollar: 2500000 }, // $0.10/$0.40 per 1M tokens
+	'gemini-1.5-pro': { inputTokensPerDollar: 800000, outputTokensPerDollar: 200000 }, // $1.25/$5.00 per 1M tokens
+	'gemini-pro': { inputTokensPerDollar: 800000, outputTokensPerDollar: 200000 }, // using 1.5 pro pricing
+}
+
+// helper function to get pricing for a model (with fallback)
+function getModelPricing(model: string): ModelPricing {
+	// try exact match first
+	if (MODEL_PRICING[model]) {
+		return MODEL_PRICING[model]
+	}
+
+	// fallback to pattern matching
+	if (model.startsWith('gpt-4o')) {
+		return MODEL_PRICING['gpt-4o']
+	} else if (model.startsWith('gpt-4')) {
+		return MODEL_PRICING['gpt-4']
+	} else if (model.startsWith('gpt-3.5')) {
+		return MODEL_PRICING['gpt-3.5-turbo']
+	} else if (model.startsWith('o1')) {
+		return MODEL_PRICING['o1']
+	} else if (model.startsWith('o3')) {
+		return MODEL_PRICING['o3']
+	} else if (model.startsWith('claude-opus')) {
+		return MODEL_PRICING['claude-opus-4-0']
+	} else if (model.startsWith('claude-sonnet-3-7')) {
+		return MODEL_PRICING['claude-3-7-sonnet-latest']
+	} else if (model.startsWith('claude-sonnet-3-5')) {
+		return MODEL_PRICING['claude-3-5-sonnet-latest']
+	} else if (model.startsWith('claude-sonnet')) {
+		return MODEL_PRICING['claude-sonnet-4-0']
+	} else if (model.startsWith('claude-haiku') || model.startsWith('claude-3-5-haiku')) {
+		return MODEL_PRICING['claude-3-5-haiku-latest']
+	} else if (model.startsWith('gemini-2.5-pro')) {
+		return MODEL_PRICING['gemini-2.5-pro']
+	} else if (model.startsWith('gemini-2.5-flash')) {
+		return MODEL_PRICING['gemini-2.5-flash']
+	} else if (model.startsWith('gemini-2.0-flash')) {
+		return MODEL_PRICING['gemini-2.0-flash']
+	} else if (model.startsWith('gemini-1.5-pro')) {
+		return MODEL_PRICING['gemini-1.5-pro']
+	} else if (model.startsWith('gemini')) {
+		return MODEL_PRICING['gemini-pro']
+	}
+
+	// default fallback pricing
+	return { inputTokensPerDollar: 100000, outputTokensPerDollar: 50000 }
+}
+
+// helper function to calculate cost for api call
+function calculateApiCallCost(inputTokens: number, outputTokens: number, model: string): number {
+	const pricing = getModelPricing(model)
+	const inputCost = inputTokens / pricing.inputTokensPerDollar
+	const outputCost = outputTokens / pricing.outputTokensPerDollar
+	return inputCost + outputCost
+}
 
 interface CLIOptions {
 	debug?: boolean
@@ -434,6 +572,12 @@ const envVars =
 				reasoningEffort: process.env.PROMPT_SHAPER_REASONING_EFFORT,
 		  }
 		: {}
+
+// global cost tracker for the session
+let sessionCostTracker: CostTracker = {
+	totalCost: 0,
+	apiCalls: [],
+}
 
 // create readline interface when not in test mode
 let rl: readline.Interface | null = null
@@ -773,9 +917,33 @@ async function makeCompletionRequest(conversation: GenericMessage[], options: CL
 	if (options.debug) {
 		console.log(`[DEBUG] Making completion request with model: ${options.model}`)
 	}
+
+	// calculate input tokens before api call
+	const inputText = conversation.map(msg => (typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content))).join('\n')
+	const inputTokens = countTokens(inputText, options.model)
+
 	console.log('assistant')
 	const result = await generateWithProvider(conversation, options.model, options.responseFormat, options.reasoningEffort, options.debug)
 	console.log('\n-----')
+
+	// calculate output tokens after api call
+	const outputTokens = countTokens(result, options.model)
+
+	// calculate and track cost
+	const cost = calculateApiCallCost(inputTokens, outputTokens, options.model)
+	sessionCostTracker.totalCost += cost
+	sessionCostTracker.apiCalls.push({
+		model: options.model,
+		inputTokens,
+		outputTokens,
+		cost,
+		timestamp: new Date(),
+	})
+
+	if (options.debug) {
+		console.log(`[DEBUG] API call cost: $${cost.toFixed(6)} (${inputTokens} input + ${outputTokens} output tokens)`)
+		console.log(`[DEBUG] Session total cost: $${sessionCostTracker.totalCost.toFixed(6)}`)
+	}
 
 	// update/save chat history
 	conversation.push({ role: 'assistant', content: result })

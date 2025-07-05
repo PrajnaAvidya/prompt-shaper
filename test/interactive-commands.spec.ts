@@ -280,4 +280,33 @@ describe('Interactive commands', function () {
 			expect(output).to.include('No messages in conversation to count')
 		})
 	})
+
+	describe('/cost command', () => {
+		it('should exist and have correct description', () => {
+			const costCommand = interactiveCommands.find(cmd => cmd.name === 'cost')
+			expect(costCommand).to.exist
+			expect(costCommand!.description).to.equal('Show estimated cost for the current session')
+		})
+
+		it('should show message when no api calls made', () => {
+			const costCommand = interactiveCommands.find(cmd => cmd.name === 'cost')!
+
+			const mockConversation: GenericMessage[] = []
+			const mockOptions = { model: 'gpt-4' } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+			// capture console output
+			const originalLog = console.log
+			let output = ''
+			console.log = (...args) => {
+				output += args.join(' ') + '\n'
+			}
+
+			const result = costCommand.handler(mockConversation, mockOptions, [])
+
+			console.log = originalLog
+
+			expect(result).to.be.true
+			expect(output).to.include('No API calls made in this session yet')
+		})
+	})
 })

@@ -417,7 +417,7 @@ const MODEL_PRICING: Record<string, ModelPricing> = {
 	'gemini-1.5-flash': { inputTokensPerDollar: 13333333, outputTokensPerDollar: 3333333 }, // $0.075/$0.30 per 1M tokens (≤128k context)
 	'gemini-1.5-flash-8b': { inputTokensPerDollar: 26666667, outputTokensPerDollar: 6666667 }, // $0.0375/$0.15 per 1M tokens (≤128k context)
 	'gemini-1.5-pro': { inputTokensPerDollar: 800000, outputTokensPerDollar: 200000 }, // $1.25/$5.00 per 1M tokens (≤128k context)
-	
+
 	// legacy/compatibility
 	'gemini-pro': { inputTokensPerDollar: 800000, outputTokensPerDollar: 200000 }, // using 1.5 pro pricing
 }

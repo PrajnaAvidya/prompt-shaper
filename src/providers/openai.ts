@@ -1,12 +1,12 @@
 import { LLMProvider, GenericMessage, ProviderOptions } from './base'
 
-// Dynamic import for optional dependency
+// dynamic import for optional dependency
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let OpenAI: any = null
 try {
 	OpenAI = require('openai')
 } catch (e) {
-	// OpenAI SDK not installed
+	// openai sdk not installed
 }
 
 export class OpenAIProvider implements LLMProvider {

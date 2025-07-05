@@ -64,6 +64,36 @@ export const interactiveCommands: InteractiveCommand[] = [
 			return true // continue conversation
 		},
 	},
+	{
+		name: 'clear',
+		description: 'Clear conversation history and start fresh',
+		handler: (conversation, options) => {
+			// clear screen (skip during tests)
+			if (!process.env.PROMPT_SHAPER_TESTS) {
+				console.clear()
+			}
+
+			// reset conversation to just system prompt if exists
+			const systemMessage = conversation.find(msg => msg.role === 'system')
+			conversation.length = 0 // clear array
+			if (systemMessage) {
+				conversation.push(systemMessage)
+			}
+
+			// update saved files with cleared conversation
+			if (options.saveJson) {
+				saveConversationAsJson(conversation, options)
+			}
+			if (options.save) {
+				saveConversationAsText(conversation, options)
+			}
+
+			// show welcome message again
+			console.log('Conversation cleared. Starting fresh!\n-----')
+			showWelcomeMessage(options)
+			return true // continue conversation
+		},
+	},
 ]
 
 interface CLIOptions {
@@ -187,12 +217,53 @@ const envVars =
 		  }
 		: {}
 
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
-const prompt = (query: string) => new Promise(resolve => rl.question(query, resolve))
+// create readline interface when not in test mode
+let rl: readline.Interface | null = null
+const getReadlineInterface = () => {
+	if (!rl && !process.env.PROMPT_SHAPER_TESTS) {
+		rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+	}
+	return rl
+}
+const prompt = (query: string) =>
+	new Promise(resolve => {
+		const readline = getReadlineInterface()
+		if (readline) {
+			readline.question(query, resolve)
+		} else {
+			resolve('') // return empty string during tests
+		}
+	})
+
+function showWelcomeMessage(options: CLIOptions) {
+	// determine provider from model name
+	let provider = 'Unknown'
+	if (options.model.startsWith('gpt') || options.model.startsWith('o1') || options.model.startsWith('o3')) {
+		provider = 'OpenAI'
+	} else if (options.model.startsWith('claude-')) {
+		provider = 'Anthropic'
+	} else if (options.model.startsWith('gemini-')) {
+		provider = 'Google'
+	}
+
+	const modelDisplay = `${options.model} (${provider})`
+
+	console.log('╭─────────────────────────────────────────────────────────────╮')
+	console.log('│ PromptShaper Interactive Mode                               │')
+	console.log('├─────────────────────────────────────────────────────────────┤')
+	console.log(`│ Model: ${modelDisplay.substring(0, 50).padEnd(53)}│`)
+	console.log('│                                                             │')
+	console.log('│ Type /help to see available commands                        │')
+	console.log('│ Type /exit to quit                                          │')
+	console.log('╰─────────────────────────────────────────────────────────────╯')
+	console.log()
+}
 
 // centralized exit handler
 function exitApp(code: number = 0): never {
-	rl.close()
+	if (rl) {
+		rl.close()
+	}
 	process.exit(code)
 }
 
@@ -200,7 +271,7 @@ async function handler(input: string, cliOptions: CLIOptions) {
 	// implement priority system: CLI > profile > env vars
 	let profileOptions: Partial<CLIOptions> = {}
 
-	// determine which profile to load (CLI takes priority over env var)
+	// determine profile to load (cli takes priority over env var)
 	const profilePath = cliOptions.profile || envVars.profile
 	if (profilePath) {
 		if (cliOptions.profile && envVars.profile && cliOptions.profile !== envVars.profile) {
@@ -209,7 +280,7 @@ async function handler(input: string, cliOptions: CLIOptions) {
 		profileOptions = loadProfileOptions(profilePath)
 	}
 
-	// merge options in priority order: CLI > profile > env vars > defaults
+	// merge options in priority order: cli > profile > env vars > defaults
 	const options: CLIOptions = {
 		debug: cliOptions.debug ?? profileOptions.debug ?? envVars.debug ?? false,
 		extensions: cliOptions.extensions ?? profileOptions.extensions ?? envVars.extensions ?? defaultFileExtensions.join(','),
@@ -330,7 +401,7 @@ async function handler(input: string, cliOptions: CLIOptions) {
 		const parserContext = { variables, options: parserOptions, attachments: [] }
 		const parsed = options.raw ? template : await parseTemplate(template, parserContext)
 
-		// check if user wants to send results to LLM (but not in raw mode or disable-llm mode)
+		// check if user wants to send results to llm (but not in raw mode or disable-llm mode)
 		if (!options.raw && !noLlm && (options.generate || options.interactive)) {
 			// show conversational formatting when using llm features
 			if (!options.hidePrompt) {
@@ -388,29 +459,9 @@ async function interactiveModeLoop(conversation: GenericMessage[], options: CLIO
 		userTurn = true
 	}
 
-	// Show welcome message for new conversations
+	// show welcome message for new conversations
 	if (conversation.length === 0 || (conversation.length === 1 && conversation[0].role === 'system')) {
-		// Determine provider from model name
-		let provider = 'Unknown'
-		if (options.model.startsWith('gpt') || options.model.startsWith('o1') || options.model.startsWith('o3')) {
-			provider = 'OpenAI'
-		} else if (options.model.startsWith('claude-')) {
-			provider = 'Anthropic'
-		} else if (options.model.startsWith('gemini-')) {
-			provider = 'Google'
-		}
-
-		const modelDisplay = `${options.model} (${provider})`
-
-		console.log('╭─────────────────────────────────────────────────────────────╮')
-		console.log('│ PromptShaper Interactive Mode                               │')
-		console.log('├─────────────────────────────────────────────────────────────┤')
-		console.log(`│ Model: ${modelDisplay.substring(0, 50).padEnd(53)}│`)
-		console.log('│                                                             │')
-		console.log('│ Type /help to see available commands                        │')
-		console.log('│ Type /exit to quit                                          │')
-		console.log('╰─────────────────────────────────────────────────────────────╯')
-		console.log()
+		showWelcomeMessage(options)
 	}
 
 	// runs until user exits
